@@ -84,7 +84,7 @@ check_track <- function(x) {
         yr <- names(x)[i]
         y[[i]] <- count(x[[i]], duration, left) %>% mutate(year = yr)
     }
-    rbind_all(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
 }
 
 #' Check license history creation
@@ -124,7 +124,7 @@ check_lapse <- function(x) {
             y[[i]] <- count(x[[i]], duration, left, lapse) %>% mutate(year = yr)
         }
     }
-    rbind_all(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
 }
 
 #' Check privilege table (R3)
@@ -142,7 +142,7 @@ check_R3 <- function(x) {
             y[[i]] <- count(x[[i]], duration, left, R3) %>% mutate(year = yr)
         }
     }
-    rbind_all(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
 }
 
 #' Check Privilege Table Creation

@@ -299,7 +299,7 @@ make_priv_final <- function(priv, keep = c("cust_id", "year", "lapse", "R3")) {
             mutate(year = yr) %>%
             select_(.dots = keep)
     }
-    out <- rbind_all(priv)
+    out <- bind_rows(priv)
     out$R3 <- factor(out$R3,
                      labels = c("Carried", "Renewed", "Reactivated", "Recruited"))
     out
