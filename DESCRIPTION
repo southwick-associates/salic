@@ -1,0 +1,19 @@
+Package: salic
+Type: Package
+Title: Prepare License Data from Wildlife Agencies
+Version: 0.2.0
+Date: 2015-08-17
+Author: Dan Kary
+Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
+Description: A set of functions for getting license data into a standard format
+    that facilitates further analysis (churn, R3, etc.)
+License: Only share within Southwick Associates
+LazyData: TRUE
+Depends:
+    R (>= 3.2.1)
+Imports:
+    dplyr (>= 0.4.1),
+    tidyr (>= 0.2.0),
+    saproj (>= 0.3.0)
+RoxygenNote: 5.0.1
+Suggests: saproj
