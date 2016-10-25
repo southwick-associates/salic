@@ -15,12 +15,12 @@ pct_round(x, rnd = 1, scale = 100)
 }
 \description{
 This is a helper function for conveniently displaying percentages. It is used
-in other summary functions in lichist.
+in other summary functions in salic.
 }
 \examples{
 x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
 x$pct <- pct_round(x$pop / sum(x$pop))
-saproj::print_dat(x, "Population Percentages")
+print_dat(x, "Population Percentages")
 }
 \seealso{
 Other functions for validating license data: \code{\link{calc_churn}},

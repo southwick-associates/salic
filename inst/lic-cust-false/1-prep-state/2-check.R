@@ -2,7 +2,7 @@
 
 library(dplyr)
 library(tidyr)
-library(lichist)
+library(salic)
 library(lubridate)
 
 source("code/1-prep-state/funs.R")

@@ -3,7 +3,7 @@
 
 library(dplyr)
 library(tidyr)
-library(lichist)
+library(salic)
 
 f <- "D:/SA/Data/WI_dashboard_2016/raw.sqlite3"
 options(width = 200)

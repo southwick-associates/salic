@@ -27,7 +27,7 @@ catf2 <- function(x) cat(paste0(x, "\n"))
 #' Round numeric values and print as a character percentages
 #'
 #' This is a helper function for conveniently displaying percentages. It is used
-#' in other summary functions in lichist.
+#' in other summary functions in salic.
 #' @param x numeric: Vector of values to display as rounded percentages
 #' @param rnd numeric: number of decimals to round pct change results
 #' @param scale numeric: scaling paramter - defaults to 100 for showing percentages
@@ -36,7 +36,7 @@ catf2 <- function(x) cat(paste0(x, "\n"))
 #' @examples
 #' x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
 #' x$pct <- pct_round(x$pop / sum(x$pop))
-#' saproj::print_dat(x, "Population Percentages")
+#' print_dat(x, "Population Percentages")
 pct_round <- function(x, rnd = 1, scale = 100) {
     # sprintf is used to insure trailing zeroes are included
     sprintf_param <- paste0("%.", rnd, "f")

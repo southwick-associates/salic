@@ -3,8 +3,7 @@
 
 library(dplyr)
 library(tidyr)
-library(lichist)
-library(saproj)
+library(salic)
 
 f <- "D:/SA/Data/"
 yrs <- 2005:2015
@@ -28,8 +27,6 @@ summary_sale(sale)
 summary_churn(sale, yrs)
 
 # 3. License Sales by Year breakouts
-options(width = 200)
 lic_summary(sale, c("lic_id"), show_change = TRUE)
 lic_summary(sale, c("lic_id", "description"))
 # count(sale, lic_id, description) %>% print_dat("License Descriptions by ID")
-options(width = 90)

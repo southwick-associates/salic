@@ -2,12 +2,11 @@
 
 library(dplyr)
 library(tidyr)
-library(lichist)
+library(salic)
 library(lubridate)
 
 source("code/1-prep-state/funs.R")
 f <- "D:/SA/Data/"
-options(width = 200)
 
 ### Connect to Data
 db <- src_sqlite(f) # connect with dplyr
@@ -86,5 +85,3 @@ count(x, year) %>% print_dat("Customers by Year")
 # Check for duplicate sales cust_id, lic_id
 select(sale, cust_id, year, lic_id) %>%
     check_dups("Duplicate sales based on cust_id, year, lic_id")
-
-options(width = 90)
