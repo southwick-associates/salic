@@ -22,11 +22,15 @@ by year}
 \item{note}{character: note for output table}
 }
 \description{
-Summarize license sales by selected grouping variables
+Note: This function is deprecated. I recommend using dpylr/tidyr instead (see examples).
 }
 \examples{
 library(dplyr)
+library(tidyr)
+
+# I recommend just using dplyr/tidyr (count-spread) rather than lic_summary()
 x <- select(lic, lic_id, description) \%>\% left_join(sale)
+count(x, description) \%>\% spread(year, n) \%>\% View()
 
 lic_summary(x, c("lic_id", "description"))
 lic_summary(x, c("lic_id", "description"), show_change = T)

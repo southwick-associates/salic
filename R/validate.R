@@ -125,6 +125,8 @@ calc_churn <- function(x, yr) {
 }
 
 #' Summarize license sales by selected grouping variables
+#' 
+#' Note: This function is deprecated. I recommend using dpylr/tidyr instead (see examples).
 #' @param x data frame: Table holding sales by year
 #' @param groups character: grouping variables to be used for the summary
 #' @param show_change logical: If TRUE, include a table showing percent changes
@@ -135,7 +137,11 @@ calc_churn <- function(x, yr) {
 #' @export
 #' @examples
 #' library(dplyr)
+#' library(tidyr)
+#' 
+#' # I recommend just using dplyr/tidyr (count-spread) rather than lic_summary()
 #' x <- select(lic, lic_id, description) %>% left_join(sale)
+#' count(x, description) %>% spread(year, n) %>% View()
 #'
 #' lic_summary(x, c("lic_id", "description"))
 #' lic_summary(x, c("lic_id", "description"), show_change = T)
