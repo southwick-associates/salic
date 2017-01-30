@@ -34,7 +34,7 @@ rank_sale <- function(sale, rank_var = "duration") {
         arrange_(.dots = rank_var) %>%
         summarise_each(funs(last)) %>%
         ungroup()
-    # This is a more natural way to select highest duration
+    # Below is a more natural way to select highest duration
     # However it runs very slowly for some reason
     #select(sale, cust_id, year, duration) %>%
     #group_by(cust_id, year) %>%
@@ -300,7 +300,7 @@ make_priv_final <- function(priv, keep = c("cust_id", "year", "lapse", "R3")) {
             select_(.dots = keep)
     }
     out <- bind_rows(priv)
-    out$R3 <- factor(out$R3,
-                     labels = c("Carried", "Renewed", "Reactivated", "Recruited"))
+    # out$R3 <- factor(out$R3,
+    #                  labels = c("Carried", "Renewed", "Reactivated", "Recruited"))
     out
 }
