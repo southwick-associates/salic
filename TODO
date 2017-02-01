@@ -1,5 +1,11 @@
 
 Todo:
+1. Don't do lazy loading of sample data (to easy to operate on sample data)
+2. Apply WI changes to salic
+3. Work on vignette
+
+
+OLDER STUFF - take a look at this for reference
 1. work on (make.R) functions, see corresponding functions in saproj
 -  (done) new()
 -  (done) section()

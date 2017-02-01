@@ -4,7 +4,7 @@
 \alias{rank_sale}
 \title{Aggregate a Sale Table to insure 1 row per customer per year.}
 \usage{
-rank_sale(sale, rank_var = "duration")
+rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 }
 \arguments{
 \item{sale}{data frame: Input sales data}

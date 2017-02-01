@@ -26,10 +26,10 @@
 #' # Perform ranking and check the result
 #' sale_ranked <- rank_sale(sale_unranked)
 #' check_rank_sale(sale_ranked, sale_unranked)
-rank_sale <- function(sale, rank_var = "duration") {
+rank_sale <- function(sale, rank_var = "duration",  
+                      grp_var = c("cust_id", "year")) {
     # This executes quickly
-    select_(sale, .dots = c("cust_id", "year", rank_var)) %>%
-        group_by(cust_id, year) %>%
+    group_by_(sale, .dots = grp_var) %>%
         # to insure highest value is picked - sort ascending, pick last
         arrange_(.dots = rank_var) %>%
         summarise_each(funs(last)) %>%
@@ -178,20 +178,20 @@ make_priv <- function(track) {
 
 #' Identify R3 group each year
 #'
-#' This is called as part of \code{\link{make_priv}} and codes R3: 0 = carried,
-#' 1 = retained, 2 = reactivated, 3 = recruited, where 1 (retained) consists
+#' This is called as part of \code{\link{make_priv}} and codes R3: 1 = carried,
+#' 2 = retained, 3 = reactivated, 4 = recruited, where 1 (retained) consists
 #' of carried + renewed.
 #'
 #' R3 Conditionals:
 #' \itemize{
-#' \item \emph{0 (carry)}: License doesn't expire this year
+#' \item \emph{1 (carry)}: License doesn't expire this year
 #' (l!is.na(left) & left > 0)
-#' \item \emph{1 (renew)}: Renewed a license this year
+#' \item \emph{2 (renew)}: Renewed a license this year
 #' (duration >=1 & !is.na(left) & left == 0)
-#' \item \emph{2 (reactivate)}: Bought a license, no privilege last year but had
+#' \item \emph{3 (reactivate)}: Bought a license, no privilege last year but had
 #' a privilege within the past 5 years
 #' (duration >=1 & !is.na(left) & left < 0 & left > -5)
-#' \item \emph{3 (recruit)}: Bought a license, but no privilege in past 5 years
+#' \item \emph{4 (recruit)}: Bought a license, but no privilege in past 5 years
 #' (duration >=1 & (is.na(left) | left <= -5))
 #' }
 #' @param i integer/character: position of data frame in tracking list to
@@ -206,10 +206,10 @@ make_priv <- function(track) {
 #' x <- get_R3(track, "2012")
 #'
 #' # Show counts of customers who bought licenses in 2012
-#' # Recruited (R3=3) bought never (NA) or 6 or more years previously
-#' # Reactivated (R3=2) bought between 2 and 5 years before
-#' # Renewed (R3=1) bought last year
-#' # Carried (R3=0) bought a multi-year or lifetime license
+#' # Recruited (R3=4) bought never (NA) or 6 or more years previously
+#' # Reactivated (R3=3) bought between 2 and 5 years before
+#' # Renewed (R3=2) bought last year
+#' # Carried (R3=1) bought a multi-year or lifetime license
 #' count(x, duration, left, R3) %>%
 #'     filter(!is.na(R3)) %>%
 #'     tidyr::spread(duration, n, fill = "")
@@ -217,10 +217,10 @@ get_R3 <- function(track, i) {
     # the !is.na(left) condition is specified to prevent output being
     # assigned to missing values unintentionally
     mutate(track[[i]],
-           R3 = ifelse(!is.na(left) & left > 0, 0, # carry
-                ifelse(duration >=1 & !is.na(left) & left == 0, 1, # renew
-                ifelse(duration >=1 & !is.na(left) & left < 0 & left > -5, 2, # reactivate
-                ifelse(duration >=1 & (is.na(left) | left <= -5), 3, # recruit
+           R3 = ifelse(!is.na(left) & left > 0, 1, # carry
+                ifelse(duration >=1 & !is.na(left) & left == 0, 2, # renew
+                ifelse(duration >=1 & !is.na(left) & left < 0 & left > -5, 3, # reactivate
+                ifelse(duration >=1 & (is.na(left) | left <= -5), 4, # recruit
                 NA)))))
 }
 
@@ -290,7 +290,10 @@ get_lapse <- function(track, i, count_multi = TRUE) {
 #' @export
 #' @examples
 #' make_priv_final()
-make_priv_final <- function(priv, keep = c("cust_id", "year", "lapse", "R3")) {
+make_priv_final <- function(
+    priv, 
+    keep = c("cust_id", "year", "lapse", "R3", "res", "sex", "age", "county")
+) {
     for (i in seq_along(priv)) {
         yr <- names(priv)[i]
         # drop rows that don't correspond to privileges in a given year

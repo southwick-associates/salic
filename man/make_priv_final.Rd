@@ -4,7 +4,8 @@
 \alias{make_priv_final}
 \title{Finalizes input privilege table (stored as list)}
 \usage{
-make_priv_final(priv, keep = c("cust_id", "year", "lapse", "R3"))
+make_priv_final(priv, keep = c("cust_id", "year", "lapse", "R3", "res", "sex",
+  "age", "county"))
 }
 \arguments{
 \item{priv}{list: Input privilege table}

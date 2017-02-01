@@ -14,21 +14,21 @@ get_R3(track, i)
 calculate metric}
 }
 \description{
-This is called as part of \code{\link{make_priv}} and codes R3: 0 = carried,
-1 = retained, 2 = reactivated, 3 = recruited, where 1 (retained) consists
+This is called as part of \code{\link{make_priv}} and codes R3: 1 = carried,
+2 = retained, 3 = reactivated, 4 = recruited, where 1 (retained) consists
 of carried + renewed.
 }
 \details{
 R3 Conditionals:
 \itemize{
-\item \emph{0 (carry)}: License doesn't expire this year
+\item \emph{1 (carry)}: License doesn't expire this year
 (l!is.na(left) & left > 0)
-\item \emph{1 (renew)}: Renewed a license this year
+\item \emph{2 (renew)}: Renewed a license this year
 (duration >=1 & !is.na(left) & left == 0)
-\item \emph{2 (reactivate)}: Bought a license, no privilege last year but had
+\item \emph{3 (reactivate)}: Bought a license, no privilege last year but had
 a privilege within the past 5 years
 (duration >=1 & !is.na(left) & left < 0 & left > -5)
-\item \emph{3 (recruit)}: Bought a license, but no privilege in past 5 years
+\item \emph{4 (recruit)}: Bought a license, but no privilege in past 5 years
 (duration >=1 & (is.na(left) | left <= -5))
 }
 }
@@ -38,10 +38,10 @@ library(dplyr)
 x <- get_R3(track, "2012")
 
 # Show counts of customers who bought licenses in 2012
-# Recruited (R3=3) bought never (NA) or 6 or more years previously
-# Reactivated (R3=2) bought between 2 and 5 years before
-# Renewed (R3=1) bought last year
-# Carried (R3=0) bought a multi-year or lifetime license
+# Recruited (R3=4) bought never (NA) or 6 or more years previously
+# Reactivated (R3=3) bought between 2 and 5 years before
+# Renewed (R3=2) bought last year
+# Carried (R3=1) bought a multi-year or lifetime license
 count(x, duration, left, R3) \%>\%
     filter(!is.na(R3)) \%>\%
     tidyr::spread(duration, n, fill = "")
