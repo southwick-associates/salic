@@ -1,0 +1,16 @@
+---
+title: "Initial Data Check"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+knitr::opts_chunk$set(comment = NA)
+```
+
