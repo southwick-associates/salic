@@ -1,8 +1,9 @@
 
 Todo:
 1. Don't do lazy loading of sample data (to easy to operate on sample data)
-2. Apply WI changes to salic
+2. Apply WI changes to salic (Rmds mostly)
 3. Work on vignette
+4. Work on updating code (Rmd + functions perhaps) and vignette
 
 
 OLDER STUFF - take a look at this for reference
