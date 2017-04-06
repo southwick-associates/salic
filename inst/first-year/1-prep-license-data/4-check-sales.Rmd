@@ -11,6 +11,9 @@ output:
 ```{r setup, message=FALSE}
 library(dplyr)
 library(tidyr)
+library(readxl)
+library(lubridate)
+library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
@@ -18,3 +21,88 @@ START HERE - should be much simpler than customer check
 
 ## Guidelines
 
+- bla di bla
+
+## Load Data
+
+### Prepped License Types
+
+```{r}
+f <- "../../data/1-prep-license-data/lic_types.xlsx"
+f <- "~/Project/MO_Dashboard/Analysis/data/1-initial-prep/MO license types.xlsx"
+lic <- read_excel(f)
+lic <- select(lic, TypeCode, TypeName, type)
+names(lic) <- c("lic_id", "description", "type")
+glimpse(lic)
+```
+
+### All Sales
+
+```{r}
+# db <- src_sqlite("~/Data/")
+db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3")
+src_tbls(db)
+```
+
+```{r}
+tbl(db, "sale") %>% head() %>% collect() %>% glimpse()
+sale <- tbl(db, "sale") %>% 
+    select(CustomerPrimaryID, typecode, Season, PurchaseDate) %>%
+    collect(n = Inf)
+names(sale) <- c("cust_id", "lic_id", "year", "dot")
+# sale <- mutate(sale, lic_id = as.numeric(lic_id))
+glimpse(sale)
+```
+
+## Check for Dups
+
+```{r}
+select(sale, cust_id, lic_id, year) %>% salic::check_dups()
+```
+
+- People buying the same license more than once in the same year can be common for some license types (e.g., short-term, antlerless deer)
+    + it may require closer investigation if there are large numbers of unusual looking duplicates (e.g., annual licenses)
+    
+```{r}
+# this can take a few minutes to run
+dup <- count(sale, cust_id, lic_id, year) %>% 
+    ungroup() %>% filter(n > 1)
+dup_all <- left_join(dup, sale, by = c("cust_id", "lic_id", "year")) %>%
+    left_join(lic, by = "lic_id")
+
+count(dup_all, lic_id, description, year) %>%
+    spread(year, nn) %>%
+    DT::datatable()
+```
+
+## Check Dates - START HERE
+
+- Important!!! > need to look at inst/first-year/func.R
+    + decide whether to store these functions in salic (probably) or as a template
+    + maybe store in template Rmd for the time being, or just get a subset into salic (recode_month, etc.)
+
+```{r}
+# convert string to date > varies by state
+# run on sample to test
+head(sale) %>% select(dot) %>% mutate(dot_new = lubridate::mdy_hms(dot))
+
+sale <- mutate(sale, dot_new = lubridate::mdy_hms(dot))
+sample_n(sale, 5) %>% select(dot, dot_new)
+```
+
+- Note: purchases in December (for the following year) are common
+- License years sometimes don't follow calendar years
+    + This can vary by license type
+
+```{r}
+sale <- sale %>% mutate(
+    dot_year = lubridate::year(dot_new),   
+    dot_month = lubridate::month(dot_new)
+)
+sale %>%
+    sample_n(5) %>% 
+    select(dot, dot_year, dot_month)
+sale %>%
+    count(year, dot_year, dot_month) %>% 
+    DT::datatable()
+```

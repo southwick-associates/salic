@@ -58,7 +58,6 @@ sale <- tbl(db, "sale") %>%
     select(CustomerPrimaryID, typecode, Season) %>%
     collect(n = Inf)
 names(sale) <- c("cust_id", "lic_id", "year")
-sale <- mutate(sale, lic_id = as.numeric(lic_id))
 glimpse(sale)
 ```
 
@@ -106,7 +105,8 @@ length(unique(cust$cust_id)) == length(cust$cust_id)
 
 ## Recode Demographic Variables
 
-- This is done for a standardized output
+- This enables standardization for checking demographics
+- The recoding specification varies by state
 
 ### Gender
 
