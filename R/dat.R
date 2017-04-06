@@ -1,5 +1,21 @@
 # Documentation for Sample Data
 
+#' Data: State/Province/Territory Abbreviations for US & Canada
+#'
+#' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
+#'
+#' @docType data
+#' @keywords datasets
+#' @name state_abbreviations
+#' @format A data frame with 72 rows and 3 variables
+#' \describe{
+#' \item{name}{State/Province/Territory name}
+#' \item{state}{Abbreviation}
+#' \item{country}{Country Abbreviation where CN = Canada}
+#' }
+#' @family Sample Data
+NULL
+
 #' Sample Data: GA Hunting Customers
 #'
 #' A data frame with a random sample of 1000 GA hunting customers
