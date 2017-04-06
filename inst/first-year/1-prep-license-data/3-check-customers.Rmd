@@ -14,3 +14,6 @@ library(tidyr)
 knitr::opts_chunk$set(comment = NA)
 ```
 
+### START HERE
+- try to move these last few scripts along more quickly
+- it might be worth prioritizing other tasks so OR will be ready by Friday

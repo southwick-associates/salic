@@ -4,6 +4,17 @@ Todo:
 3. Work on vignette (just an initial, creating directory, intializing w/templates)
 4. Work on updating code (Rmd + functions perhaps) and vignette
 
+Priorities: Address largest time bottlenecks
+1. basic Rmd templates with auto-populating functions in salic
+   - 1-prep-license
+   - 4-dashboard-results (should improve OR update code)
+   - run OR "first-year" through the above
+2. More generic priv structure (lic_priv table)
+   - probably use this for OR > add new column for bow vs. rifle
+3. Update workflow
+   - first run OR through a new "first-year" process with changes above
+   - write update workflow scripts (maybe with some auto-populate templates)
+   - use last update as a reference, probably keep changes small
 
 OLDER STUFF - take a look at this for reference
 1. work on (make.R) functions, see corresponding functions in saproj

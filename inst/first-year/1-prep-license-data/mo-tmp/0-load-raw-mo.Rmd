@@ -1,0 +1,131 @@
+---
+title: "Load Raw Data into sqlite database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Guidelines
+
+- Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)
+- Regarding dates:
+    + I recommend just importing with `col_character` (as per the examples below)
+    + If date fields are imported with `col_date` (or similar), it's probably best to convert with `as.character()` prior to writing to sqlite
+
+- Regarding large data files:
+    + I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large (and loading too much data into memory can cause your computer to freeze)
+    + I used to have this issue pretty regularly on a laptop with 8gb of memory
+
+## Load
+
+### License Types
+
+```{r}
+f <- "~/Data/MO_Dashboard/ProductInfo.csv" # path to raw data file
+
+# test
+read_lines(f, n_max = 5)
+read_csv(f, n_max = 5) %>% glimpse() # see readr documentation for non-csv formats
+```
+
+```{r}
+# column type specification (varies by state)
+# note: start with output above (Parsed with column specification:)
+coltyp <- cols(
+  TypeCode = col_integer(),
+  TypeName = col_character(),
+  Species = col_character(),
+  Category = col_character()
+)
+lic <- read_csv(f, col_types = coltyp, progress = FALSE)
+glimpse(lic)
+```
+
+### Customers
+
+```{r}
+f <- "~/Data/MO_Dashboard/MDC_Data/tblCustomer.txt"
+read_lines(f, n_max = 5)
+read_csv(f, n_max = 5) %>% glimpse()
+```
+
+```{r}
+# note: defaulting to col_character() tends to produce fewer import problems
+coltyp <- cols(
+  CustomerID = col_integer(),
+  FirstName = col_character(),
+  MiddleInitial = col_character(),
+  LastName = col_character(),
+  Suffix = col_character(),
+  MailStreet1 = col_character(),
+  MailStreet2 = col_character(),
+  MailCity = col_character(),
+  MailState = col_character(),
+  MailZip = col_character(),
+  MailCountry = col_character(),
+  DOB = col_character(),
+  Gender = col_character(),
+  statuscodeid = col_integer()
+)
+cust <- read_csv(f, n_max = Inf, col_types = coltyp, progress = FALSE)
+problems(cust)
+glimpse(cust)
+```
+
+### Sales
+
+```{r}
+f <- "~/Data/MO_Dashboard/MDC_Data/tblPrivilegeSales.txt"
+read_lines(f, n_max = 5)
+read_csv(f, n_max = 5) %>% glimpse()
+```
+
+```{r}
+coltyp <- cols(
+  CustomerPrimaryID = col_integer(),
+  PermitNo = col_integer(),
+  Season = col_integer(),
+  PurchaseDate = col_character(),
+  typecode = col_character(),
+  Amount = col_character(),
+  Quantity = col_integer(),
+  AccountNo = col_character(),
+  SaleOriginID = col_integer(),
+  OriginalID = col_integer()
+)
+sale <- read_csv(f, n_max = Inf, col_types = coltyp, progress = FALSE)
+problems(sale)
+glimpse(sale)
+```
+
+## Add Row IDs
+
+```{r}
+cust$raw_id_cust <- as.integer(row.names(cust))
+tail(cust$raw_id_cust)
+
+sale$raw_id_sale <- as.integer(row.names(sale))
+tail(sale$raw_id_sale)
+```
+
+## Write to sqlite
+
+```{r}
+dir <- "~/Data/MO_Dashboard/" # directory for sqlite database
+f <- file.path(dir, "raw-tmp.sqlite3")
+if (!file.exists(f)) db <- src_sqlite(f, create = TRUE)
+copy_to(db, lic, temporary = FALSE)
+copy_to(db, cust, temporary = FALSE)
+copy_to(db, sale, temporary = FALSE)
+```
+
