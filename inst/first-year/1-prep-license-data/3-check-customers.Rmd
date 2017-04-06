@@ -10,10 +10,213 @@ output:
 
 ```{r setup, message=FALSE}
 library(dplyr)
+library(readxl)
 library(tidyr)
+library(lubridate)
+library(salic)
+options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-### START HERE
-- try to move these last few scripts along more quickly
-- it might be worth prioritizing other tasks so OR will be ready by Friday
+## Guidelines
+
+- stuff and stuff
+
+## Load Data
+
+### Prepped License Types
+
+```{r}
+f <- "../../data/1-prep-license-data/lic_types.xlsx"
+f <- "~/Project/MO_Dashboard/Analysis/data/1-initial-prep/MO license types.xlsx"
+lic <- read_excel(f)
+lic <- select(lic, TypeCode, TypeName, type)
+names(lic) <- c("lic_id", "description", "type")
+glimpse(lic)
+```
+
+### All Customers & Sales
+
+```{r}
+# db <- src_sqlite("~/Data/")
+db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3")
+src_tbls(db)
+```
+
+```{r}
+tbl(db, "cust") %>% head() %>% collect() %>% glimpse()
+cust <- tbl(db, "cust") %>% 
+    select(CustomerID, DOB, FirstName, LastName, Gender, MailState) %>%
+    collect(n = Inf)
+names(cust) <- c("cust_id", "dob", "first", "last", "sex", "state")
+glimpse(cust)
+```
+
+```{r}
+tbl(db, "sale") %>% head() %>% collect() %>% glimpse()
+sale <- tbl(db, "sale") %>% 
+    select(CustomerPrimaryID, typecode, Season) %>%
+    collect(n = Inf)
+names(sale) <- c("cust_id", "lic_id", "year")
+# sale <- mutate(sale, lic_id = as.numeric(lic_id))
+glimpse(sale)
+```
+
+## Check customers IDs
+
+### Dups: One customer (last, first, dob) - multiple cust_ids
+
+- Some number of duplicates is common, probably not a concern if it's fewer than 1 percent or so
+
+```{r}
+# this semi_join may be necessary to drop customers who aren't hunters or anglers
+cust <- semi_join(cust, sale, by = "cust_id")
+
+# same last, first, dob across multiple customer IDs
+select(cust, dob, last, first) %>%
+    salic::check_dups()
+```
+
+```{r}
+# this can take a few minutes to run
+dup <- group_by(cust, first, last, dob) %>%
+	summarise(count = n() - 1, min_cust_id = min(cust_id)) %>% 
+	filter(count != 0)
+```
+
+- Note: It's worth taking a closer look at duplicates to see if there are any patterns that might lead to skewed results when tracking customers across years
+    + the sample code below provides a start in that direction
+    
+```{r}
+# investigate a sample of duplicates
+sample_n(dup, 100) %>%
+    select(first, last, dob, min_cust_id) %>%
+    left_join(cust, by = c("first", "last", "dob")) %>%
+    left_join(sale, by = "cust_id") %>%
+    DT::datatable()
+```
+
+### Dups: One cust_id - multiple customers
+
+- Note: This type of duplicate won't exist if a customer table (with one row per customer) was provided separately
+
+```{r}
+length(unique(cust$cust_id)) == length(cust$cust_id)
+```
+
+## Hunter Demographics
+
+### Prep Hunters by Year
+
+```{r}
+lic_hunt <- filter(lic, type %in% c("combo", "hunt", "trap"))
+sale_hunt <- filter(sale, lic_id %in% lic_hunt$lic_id) %>% 
+    select(cust_id, year) %>% 
+    distinct()
+hunt <- right_join(cust, sale_hunt, by = "cust_id")
+glimpse(hunt)
+```
+
+### Gender
+
+- Typical Male Hunting: 80-95%
+- Female percentage is typically increasing over time
+
+```{r}
+count(hunt, sex)
+mutate(hunt, sex = ifelse(!(sex %in% c("M", "F")), NA, sex)) %>%
+    filter(!is.na(sex)) %>%
+    count(year, sex) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(sex, pct) %>% data.frame()
+```
+
+### Residency - START HERE
+
+- Use an salic::recode_state()
+
+```{r}
+count(hunt, state)
+data(state_abbreviations) # loads data from salic
+DT::datatable(state_abbreviations)
+# salic::recode_state()
+```
+
+```{r}
+# code residency based on state of residence
+
+# count
+count(hunt, year, is_wi_resident) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(is_wi_resident, pct) %>% data.frame()
+```
+
+
+### Age
+
+- No surprises here: consistent with aging activity base
+
+```{r}
+age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf)
+
+hunt <- mutate(hunt, age = year - lubridate::year(lubridate::ymd(dob)),
+       agecat = cut(age, breaks = age_breaks, labels = age_labs))
+sample_n(hunt, 5) %>% select(dob, year, age, agecat)
+
+count(hunt, year, agecat) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(agecat, pct) %>% data.frame()
+```
+
+## Angler Demographics
+
+### Prep Anglers by Year
+
+```{r}
+lic_fish <- filter(lic, type %in% c("combo", "fish"))
+sale_fish <- filter(sale, lic_id %in% lic_fish$lic_id) %>% 
+    select(cust_id, year) %>% 
+    distinct()
+fish <- right_join(cust, sale_fish, by = "cust_id")
+glimpse(fish)
+```
+
+### Gender
+
+- Gradually increasing women percentage (as expected)
+
+```{r}
+count(fish, year, gender) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(gender, pct) %>% data.frame()
+```
+
+### Residency
+
+- Decreasing nonresident share - interesting
+
+```{r}
+count(fish, year, is_wi_resident) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(is_wi_resident, pct) %>% data.frame()
+```
+
+
+### Age
+
+- No surprises here: consistent with aging activity base
+
+```{r}
+age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf)
+
+fish <- mutate(fish, age = year - lubridate::year(lubridate::ymd(dob)),
+       agecat = cut(age, breaks = age_breaks, labels = age_labs))
+sample_n(fish, 5) %>% select(dob, year, age, agecat)
+
+count(fish, year, agecat) %>% 
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    select(-n) %>% spread(agecat, pct) %>% data.frame()
+```
+
