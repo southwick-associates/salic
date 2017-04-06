@@ -14,3 +14,7 @@ library(tidyr)
 knitr::opts_chunk$set(comment = NA)
 ```
 
+START HERE - should be much simpler than customer check
+
+## Guidelines
+

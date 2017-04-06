@@ -29,7 +29,6 @@ knitr::opts_chunk$set(comment = NA)
 
 ```{r}
 f <- "~/Project/MO_Dashboard/Analysis/data/1-initial-prep/MO license types.xlsx"
-f <- "../../data/1-prep-license-data/lic_types.xlsx"
 lic <- read_excel(f)
 lic <- select(lic, TypeCode, TypeName, type)
 names(lic) <- c("lic_id", "description", "type")

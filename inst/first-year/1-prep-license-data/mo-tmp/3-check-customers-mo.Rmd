@@ -20,9 +20,7 @@ knitr::opts_chunk$set(comment = NA)
 
 ## Guidelines
 
-- This script dives into customer characteristics:
-    + Uniquely identifying customers is key for the dashboard, so the customer ID should be checked carefully
-    + Demographic distributions are informative and can sometimes reveal data issues
+- stuff and stuff
 
 ## Load Data
 
@@ -30,6 +28,7 @@ knitr::opts_chunk$set(comment = NA)
 
 ```{r}
 f <- "../../data/1-prep-license-data/lic_types.xlsx"
+f <- "~/Project/MO_Dashboard/Analysis/data/1-initial-prep/MO license types.xlsx"
 lic <- read_excel(f)
 lic <- select(lic, TypeCode, TypeName, type)
 names(lic) <- c("lic_id", "description", "type")
@@ -39,7 +38,8 @@ glimpse(lic)
 ### All Customers & Sales
 
 ```{r}
-db <- src_sqlite("~/Data/")
+# db <- src_sqlite("~/Data/")
+db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3")
 src_tbls(db)
 ```
 
@@ -104,7 +104,7 @@ sample_n(dup, 100) %>%
 length(unique(cust$cust_id)) == length(cust$cust_id)
 ```
 
-## Recode Demographic Variables
+## Recoding Demographics
 
 - This is done for a standardized output
 
@@ -129,7 +129,7 @@ count(cust, state_new, state) %>% DT::datatable()
 ```
 
 ```{r}
-cust <- mutate(cust, res = ifelse(state_new == "XX", "res", "nonres"))
+cust <- mutate(cust, res = ifelse(state_new == "MO", "res", "nonres"))
 count(cust, res, state_new) %>% DT::datatable()
 ```
 
@@ -144,7 +144,7 @@ cust <- mutate(cust, dob_new = lubridate::mdy_hms(dob))
 sample_n(cust, 5) %>% select(dob, dob_new)
 ```
 
-## Check Hunter Demographics
+## Hunter Demographics
 
 ### Prep Hunters by Year
 
@@ -205,7 +205,7 @@ filter(hunt, !is.na(agecat)) %>%
     select(-n) %>% spread(agecat, pct) %>% data.frame()
 ```
 
-## Check Angler Demographics
+## Angler Demographics
 
 ### Prep Anglers by Year
 
