@@ -17,30 +17,37 @@ library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-START HERE - should be much simpler than customer check
+## Overview
 
-## Guidelines
-
-- bla di bla
+**Guidelines**
+- 
 
 ## Load Data
 
 ### Prepped License Types
 
+**Guidelines**
+- Suggestion: Copy/paste code from 2-check-intial.Rmd
+    + For sales, include an extra field: "dot" (transaction date)
+    + Probably no need to load customer data
+
+### temp
+
 ```{r}
 f <- "../../data/1-prep-license-data/lic_types.xlsx"
-f <- "~/Project/MO_Dashboard/Analysis/data/1-initial-prep/MO license types.xlsx"
 lic <- read_excel(f)
 lic <- select(lic, TypeCode, TypeName, type)
 names(lic) <- c("lic_id", "description", "type")
 glimpse(lic)
 ```
 
-### All Sales
+### Raw Sales
+
+### temp
 
 ```{r}
-# db <- src_sqlite("~/Data/")
-db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3")
+db <- src_sqlite("~/Data/")
+db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3") ### temp
 src_tbls(db)
 ```
 
@@ -50,7 +57,7 @@ sale <- tbl(db, "sale") %>%
     select(CustomerPrimaryID, typecode, Season, PurchaseDate) %>%
     collect(n = Inf)
 names(sale) <- c("cust_id", "lic_id", "year", "dot")
-# sale <- mutate(sale, lic_id = as.numeric(lic_id))
+sale <- mutate(sale, lic_id = as.numeric(lic_id)) ### temp
 glimpse(sale)
 ```
 
@@ -60,8 +67,9 @@ glimpse(sale)
 select(sale, cust_id, lic_id, year) %>% salic::check_dups()
 ```
 
-- People buying the same license more than once in the same year can be common for some license types (e.g., short-term, antlerless deer)
-    + it may require closer investigation if there are large numbers of unusual looking duplicates (e.g., annual licenses)
+**Guidelines**
+- Note: People buying the same license more than once in the same year can be common for some license types (e.g., short-term, antlerless deer)
+    + it may require closer investigation if there are large percentages of unusual looking duplicates (e.g., annual licenses)
     
 ```{r}
 # this can take a few minutes to run
@@ -90,6 +98,7 @@ sale <- mutate(sale, dot_new = lubridate::mdy_hms(dot))
 sample_n(sale, 5) %>% select(dot, dot_new)
 ```
 
+**Guidelines**
 - Note: purchases in December (for the following year) are common
 - License years sometimes don't follow calendar years
     + This can vary by license type
