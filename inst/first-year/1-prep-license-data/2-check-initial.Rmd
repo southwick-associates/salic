@@ -19,22 +19,26 @@ options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-## Guidelines
+## Overview
 
+- (for overall state-specific notes)
+
+**Guidelines**
 - This script is intended to catch data problems early.
     + Results outside of expected ranges can indicate underlying data issues (incomplete data is probably the most common problem)
 - Note: churn calculations with `salic::summary_churn()` don't take multi-year & lifetime license sales into account (so churn may be overestimated)
 
 ## Load Data
 
+**Guidelines**
+- only a subset of columns are needed for each table (names will vary by state)
+- renaming columns to standard values allows boilerplate code to be applied to different states
+
 ### Prepped License Types
 
 ```{r}
 f <- "../../data/1-prep-license-data/lic_types.xlsx"
 lic <- read_excel(f)
-
-# only a subset of columns are needed for each table > will vary by state
-# standard names are used so code can be generalized
 lic <- select(lic, TypeCode, TypeName, type)
 names(lic) <- c("lic_id", "description", "type")
 glimpse(lic)
@@ -48,15 +52,6 @@ src_tbls(db)
 ```
 
 ```{r}
-tbl(db, "cust") %>% glimpse()
-cust <- tbl(db, "cust") %>% 
-    select(CustomerID) %>% 
-    collect(n = Inf)
-names(cust) <- "cust_id"
-glimpse(cust)
-```
-
-```{r}
 tbl(db, "sale") %>% glimpse()
 sale <- tbl(db, "sale") %>%
     select(CustomerPrimaryID, Season, typecode) %>%
@@ -65,11 +60,24 @@ names(sale) <- c("cust_id", "year", "lic_id")
 glimpse(sale)
 ```
 
+**Guidelines**
+- Customer data is pulled only to check customer coverage (near end of this script)
+
+```{r}
+tbl(db, "cust") %>% glimpse()
+cust <- tbl(db, "cust") %>% 
+    select(CustomerID) %>% 
+    collect(n = Inf)
+names(cust) <- "cust_id"
+glimpse(cust)
+```
+
 ## Check Hunters
 
 ### Sales & Customers by Year
 
-Compare to secondary data sources (Shift + click):
+**Guidelines**
+- Compare output of `summary_sale()` to secondary data sources (Shift + click):
 - https://wsfrprograms.fws.gov/Subpages/LicenseInfo/Hunting.htm
 
 ```{r}
@@ -80,22 +88,25 @@ salic::summary_sale(hunt_sale)
 
 ### Churn
 
+**Guidelines**
+- years selected will vary by state (include all available license years)
+
 ```{r}
-# years selected will vary by state
 salic::summary_churn(hunt_sale, 2007:2016)
 ```
 
 ### Sales by License Type
 
+**Guidelines**
+- Note: I find the heatmap useful for spotting patterns
+- Opening the output in a new window usually helps
+
 ```{r, fig.height=10}
-# A heatmap is useful for spotting patterns
 hunt_sale <- select(lic, lic_id, description) %>% right_join(hunt_sale)
 y <- count(hunt_sale, description, year) %>% 
     spread(year, n, fill = 0) %>% data.frame()
 row.names(y) <- y$description # b/c heatmap uses row names for the y-axis
 y$description <- NULL
-
-# suggestion: Show in New Window
 d3heatmap(y, scale = "none", colors = "Blues", Rowv = F, Colv = F, dendrogram="none")
 ```
 
@@ -103,7 +114,6 @@ d3heatmap(y, scale = "none", colors = "Blues", Rowv = F, Colv = F, dendrogram="n
 
 ### Sales & Customers by Year
 
-Compare to secondary data sources (Shift + click):
 - https://wsfrprograms.fws.gov/Subpages/LicenseInfo/Fishing.htm
 
 ```{r}
@@ -133,7 +143,9 @@ d3heatmap(y, scale = "none", colors = "Blues", Rowv = F, Colv = F, dendrogram="n
 
 ### Customer Coverage
 
-- It's important that all customers in the sales table are included in the customer table
+**Guidelines**
+- Note: It's important that all customers in the sales table are included in the customer table
+    + If the 2 counts below are different, then you might need to get a repull of customer data from the state
 
 ```{r}
 cust_sale <- semi_join(cust, sale, by = "cust_id")
@@ -157,6 +169,7 @@ tribble(
 
 ## Output Total Sales Count
 
+**Guidelines**
 - This can be useful for closer inspection of sales by year (by individual license type)
 
 ```{r}

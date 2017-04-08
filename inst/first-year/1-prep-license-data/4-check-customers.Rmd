@@ -18,85 +18,62 @@ options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-## Guidelines
+## Overview
 
+**Guidelines**
 - This script dives into customer characteristics:
     + Uniquely identifying customers is key for the dashboard, so the customer ID should be checked carefully
     + Demographic distributions are informative and can sometimes reveal data issues
 
 ## Load Data
 
+**Guidelines**
+- Suggestion: Copy/paste code from 2-check-intial.Rmd
+    + For customers, include extra fields: 
+    + c("cust_id", "dob", "first_name", "last_name", "sex", "state")
+
 ### Prepped License Types
 
-```{r}
-f <- "../../data/1-prep-license-data/lic_types.xlsx"
-lic <- read_excel(f)
-lic <- select(lic, TypeCode, TypeName, type)
-names(lic) <- c("lic_id", "description", "type")
-glimpse(lic)
-```
-
-### All Customers & Sales
-
-```{r}
-db <- src_sqlite("~/Data/")
-src_tbls(db)
-```
-
-```{r}
-tbl(db, "cust") %>% head() %>% collect() %>% glimpse()
-cust <- tbl(db, "cust") %>% 
-    select(CustomerID, DOB, FirstName, LastName, Gender, MailState) %>%
-    collect(n = Inf)
-names(cust) <- c("cust_id", "dob", "first", "last", "sex", "state")
-glimpse(cust)
-```
-
-```{r}
-tbl(db, "sale") %>% head() %>% collect() %>% glimpse()
-sale <- tbl(db, "sale") %>% 
-    select(CustomerPrimaryID, typecode, Season) %>%
-    collect(n = Inf)
-names(sale) <- c("cust_id", "lic_id", "year")
-glimpse(sale)
-```
+### Raw Sales & Customers
 
 ## Check customers IDs
 
-### Dups: One customer (last, first, dob) - multiple cust_ids
+### Dups: One customer (last_name, first_name, dob) - multiple cust_ids
 
+**Guidelines**
 - Some number of duplicates is common, probably not a concern if it's fewer than 1 percent or so
+- A `semi_join` is used because sometimes the customer table has additional customers (not found in the sales table). This is okay as long as we aren't missing any license sales that need to be tracked.
 
 ```{r}
-# this semi_join may be necessary to drop customers who aren't hunters or anglers
+cust_in <- cust
 cust <- semi_join(cust, sale, by = "cust_id")
-
-# same last, first, dob across multiple customer IDs
-select(cust, dob, last, first) %>%
+select(cust, dob, last_name, first_name) %>%
     salic::check_dups()
 ```
 
+**Guidelines**
+- Note: It's worth taking a closer look at duplicates to see if there are any patterns that might lead to skewed results when tracking customers across years
+    + the "investigate sample" code below provides a start in that direction
+
 ```{r}
 # this can take a few minutes to run
-dup <- group_by(cust, first, last, dob) %>%
+dup <- group_by(cust, first_name, last_name, dob) %>%
 	summarise(count = n() - 1, min_cust_id = min(cust_id)) %>% 
 	filter(count != 0)
 ```
 
-- Note: It's worth taking a closer look at duplicates to see if there are any patterns that might lead to skewed results when tracking customers across years
-    + the sample code below provides a start in that direction
-    
 ```{r}
 # investigate a sample of duplicates
 sample_n(dup, 100) %>%
-    select(first, last, dob, min_cust_id) %>%
-    left_join(cust, by = c("first", "last", "dob")) %>%
+    select(first_name, last_name, dob, min_cust_id) %>%
+    left_join(cust, by = c("first_name", "last_name", "dob")) %>%
     left_join(sale, by = "cust_id") %>%
     DT::datatable()
 ```
 
 ### Dups: One cust_id - multiple customers
 
+**Guidelines**
 - Note: This type of duplicate won't exist if a customer table (with one row per customer) was provided separately
 
 ```{r}
@@ -105,6 +82,7 @@ length(unique(cust$cust_id)) == length(cust$cust_id)
 
 ## Recode Demographic Variables
 
+**Guidelines**
 - This enables standardization for checking demographics
 - The recoding specification varies by state
 
@@ -144,7 +122,7 @@ cust <- mutate(cust, dob_new = lubridate::mdy_hms(dob))
 sample_n(cust, 5) %>% select(dob, dob_new)
 ```
 
-## Check Hunter Demographics
+## Check Hunter Demographics - TODO STD BELOW
 
 ### Prep Hunters by Year
 
