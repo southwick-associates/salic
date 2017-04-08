@@ -40,8 +40,23 @@ glimpse(lic)
 
 ```{r}
 # db <- src_sqlite("~/Data/")
-db <- src_sqlite("~/Data/MO_Dashboard/raw-tmp.sqlite3")
+db <- src_sqlite("~/Data/MO_Dashboard/raw-samp.sqlite3")
 src_tbls(db)
+```
+
+### TEST - just for fun
+
+- This might end up being a good way to interact with the database backend
+    + especially for someone like Martin who is probably already good at sql
+
+```{r}
+# test sql
+library(DBI)
+db <- dbConnect(RSQLite::SQLite(), dbname = "~/Data/MO_Dashboard/raw-samp.sqlite3")
+```
+
+```{sql, connection = db}
+select CustomerID, Gender from cust limit 5
 ```
 
 ```{r}
