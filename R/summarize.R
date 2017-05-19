@@ -1,6 +1,9 @@
 # for summarizing license history to easily calculate R3, churn
 # ultimate goal - making a privilege table with lapse & R3 variables
 
+### Todo: update these functions to be simpler and more intuitive
+# see "license history data" in Dashbard Data Dictionary.xlsx
+
 
 #' Aggregate a Sale Table to insure 1 row per customer per year.
 #'
@@ -109,14 +112,31 @@ make_track <- function(sale_ranked, yrs, carry_vars = NULL) {
 update_track <- function(x, sale_ranked, yr, carry_vars = NULL) {
     out <- x %>%
         # move the "left" counter down by 1 year
-        # those who did buy last year (!is.na(duration)) are set based on
-        # the duration of last year's licenes
-        mutate(
-            left = ifelse(duration == 0, left - 1,    # didn't buy last year
-                          duration - 1)) %>%          # did buy last year
+        # done based on the value of duration from the previous year
+        #  duration == 0 (didn't buy last year) > move down (left - 1), NAs remain NAs
+        #  otherwise (did buy last year) > move down (duration - 1)
+        
+        ### PROBABLY DROP THIS TEMPORARY WORK
+        # exception: some multi-year/lifetime license holders will still buy other licenses
+        #  left > 0
+        # the left counter will always try to take the maximum reasonable value
+        # example: if a person buys a fishing priv but bought a 3-year license the previous year
+        #   the left value will be updated to 1 (instead of 0)
+        mutate(left = ifelse(
+            duration == 0 | (!is.na(left) & left > 0), left - 1,   # didn't buy last year
+            max(duration - 1, left - 1)                            # did buy last year
+        )) %>%
+        # mutate(left = ifelse(
+        #     duration == 0, left - 1,   # didn't buy last year
+        #     duration - 1                            # did buy last year
+        # )) %>%      
         select(cust_id, left) %>%
+        
         # update duration with current year's data
         left_join(filter(sale_ranked, year == yr)) %>%
+        
+        # set duration to zero for anyone who didn't buy a license
+        # this makes it easier to specify the code to update the left variable
         mutate(duration = ifelse(is.na(duration), 0, duration)) %>%
         select(-year)
     # carry over previous value(s) for multi-year/lifetime licenses
