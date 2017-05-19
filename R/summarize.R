@@ -116,20 +116,23 @@ update_track <- function(x, sale_ranked, yr, carry_vars = NULL) {
         #  duration == 0 (didn't buy last year) > move down (left - 1), NAs remain NAs
         #  otherwise (did buy last year) > move down (duration - 1)
         
-        ### PROBABLY DROP THIS TEMPORARY WORK
+        ### DECIDE LATER WHETHER TO MAKE THIS ADJUSTMENT
+        # this was written to fix a bug where left gets reset if a person buys a new privilege
+        # it hasn't been tested yet, so I didn't make it operational
         # exception: some multi-year/lifetime license holders will still buy other licenses
         #  left > 0
         # the left counter will always try to take the maximum reasonable value
         # example: if a person buys a fishing priv but bought a 3-year license the previous year
         #   the left value will be updated to 1 (instead of 0)
-        mutate(left = ifelse(
-            duration == 0 | (!is.na(left) & left > 0), left - 1,   # didn't buy last year
-            max(duration - 1, left - 1)                            # did buy last year
-        )) %>%
         # mutate(left = ifelse(
-        #     duration == 0, left - 1,   # didn't buy last year
-        #     duration - 1                            # did buy last year
-        # )) %>%      
+        #     duration == 0 | (!is.na(left) & left > 0), left - 1,   # didn't buy last year
+        #     max(duration - 1, left - 1, na.rm = T)                 # did buy last year
+        # )) %>%
+        
+        mutate(left = ifelse(
+            duration == 0, left - 1,   # didn't buy last year
+            duration - 1               # did buy last year
+        )) %>%
         select(cust_id, left) %>%
         
         # update duration with current year's data
