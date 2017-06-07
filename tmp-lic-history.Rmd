@@ -1,0 +1,185 @@
+---
+title: "Temporary License History Work"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(lazyeval)
+# library(tidyr)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Prep
+
+```{r}
+data("sale", package = "salic")
+data("lic", package = "salic")
+
+sale_unranked <- select(lic, lic_id, duration) %>%
+    right_join(sale) %>%
+    select(cust_id, year, duration)
+sale_ranked <- rank_sale(sale_unranked)
+```
+
+## Functions
+
+```{r}
+### todo
+# 1. organize new functions in lichist.R, and leave deprecated funcs in summary.R, etc.
+# - make_lic_history()
+# - identify_R3()
+# - identify_lapse()
+# note: probably no need for a new make_priv() function
+
+# 3. consider specific cases
+# - when a lifetime should only count for 1 year, should it count as churned next year???
+# - this will be part of identify_lapse()
+# 4. work on documentation
+# - data structure whould be intuitive & easy to check for accuracy
+# - code should be understandable (as simple as possible) & updateable
+
+# yrs = 2004:2013
+
+make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
+    
+    # 1. fill-in NAs for years where no license was purchased by customer in given year
+    # this is a bit of a hacky way to fill all years for every customer (1 row per customer-year)
+    # - which is used later to create a running duration
+    x <- sale_ranked %>%
+        select(cust_id, year, duration) %>%
+        tidyr::spread(year, duration) %>%            # fills NAs for missing years
+        tidyr::gather(year, duration, -cust_id) %>%  # brings back into tidy form
+        mutate(year = as.integer(year)) %>%
+        arrange(cust_id)
+    
+    # 2. initialize a list to store tracking table
+    # looping over a list is (seemingly) simpler than iterating over data frame rows
+    lic_history <- list()
+    
+    # 3. Initialize running duration for first year
+    # no previous years to update from
+    lic_history[[1]] <- x %>%
+        filter(year == yrs[1]) %>%
+        mutate(
+            duration_run = duration, # years remaining on privilege
+            bought = ifelse(!is.na(duration), TRUE, FALSE) # bought privilege this year?
+        )
+    
+    # 4. Calculate running duration for subsequent years
+    for (i in 2:length(yrs)) {
+        lic_history[[i]] <- x %>%
+            # a. join current year (i) to previous year (i-1) to get lag_duration_run
+            filter(year == yrs[i]) %>%
+            left_join(select(lic_history[[i-1]], cust_id, lag_duration_run = duration_run),  
+                      by = "cust_id"
+            ) %>%
+        mutate(
+            # b. make variable (bought): did customer buy a license in current year?
+            bought = ifelse(!is.na(duration), TRUE, FALSE),
+            
+            # c. make variable (duration_run), coding depends on "bought" condition
+            duration_run = ifelse(
+                # if (bought in current year) we use current year's value
+                # UNLESS it's smaller than the running duration (lag_duration_run - 1)
+                # - this avoids the situation where (for example) a 1-year priv would replace
+                # - a multi-year (or lifetime) license
+                # - (i.e., it always favors the license with the longest remaining duration)
+                bought, pmax(duration, lag_duration_run - 1, na.rm = TRUE),
+                
+                # otherwise we use the running duration
+                lag_duration_run - 1
+            )
+        )
+    }
+        
+    # 5. combine into data frame & finalize
+    out <- bind_rows(lic_history) %>%
+        mutate(
+            # make a dummy variable that indicates whether a customer has 
+            #  a privilege in a given year
+            has_priv = ifelse(duration_run >= 1 & !is.na(duration_run), TRUE, FALSE)
+        ) %>%
+        select(-lag_duration_run) %>%
+        arrange(cust_id, year)
+    
+    # 6. carry over variables that need to be populated for multi-year & lifetime (e.g., res)
+    # this is pretty clunky, would be nice if it could be simplified
+    # the standard evaluation works, but it's a bit difficult to grok
+    if (!is.null(carry_vars)) {
+        for (var in carry_vars) {
+            # initialize
+            y <- sale_ranked %>%
+                select_(.dots = c("cust_id", "year", var))
+            
+            # get the latest non-missing value of var
+            # using standard evaluation to pass as.name(var)
+            var_expression <- lazyeval::interp(
+                ~ last(x),
+                x = as.name(var)
+            )
+            first_var <- y %>%
+                filter_(paste0("!is.na(", var, ")")) %>%
+                group_by(cust_id) %>%
+                # summarise_("first_var" = paste0("last(", var, ")")) # alternative
+                summarise_(.dots = setNames(list(var_expression), "first_var"))
+            
+            # update missing values where appropriate
+            var_expression <- lazyeval::interp(
+                ~ ifelse(has_priv & !bought, first_var, x), 
+                x = as.name(var)
+            )
+            out <- out %>%
+                left_join(y, by = c("cust_id", "year")) %>%
+                left_join(first_var, by = "cust_id") %>%
+                mutate_(.dots = setNames(list(var_expression), var)) %>%
+                select(-first_var)
+        }
+    }
+    out
+}
+
+# helper function for checking (overall)
+check_history_summary <- function(lic_history) {
+    lic_history %>%
+        filter(has_priv) %>%
+        count(year, bought, duration_run) %>%
+        tidyr::spread(year, n) %>%
+        arrange(desc(bought))
+}
+
+# helper function for checking (detailed sample)
+check_history_samp <- function(lic_history, n_samp = 5, buy_min = 3, buy_max = 8) {
+    lic_history %>%
+        filter(has_priv) %>%
+        count(cust_id) %>%
+        filter(n >= 3, n <= 8) %>%
+        sample_n(n_samp) %>%
+        left_join(lic_history, by = "cust_id")
+}
+```
+
+## Test
+
+```{r}
+sale_ranked$res <- sample(c(1,0,NA), nrow(sale_ranked), replace = T) # to test "carry_vars"
+lic_history <- make_lic_history(sale_ranked, 2004:2013, "res")
+
+# check - visual
+g <- filter(lic_history, has_priv) %>%
+    ggplot(aes(factor(year))) + 
+    geom_bar(aes(fill = factor(duration_run)))
+ggplotly(g)
+
+# check with tables
+check_history_summary(lic_history)
+check_history_samp(lic_history)
+```
+
