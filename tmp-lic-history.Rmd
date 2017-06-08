@@ -13,6 +13,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(lazyeval)
+devtools::load_all()
 # library(tidyr)
 knitr::opts_chunk$set(comment = NA)
 ```
@@ -20,6 +21,7 @@ knitr::opts_chunk$set(comment = NA)
 ## Prep
 
 ```{r}
+yrs <- 2004:2013
 data("sale", package = "salic")
 data("lic", package = "salic")
 
@@ -32,21 +34,33 @@ sale_ranked <- rank_sale(sale_unranked)
 ## Functions
 
 ```{r}
+# helper function for checking (overall)
+check_history_summary <- function(lic_history) {
+    lic_history %>%
+        filter(has_priv) %>%
+        count(year, bought, duration_run) %>%
+        tidyr::spread(year, n) %>%
+        arrange(desc(bought))
+}
+
+# helper function for checking (detailed sample)
+check_history_samp <- function(lic_history, n_samp = 5, buy_min = 3, buy_max = 8) {
+    lic_history %>%
+        filter(has_priv) %>%
+        count(cust_id) %>%
+        filter(n >= 3, n <= 8) %>%
+        sample_n(n_samp) %>%
+        left_join(lic_history, by = "cust_id")
+}
+```
+
+```{r}
 ### todo
-# 1. organize new functions in lichist.R, and leave deprecated funcs in summary.R, etc.
+# organize new functions in lichist.R, and leave deprecated funcs in summary.R, etc.
 # - make_lic_history()
 # - identify_R3()
 # - identify_lapse()
 # note: probably no need for a new make_priv() function
-
-# 3. consider specific cases
-# - when a lifetime should only count for 1 year, should it count as churned next year???
-# - this will be part of identify_lapse()
-# 4. work on documentation
-# - data structure whould be intuitive & easy to check for accuracy
-# - code should be understandable (as simple as possible) & updateable
-
-# yrs = 2004:2013
 
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
@@ -58,7 +72,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
         tidyr::spread(year, duration) %>%            # fills NAs for missing years
         tidyr::gather(year, duration, -cust_id) %>%  # brings back into tidy form
         mutate(year = as.integer(year)) %>%
-        arrange(cust_id)
+        arrange(cust_id, year)
     
     # 2. initialize a list to store tracking table
     # looping over a list is (seemingly) simpler than iterating over data frame rows
@@ -107,7 +121,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
             #  a privilege in a given year
             has_priv = ifelse(duration_run >= 1 & !is.na(duration_run), TRUE, FALSE)
         ) %>%
-        select(-lag_duration_run) %>%
+        # select(-lag_duration_run) %>%
         arrange(cust_id, year)
     
     # 6. carry over variables that need to be populated for multi-year & lifetime (e.g., res)
@@ -146,31 +160,67 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     out
 }
 
-# helper function for checking (overall)
-check_history_summary <- function(lic_history) {
+identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
-        filter(has_priv) %>%
-        count(year, bought, duration_run) %>%
-        tidyr::spread(year, n) %>%
-        arrange(desc(bought))
+        arrange(cust_id, year) %>% # for correct lag ordering
+        group_by(cust_id) %>% # to insure any lagged calculations are customer-specific
+        mutate(
+            # make recruit designators to simplify R3 logic below
+            # "new" haven't bought before, and "old" haven't bought in 5 years
+            new_recruit = ifelse(is.na(lag(duration_run) & bought), TRUE, FALSE),
+            old_recruit = ifelse(bought & lag_duration_run <= -4 & !is.na(lag_duration_run),
+                                 TRUE, FALSE),
+            
+            # CARRY (1): still have time left on their previous purchase
+            R3 = ifelse(lag_duration_run > 1 & !is.na(lag_duration_run), 1,
+                
+                 # RENEW (2): bought in current and had priv in previous year
+                 ifelse(bought & lag(has_priv), 2,
+                        
+                 # RECRUIT (4): coded before reactivate so that logic is simpler
+                 ifelse(new_recruit | old_recruit, 4, 
+                        
+                 # REACTIVATE (3): bought this year bought not in previous
+                 ifelse(bought & !(lag(bought)), 3, # reactivate
+                        
+                 # doesn't have a priv this year (has_priv == FALSE)
+                 NA)))),
+            
+            # set to NA for first 5 years
+            R3 = ifelse(!(year %in% yrs[1:5]), R3, NA)
+        ) %>%
+        ungroup() %>%
+        select(-new_recruit, -old_recruit)
 }
 
-# helper function for checking (detailed sample)
-check_history_samp <- function(lic_history, n_samp = 5, buy_min = 3, buy_max = 8) {
+# will need to think about how count_multi (or similar) should be implemented
+# maybe start with simple (can always add exceptions later as needed)
+identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
-        filter(has_priv) %>%
-        count(cust_id) %>%
-        filter(n >= 3, n <= 8) %>%
-        sample_n(n_samp) %>%
-        left_join(lic_history, by = "cust_id")
+        arrange(cust_id, year) %>% # for correct lag ordering
+        group_by(cust_id) %>% # to insure any lagged calculations are customer-specific
+        mutate(
+            # if didn't buy next year > lapsed, otherwise > renewed
+            lapse = ifelse(has_priv & !(lead(has_priv)), 1, 0),
+            
+            # set to NA if no license bought in current year
+            lapse = ifelse(has_priv, lapse, NA)
+        ) %>%
+        ungroup()
 }
 ```
 
-## Test
+## New Workflow
+
+```{r}
+summary_sale(sale_ranked)
+```
+
+### Make License History
 
 ```{r}
 sale_ranked$res <- sample(c(1,0,NA), nrow(sale_ranked), replace = T) # to test "carry_vars"
-lic_history <- make_lic_history(sale_ranked, 2004:2013, "res")
+lic_history <- make_lic_history(sale_ranked, yrs, "res")
 
 # check - visual
 g <- filter(lic_history, has_priv) %>%
@@ -181,5 +231,75 @@ ggplotly(g)
 # check with tables
 check_history_summary(lic_history)
 check_history_samp(lic_history)
+```
+
+### Identify R3
+
+```{r}
+lic_history <- identify_R3(lic_history, yrs)
+
+# check overall
+g <- filter(lic_history, has_priv) %>%
+    ggplot(aes(factor(year))) + 
+    geom_bar(aes(fill = factor(R3)))
+ggplotly(g)
+
+# check R3 coding
+filter(lic_history, !(year %in% yrs[1:5])) %>%
+    count(has_priv, R3, lag_duration_run) %>% 
+    tidyr::spread(R3, n)
+```
+
+### Identify Lapse - START HERE
+- maybe just include a random sample test below
+- (might be worth doing for R3 as well)
+```{r}
+lic_history <- identify_lapse(lic_history, yrs)
+
+# check overall
+g <- filter(lic_history, has_priv) %>%
+    ggplot(aes(factor(year))) + 
+    geom_bar(aes(fill = factor(lapse)))
+ggplotly(g)
+
+# take a random sample (or maybe do lag(has_priv)) ...
+lic_history
+```
+
+### Finalize Priv
+
+```{r}
+priv <- lic_history %>%
+    filter(has_priv) %>%
+    select(cust_id, year, R3, lapse, res)
+
+mutate(priv, R3 = factor(R3, levels = 1:4, 
+       labels = c("Carried", "Retained", "Reactivated", "Recruited"))) %>%
+    check_make_priv_final()
+```
+
+## Original Workflow
+
+```{r}
+# compare to original formulation
+track <- salic::make_track(sale_ranked, yrs)
+salic::check_make_track(track, sale)
+
+priv <- salic::make_priv(track)
+R3_rows <- filter(priv[[length(priv)]], !is.na(R3)) %>% nrow()
+if (R3_rows > 0) salic::check_make_priv(priv)
+
+priv <- priv %>% salic::make_priv_final(
+    keep = c("cust_id", "year", "lapse", "R3", "res")
+)
+
+# note - it might be worth leaving the check_make_priv_final function as is
+mutate(priv, R3 = factor(R3, levels = 1:4, 
+       labels = c("Carried", "Retained", "Reactivated", "Recruited"))) %>%
+    check_make_priv_final()
+
+# check visual
+z <- count(priv, R3, year)
+ggplot(z, aes(year, n, fill = R3)) + geom_bar(stat = "identity")
 ```
 
