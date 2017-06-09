@@ -90,9 +90,7 @@ rank_sale <- function(sale, rank_var = "duration",
 #' lic_history <- make_lic_history(sale_ranked, yrs)
 #' 
 #' # check
-#' filter(lic_history, has_priv) %>%
-#'     ggplot(aes(factor(year))) + 
-#'     geom_bar(aes(fill = factor(duration_run)))
+#' ggplot_lic_history(lic_history, yrs, "duration_run")
 #' check_history_summary(lic_history)
 #' check_history_samp(lic_history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
@@ -222,9 +220,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' lic_history <- identify_R3(lic_history, yrs)
 #' 
 #' # check
-#' filter(lic_history, has_priv) %>%
-#'     ggplot(aes(factor(year))) + 
-#'     geom_bar(aes(fill = factor(R3)))
+#' ggplot_lic_history(lic_history, yrs, "R3")
 #' check_identify_R3(lic_history)
 #' check_history_samp(lic_history)
 identify_R3 <- function(lic_history, yrs) {
@@ -287,9 +283,7 @@ identify_R3 <- function(lic_history, yrs) {
 #' lic_history <- identify_lapse(lic_history, yrs)
 #' 
 #' # check
-#' filter(lic_history, has_priv) %>%
-#'     ggplot(aes(factor(year))) + 
-#'     geom_bar(aes(fill = factor(lapse)))
+#' ggplot_lic_history(lic_history, yrs, "lapse")
 #' check_identify_lapse(lic_history)
 #' check_history_samp(lic_history)
 identify_lapse <- function(lic_history, yrs) {
@@ -368,6 +362,27 @@ check_rank_sale <- function(sale_ranked, sale_unranked, check_duration = TRUE) {
         }
     }
 }
+
+#' Check the output of \code{\link{make_lic_history}} using a ggplot geom_bar
+#'
+#' A visual check of license history for a given variable (duration_run, R3, lapse)
+#' @param var character: Name of variable to use for "fill" parameter in 
+#'  \code{\link[ggplot2]{aes}} in \code{\link[ggplot2]{geom_bar}}
+#' @inheritParams identify_R3
+#' @import dplyr
+#' @import 
+#' @family license history functions
+#' @export
+#' @examples
+#' # See ?salic::make_lic_history
+ggplot_lic_history <- function(lic_history, yrs, var = "duration_run") {
+    filter(lic_history, has_priv) %>%
+        mutate_at(var, "factor") %>%
+        ggplot2::ggplot(aes(factor(year))) + 
+        ggplot2::geom_bar(ggplot2::aes_string(fill = var))
+}
+
+
 #' Check the output of \code{\link{make_lic_history}}
 #'
 #' A test to insure that the license history table was built correctly

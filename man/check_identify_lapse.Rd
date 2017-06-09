@@ -20,8 +20,9 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_history_summary}},
   \code{\link{check_identify_R3}},
   \code{\link{check_make_priv_final}},
-  \code{\link{check_rank_sale}}, \code{\link{identify_R3}},
-  \code{\link{identify_lapse}},
+  \code{\link{check_rank_sale}},
+  \code{\link{ggplot_lic_history}},
+  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
 

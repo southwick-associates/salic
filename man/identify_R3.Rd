@@ -36,9 +36,7 @@ lic_history <- make_lic_history(sale_ranked, yrs)
 lic_history <- identify_R3(lic_history, yrs)
 
 # check
-filter(lic_history, has_priv) \%>\%
-    ggplot(aes(factor(year))) + 
-    geom_bar(aes(fill = factor(R3)))
+ggplot_lic_history(lic_history, yrs, "R3")
 check_identify_R3(lic_history)
 check_history_samp(lic_history)
 }
@@ -49,6 +47,7 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},
   \code{\link{check_rank_sale}},
+  \code{\link{ggplot_lic_history}},
   \code{\link{identify_lapse}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
