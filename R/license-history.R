@@ -370,7 +370,6 @@ check_rank_sale <- function(sale_ranked, sale_unranked, check_duration = TRUE) {
 #'  \code{\link[ggplot2]{aes}} in \code{\link[ggplot2]{geom_bar}}
 #' @inheritParams identify_R3
 #' @import dplyr
-#' @import 
 #' @family license history functions
 #' @export
 #' @examples
