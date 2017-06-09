@@ -1,6 +1,7 @@
 
 Todo:
-1. update license history creation to be simpler, better documented, and more inuitive
+First: Update by-type.Rmd to reflect new license history structure
+1. include functions for populating sections with template Rmds
 2. Finish applying WI changes to salic (1-check-initial to 5-standardize-data)
 3. Work on vignette (just an initial, creating directory, intializing w/templates)
 4. Work on updating code (Rmd + functions perhaps) and vignette

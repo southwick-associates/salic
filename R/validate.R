@@ -12,10 +12,13 @@
 #' @family functions for validating license data
 #' @export
 #' @examples
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic)
+#' 
 #' summary_sale(sale)
 #' summary_sale(sale, out = "summary_sale.csv")
 #'
-#' library(dplyr)
 #' sale <- left_join(sale, lic)
 #' filter(sale, priv == "hunt") %>%
 #'     summary_sale(title = "Hunting Sales/Cust", note = "An additional note")
@@ -70,6 +73,10 @@ summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
 #' @family functions for validating license data
 #' @export
 #' @examples
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic)
+#' 
 #' summary_churn(sale, 2004:2013)
 #' summary_churn(sale, 2004:2013, out = "summary_churn.csv")
 #'
@@ -109,7 +116,10 @@ summary_churn <- function(x, years, rnd = 1, out = NULL,
 #' @return Returns a numeric vector of length 1
 #' @export
 #' @examples
-#' library(dplyr)
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic)
+#' 
 #' y <- select(sale, cust_id, year) %>%
 #'     filter(year %in% 2012:2013) %>% distinct()
 #'
@@ -136,8 +146,9 @@ calc_churn <- function(x, yr) {
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(tidyr)
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic)
 #' 
 #' # I recommend just using dplyr/tidyr (count-spread) rather than lic_summary()
 #' x <- select(lic, lic_id, description) %>% left_join(sale)
@@ -178,7 +189,10 @@ lic_summary <- function(x, groups, show_change = FALSE, out = NULL,
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(dplyr)
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic)
+#' 
 #' x <- select(lic, lic_id, description) %>% left_join(sale) %>% mutate(revenue = 30)
 #'
 #' lic_summary_revenue(x, c("lic_id", "description"))

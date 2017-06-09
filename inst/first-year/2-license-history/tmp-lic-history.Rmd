@@ -40,17 +40,44 @@ check_history_summary <- function(lic_history) {
         filter(has_priv) %>%
         count(year, bought, duration_run) %>%
         tidyr::spread(year, n) %>%
-        arrange(desc(bought))
+        arrange(desc(bought)) %>%
+        data.frame()
 }
 
 # helper function for checking (detailed sample)
-check_history_samp <- function(lic_history, n_samp = 5, buy_min = 3, buy_max = 8) {
+check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
     lic_history %>%
         filter(has_priv) %>%
         count(cust_id) %>%
         filter(n >= 3, n <= 8) %>%
         sample_n(n_samp) %>%
-        left_join(lic_history, by = "cust_id")
+        left_join(lic_history, by = "cust_id") %>%
+        select(-n, -lag_duration_run) %>%
+        data.frame()
+}
+
+check_identify_R3 <- function(lic_history) {
+    lic_history %>%
+        filter(!(year %in% yrs[1:5])) %>%
+        mutate(
+            R3 = dplyr::recode(R3, `1` = "1-Carry", `2` = "2-Renew", 
+                        `3` = "3-Reactivate", `4` = "4-Recruit")
+        ) %>%
+        count(has_priv, R3, lag_duration_run) %>% 
+        tidyr::spread(R3, n) %>%
+        data.frame()
+}
+
+check_identify_lapse <- function(lic_history) {
+    lic_history %>%
+        arrange(cust_id, year) %>%
+        group_by(cust_id) %>%
+        mutate(lead_has_priv = lead(has_priv)) %>%
+        ungroup() %>%
+        filter(has_priv) %>%
+        count(lapse, year, has_priv, lead_has_priv) %>%
+        tidyr::spread(year, n) %>%
+        data.frame()
 }
 ```
 
@@ -245,14 +272,11 @@ g <- filter(lic_history, has_priv) %>%
 ggplotly(g)
 
 # check R3 coding
-filter(lic_history, !(year %in% yrs[1:5])) %>%
-    count(has_priv, R3, lag_duration_run) %>% 
-    tidyr::spread(R3, n)
+check_identify_R3(lic_history)
+check_history_samp(lic_history)
 ```
 
-### Identify Lapse - START HERE
-- maybe just include a random sample test below
-- (might be worth doing for R3 as well)
+### Identify Lapse
 ```{r}
 lic_history <- identify_lapse(lic_history, yrs)
 
@@ -262,8 +286,9 @@ g <- filter(lic_history, has_priv) %>%
     geom_bar(aes(fill = factor(lapse)))
 ggplotly(g)
 
-# take a random sample (or maybe do lag(has_priv)) ...
-lic_history
+# check lapse coding
+check_identify_lapse(lic_history)
+check_history_samp(lic_history)
 ```
 
 ### Finalize Priv
@@ -273,9 +298,12 @@ priv <- lic_history %>%
     filter(has_priv) %>%
     select(cust_id, year, R3, lapse, res)
 
-mutate(priv, R3 = factor(R3, levels = 1:4, 
-       labels = c("Carried", "Retained", "Reactivated", "Recruited"))) %>%
-    check_make_priv_final()
+# summarize
+R3_labs <- c("Carried", "Retained", "Reactivated", "Recruited")
+x <- mutate(priv, R3 = factor(R3, levels = 1:4, labels = R3_labs))
+
+check_make_priv_final(x)
+group_by(x, res) %>% check_make_priv_final()
 ```
 
 ## Original Workflow

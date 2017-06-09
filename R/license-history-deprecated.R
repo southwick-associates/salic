@@ -1,49 +1,9 @@
+# Deprecated functions
+
 # for summarizing license history to easily calculate R3, churn
 # ultimate goal - making a privilege table with lapse & R3 variables
 
-### Todo: update these functions to be simpler and more intuitive
-# see "license history data" in Dashbard Data Dictionary.xlsx
-
-
-#' Aggregate a Sale Table to insure 1 row per customer per year.
-#'
-#' This function takes an input sale table and returns the max duration
-#' value present in each year (per customer) - essentially a ranking by
-#' license duration.
-#' @param sale data frame: Input sales data
-#' @param rank_var character: name of variable(s) to use for ranking
-#' @import dplyr
-#' @family functions for summarizing license history
-#' @seealso \code{\link{check_rank_sale}}
-#' @export
-#' @examples
-#' ### Run ranking with sample data
-#' library(dplyr)
-#' library(tidyr)
-#'
-#' # Join duration variable to sale data
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
-#'
-#' # Perform ranking and check the result
-#' sale_ranked <- rank_sale(sale_unranked)
-#' check_rank_sale(sale_ranked, sale_unranked)
-rank_sale <- function(sale, rank_var = "duration",  
-                      grp_var = c("cust_id", "year")) {
-    # This executes quickly
-    group_by_(sale, .dots = grp_var) %>%
-        # to insure highest value is picked - sort ascending, pick last
-        arrange_(.dots = rank_var) %>%
-        summarise_each(funs(last)) %>%
-        ungroup()
-    # Below is a more natural way to select highest duration
-    # However it runs very slowly for some reason
-    #select(sale, cust_id, year, duration) %>%
-    #group_by(cust_id, year) %>%
-    #summarise(duration = max(duration)) %>%
-    #ungroup()
-}
+# Making Tables -----------------------------------------------------------
 
 #' Make a License History Table
 #'
@@ -69,7 +29,7 @@ rank_sale <- function(sale, rank_var = "duration",
 #' to create license history
 #' @inheritParams update_track
 #' @import dplyr
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' # Make tracking table using sample data (and check)
@@ -105,7 +65,7 @@ make_track <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @param carry_vars character: variables to carry over from previous year
 #' (for multi-year and lifetime licenses)
 #' @import dplyr
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' update_track()
@@ -172,7 +132,7 @@ update_track <- function(x, sale_ranked, yr, carry_vars = NULL) {
 #' }
 #' @param track list: Set of license history tables created using
 #' \code{\link{make_track}}
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' make_priv()
@@ -221,7 +181,7 @@ make_priv <- function(track) {
 #' calculate metric
 #' @inheritParams make_priv
 #' @import dplyr
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' # Calculate R3 in 2012
@@ -265,7 +225,7 @@ get_R3 <- function(track, i) {
 #' @param count_multi logical: If TRUE, carried group (multi-year, lifetime) is
 #' counted as renewed for calculating lapse (churn)
 #' @import dplyr
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' # Calculate lapse in 2012
@@ -309,7 +269,7 @@ get_lapse <- function(track, i, count_multi = TRUE) {
 #' @param priv list: Input privilege table
 #' @param keep character: Variables to keep in the cleaned table
 #' @import dplyr
-#' @family functions for summarizing license history
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' make_priv_final()
@@ -329,4 +289,98 @@ make_priv_final <- function(
     # out$R3 <- factor(out$R3,
     #                  labels = c("Carried", "Renewed", "Reactivated", "Recruited"))
     out
+}
+
+
+
+
+# Checking & Summarizing --------------------------------------------------
+
+#' Check license history (stored in a list)
+#' @param x list: license history tables returned by \code{\link{make_track}}
+#' @import dplyr
+#' @family deprecated license history functions
+#' @export
+#' @examples
+#' check_track()
+check_track <- function(x) {
+    y <- list()
+    for (i in seq_along(x)) {
+        yr <- names(x)[i]
+        y[[i]] <- count(x[[i]], duration, left) %>% mutate(year = yr)
+    }
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+}
+
+#' Check license history creation
+#' @param track list: license history tables returned by \code{\link{make_track}}
+#' @param sale data frame: sales table used to make license history
+#' @import dplyr
+#' @family deprecated license history functions
+#' @export
+#' @examples
+#' check_make_track(track, sale_ranked)
+check_make_track <- function(track, sale) {
+    catf("---CHECK LICENSE HISTORY SUMMARIZATION---")
+    catf("Count of License Holders (Customers):")
+    count <- list()
+    yr <- list()
+    for (i in seq_along(track)) {
+        count[[i]] <- filter(track[[i]], duration != 0) %>% nrow()
+        yr[[i]] <- names(track)[i]
+    }
+    data.frame(year = unlist(yr), n = unlist(count)) %>% printf()
+    catf("License History by duration-left:")
+    check_track(track) %>% printf()
+}
+
+#' Check privilege table (lapse)
+#' @param x list: license privilege tables returned by \code{\link{make_priv}}
+#' @import dplyr
+#' @family deprecated license history functions
+#' @export
+#' @examples
+#' check_lapse()
+check_lapse <- function(x) {
+    y <- list()
+    for (i in seq_along(x)) {
+        if (i != length(x)) {
+            yr <- names(x)[i]
+            y[[i]] <- count(x[[i]], duration, left, lapse) %>% mutate(year = yr)
+        }
+    }
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+}
+
+#' Check privilege table (R3)
+#' @param x list: license privilege tables returned by \code{\link{make_priv}}
+#' @import dplyr
+#' @family deprecated license history functions
+#' @export
+#' @examples
+#' check_R3()
+check_R3 <- function(x) {
+    y <- list()
+    for (i in seq_along(x)) {
+        if (i > 5) {
+            yr <- names(x)[i]
+            y[[i]] <- count(x[[i]], duration, left, R3) %>% mutate(year = yr)
+        }
+    }
+    bind_rows(y) %>% tidyr::spread(year, n, fill = "") %>% data.frame()
+}
+
+#' Check Privilege Table Creation
+#' @param priv list: license privilege tables returned by \code{\link{make_priv}}
+#' @import dplyr
+#' @family deprecated license history functions
+#' @export
+#' @examples
+#' check_make_priv()
+check_make_priv <- function(priv) {
+    catf("---CHECK PRIVILEGE SUMMARIZATION---")
+    catf("R3 identification:")
+    check_R3(priv) %>% printf()
+    catf("Lapse identification:")
+    check_lapse(priv) %>% printf()
 }
