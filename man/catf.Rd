@@ -16,7 +16,6 @@ Convenience function to print a title
 catf()
 }
 \seealso{
-Other functions for for checking license history summarization: \code{\link{check_rank_sale}},
-  \code{\link{printf}}
+Other functions for for checking license history summarization: \code{\link{printf}}
 }
 

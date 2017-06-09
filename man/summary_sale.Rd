@@ -25,10 +25,13 @@ summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
 Summarize sales and customers by year
 }
 \examples{
+library(tidyverse)
+library(salic)
+load(sale, lic, package = "salic")
+
 summary_sale(sale)
 summary_sale(sale, out = "summary_sale.csv")
 
-library(dplyr)
 sale <- left_join(sale, lic)
 filter(sale, priv == "hunt") \%>\%
     summary_sale(title = "Hunting Sales/Cust", note = "An additional note")

@@ -26,6 +26,10 @@ This is a simple calculation that doesn't take into account multi-year
 licenses, so it should only be used for initial data validation
 }
 \examples{
+library(tidyverse)
+library(salic)
+load(sale, lic, package = "salic")
+
 summary_churn(sale, 2004:2013)
 summary_churn(sale, 2004:2013, out = "summary_churn.csv")
 

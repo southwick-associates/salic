@@ -25,7 +25,10 @@ by year}
 Summarize license revenue by selected grouping variables
 }
 \examples{
-library(dplyr)
+library(tidyverse)
+library(salic)
+load(sale, lic, package = "salic")
+
 x <- select(lic, lic_id, description) \%>\% left_join(sale) \%>\% mutate(revenue = 30)
 
 lic_summary_revenue(x, c("lic_id", "description"))

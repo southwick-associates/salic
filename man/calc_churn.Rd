@@ -20,7 +20,10 @@ This is a simple calculation that doesn't take into account multi-year
 licenses, so it should only be used for initial data validation
 }
 \examples{
-library(dplyr)
+library(tidyverse)
+library(salic)
+load(sale, lic, package = "salic")
+
 y <- select(sale, cust_id, year) \%>\%
     filter(year \%in\% 2012:2013) \%>\% distinct()
 

@@ -25,8 +25,9 @@ by year}
 Note: This function is deprecated. I recommend using dpylr/tidyr instead (see examples).
 }
 \examples{
-library(dplyr)
-library(tidyr)
+library(tidyverse)
+library(salic)
+load(sale, lic, package = "salic")
 
 # I recommend just using dplyr/tidyr (count-spread) rather than lic_summary()
 x <- select(lic, lic_id, description) \%>\% left_join(sale)

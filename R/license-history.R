@@ -65,6 +65,7 @@ rank_sale <- function(sale, rank_var = "duration",
 #' used in coding and for downstream checking
 #' \item \emph{bought}: Bought a license this year? (TRUE, FALSE)
 #' \item \emph{has_priv}: Has a privilege this year? (TRUE, FALSE)
+#' }
 #' @param sale_ranked data frame: Sales table from which license history will be made
 #' @param yrs numeric: Years in sales data (column 'year') from which
 #' to create license history

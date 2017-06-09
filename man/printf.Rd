@@ -16,7 +16,6 @@ Convenience function to print contents of a data frame
 printf()
 }
 \seealso{
-Other functions for for checking license history summarization: \code{\link{catf}},
-  \code{\link{check_rank_sale}}
+Other functions for for checking license history summarization: \code{\link{catf}}
 }
 
