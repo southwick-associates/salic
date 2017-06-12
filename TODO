@@ -1,10 +1,7 @@
 
 Todo:
-First: Update by-type.Rmd to reflect new license history structure
-1. include functions for populating sections with template Rmds
-2. Finish applying WI changes to salic (1-check-initial to 5-standardize-data)
-3. Work on vignette (just an initial, creating directory, intializing w/templates)
-4. Work on updating code (Rmd + functions perhaps) and vignette
+1. Improve "4-dashboard-results", probably with some ggplot visuals at least
+2. Work on vignette (just an initial, creating directory, intializing w/templates)
 
 Priorities: Address largest time bottlenecks
 1. basic Rmd templates with auto-populating functions in salic

@@ -1,0 +1,44 @@
+---
+title: "Optionally compact and analyze sqlite database for efficiency"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+params:
+    db_file: "~/Data2/MO_Dashboard/lic.sqlite3"
+---
+
+- The 2 processes below takes a while to run, and I'm not sure how much difference it makes
+- If you have a spare hour to let this run, it's probably not a bad idea
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(RSQLite)
+knitr::opts_chunk$set(comment = NA)
+```
+
+```{r}
+# 1. Compact Database
+# this is only useful if tables have been removed/overwritten
+# it can also be done manually with DB Browser or similar GUI interface
+con <- dbConnect(SQLite(), dbname = params$db_file)
+RSQLite::dbListTables(con)
+dbGetQuery(con, "VACUUM")
+dbDisconnect(con)
+```
+
+```{r}
+# 2. Analyze Database
+# this is done for efficiency - not sure how much difference it makes
+con <- dbConnect(SQLite(), dbname = params$db_file)
+RSQLite::dbListTables(con)
+dbGetQuery(con, "ANALYZE")
+dbDisconnect(con)
+```
+
+```{r}
+sessionInfo()
+```

@@ -14,23 +14,25 @@
 #' @export
 #' @examples
 #' saproj::new_project(projdir = "test-dir")
-#' salic::new_section(1, projdir = "test-dir")
+#' salic::new_section_yr1(1, projdir = "test-dir")
 #' salic::section(2, projdir = "test-dir")
-new_section <- function(num, cust_file = TRUE, projdir = NULL) {
+new_section_yr1 <- function(num, cust_file = TRUE, projdir = NULL) {
     if (!requireNamespace("saproj", quietly = TRUE)) {
         stop("saproj needed for this function to work. Please install it.",
              call. = FALSE)
     }
-    sect_names <- c("1-prep-state", "2-attach-data", "3-license-history",
-                    "4-population-data", "5-summary-results")
+    sect_names <- c("1-prep-license-data", "2-license-history", "3-secondary-data",
+                    "4-dashboard-results")
+    # use (alt) set of scripts if there isn't a separate customer table
+    if (!cust_file) sect_names[1] <- paste(sect_names[1], "alt", sep = "-")
+    
+    # populate new folders for selected section
     saproj::new_section(sect_names[num], projdir)
 
     # copy template scripts to the section
-    if (!(cust_file) & num == 1) {
-        src_dir <- system.file("lic-cust-false", sect_names[1], package = "salic")
-    } else {
-        src_dir <- system.file("lic", sect_names[num], package = "salic")
-    }
-    saproj::file_copy(src_dir, file.path("code"), projdir,
-                      recursive = TRUE)
+    src_dir <- system.file("first-year", sect_names[num], package = "salic")
+    saproj::file_copy(src_dir, file.path("code"), projdir, recursive = TRUE)
 }
+
+# templatesfor subsequent years
+# new_section_update <- function()

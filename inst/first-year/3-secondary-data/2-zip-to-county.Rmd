@@ -1,0 +1,134 @@
+---
+title: "Identify Counties using Zip"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+params:
+    state_name: Missouri
+    db_file: "~/data2/MO_Dashboard/lic.sqlite3"
+    csv_file: "~/data/MO_Dashboard/geocode-addresses/cust-for-geocode.csv"
+    crosswalk_file: "~/Data2/Zip_County_Crosswalk/Zipcodes.csv"
+    test: FALSE # If TRUE, won't write to sqlite database
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(RSQLite)
+library(tidyr)
+library(readr)
+library(tibble)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Params
+
+- Note: Geocoding is a preferable way to identify zipcode. The zip-to-county is used (for now) because we don't have a reliable way to batch geocode millions of records.
+
+```{r}
+tribble(
+    ~param, ~value,
+    "state_name", params$state_name,
+    "db_file", params$db_file,
+    "csv_file", params$csv_file, 
+    "crosswalk_file", params$crosswalk_file,
+    "test", params$test
+) %>% DT::datatable()
+```
+
+## Load Data
+
+### Zip to County Relation
+
+```{r}
+col_types <- cols(
+  ID = col_skip(),
+  ZIPCODE = col_character(),
+  STATE_NAME = col_character(),
+  STATE_FIPS = col_skip(),
+  COUNTY_NAME = col_character(),
+  COUNTY_FIPS = col_double(),
+  Field6 = col_skip()
+)
+zip_cnty_in <- read_csv(params$crosswalk_file, col_types = col_types)
+names(zip_cnty_in) <- c("zip", "state", "county", "fips")
+
+zip_cnty <- filter(zip_cnty_in, state == params$state_name) %>% 
+    select(-state) %>%
+    data.frame()
+# count(zip_cnty, zip)
+# count(zip_cnty, fips)
+glimpse(zip_cnty)
+```
+
+### Customer Zipcodes
+
+- Columns may vary by state
+
+```{r}
+col_types <- cols(
+  cust_id = col_integer(),
+  street = col_skip(),
+  city = col_skip(),
+  state = col_skip(),
+  zip = col_character()
+)
+cust_zips <- read_csv(params$csv_file, col_types = col_types)
+# count(zips, zip)
+glimpse(cust_zips)
+```
+
+### Cleaned Customer Data
+
+```{r}
+db <- src_sqlite(params$db_file)
+cust <- tbl(db, "cust") %>% collect(n = Inf)
+glimpse(cust)
+```
+
+## Attach County
+
+### Resident Customers
+
+```{r}
+fips <- left_join(cust_zips, zip_cnty) %>% select(-zip)
+count(fips, fips, county) %>% DT::datatable()
+
+# check missing
+missing_fips <- filter(fips, is.na(fips)) %>% nrow()
+tribble(
+    ~all_customers, ~missing_fips, ~pct_missing,
+    nrow(fips), missing_fips, missing_fips / nrow(fips) * 100
+)
+```
+
+### All Customers
+
+```{r}
+cust <- left_join(cust, fips, by = "cust_id") %>%
+    mutate(fips = as.integer(fips))
+count(cust, res, fips, county) %>% DT::datatable()
+cust <- select(cust, -county)
+glimpse(cust)
+```
+
+## Write to SQLite
+
+```{r}
+if (!params$test) {
+    con <- dbConnect(SQLite(), dbname = params$db_file)
+
+    # create a new customer table (with zip) to insure data isn't lost by mistake
+    # it would probably be more efficient to add a new column, but this works
+    cust1 <- cust
+    copy_to(db, cust1, temporary = FALSE)
+    
+    # remove original customer table and rename the copied table
+    dbRemoveTable(con, "cust")
+    dbGetQuery(con, "ALTER TABLE cust1 RENAME TO cust")
+    dbDisconnect(con)
+}
+```
+

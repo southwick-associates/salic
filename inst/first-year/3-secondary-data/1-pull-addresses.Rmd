@@ -1,0 +1,98 @@
+---
+title: "Pull address data for geocoding"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+params:
+    raw_db_file: "~/data/MO_Dashboard/raw.sqlite"
+    db_file: "~/data2/MO_Dashboard/lic.sqlite3"
+    csv_file: "~/data/MO_Dashboard/geocode-addresses/cust-for-geocode.csv"
+---
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(tibble)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Params
+
+```{r}
+tribble(
+    ~param, ~value,
+    "raw_db_file", params$raw_db_file,
+    "db_file", params$db_file,
+    "csv_file", params$csv_file
+) %>% DT::datatable() 
+```
+
+## Load
+
+### Raw address data
+
+- Table and column names will vary by state
+
+```{r}
+db_raw <- src_sqlite(params$raw_db_file)
+# src_tbls(db_raw)
+# tbl(db_raw, "customer_info")
+
+cust_raw <- tbl(db_raw, "customer_info") %>% 
+    select(cust_id = CustomerID, street = MailStreet1, city = MailCity, 
+           state = MailState, zip = MailZip) %>% 
+    collect(n = Inf)
+glimpse(cust_raw)
+```
+
+### Cleaned data
+
+- Only residents are pulled, since the aim here is to identify county of residence
+
+```{r}
+db <- src_sqlite(params$db_file)
+cust <- tbl(db, "sale") %>% 
+    select(cust_id) %>%
+    left_join(tbl(db, "cust")) %>%
+    filter(res == 1) %>%
+    select(cust_id) %>% collect(n = Inf) %>%
+    distinct()
+glimpse(cust)
+```
+
+## Prep
+
+### Join address data
+
+```{r}
+cust_in <- cust
+cust <- left_join(cust, cust_raw)
+count(cust, state) %>% DT::datatable()
+```
+
+### Truncate Zips
+
+- insure 5 digit length
+
+```{r}
+# count(cust_raw, nchar(zip))
+count(cust, nchar(zip))
+
+cust <- mutate(cust, zip = ifelse(nchar(zip) == 5, zip, NA))
+count(cust, nchar(zip))
+```
+
+## Write to CSV
+
+```{r}
+dir.create(dirname(params$csv_file))
+write.csv(cust, file = params$csv_file, row.names = FALSE)
+```
+
+```{r}
+sessionInfo()
+```
+
