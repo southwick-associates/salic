@@ -37,8 +37,8 @@ new_section_yr1 <- function(num, cust_file = TRUE, projdir = NULL) {
     
     # copy any R files stored in parent directory for section 1 (num = 1)
     if (num == 1) {
-        R_files <- system.file("first-year", package = "salic") %>%
-            list.files(pattern = "\\.R", full.names = TRUE)
+        salic_path <- system.file("first-year", package = "salic")
+        R_files <- list.files(salic_path, pattern = "\\.R", full.names = TRUE)
         for (f in R_files) saproj::file_copy(f, file.path("code"), projdir)
     }
 }
