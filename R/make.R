@@ -1,6 +1,8 @@
 # functions for making files, folders, etc.
 # some (maybe all?) will rely on package saproj
 
+### Add func.R (probably on num = 1)
+
 #' Create a new analysis data sub-directory with template scripts
 #'
 #' This is a variation on saproj \code{\link[saproj]{new_section}}. Section titles
@@ -32,6 +34,13 @@ new_section_yr1 <- function(num, cust_file = TRUE, projdir = NULL) {
     # copy template scripts to the section
     src_dir <- system.file("first-year", sect_names[num], package = "salic")
     saproj::file_copy(src_dir, file.path("code"), projdir, recursive = TRUE)
+    
+    # copy any R files stored in parent directory for section 1 (num = 1)
+    if (num == 1) {
+        R_files <- system.file("first-year", package = "salic") %>%
+            list.files(pattern = "\\.R", full.names = TRUE)
+        for (f in R_files) saproj::file_copy(f, file.path("code"), projdir)
+    }
 }
 
 # templatesfor subsequent years
