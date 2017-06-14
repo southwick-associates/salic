@@ -16,7 +16,8 @@ A test to insure that the license history table was built correctly
 # See ?salic::make_lic_history
 }
 \seealso{
-Other license history functions: \code{\link{check_history_samp}},
+Other license history functions: \code{\link{check_carry_vars}},
+  \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},

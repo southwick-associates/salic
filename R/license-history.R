@@ -70,7 +70,8 @@ rank_sale <- function(sale, rank_var = "duration",
 #' @param yrs numeric: Years in sales data (column 'year') from which
 #' to create license history
 #' @param carry_vars character: variables to carry over from previous year
-#' (for multi-year and lifetime licenses)
+#' (for multi-year and lifetime licenses). See
+#' \code{\link{check_carry_vars}} for checking the output.
 #' @import dplyr
 #' @family license history functions
 #' @export
@@ -156,36 +157,29 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
         arrange(cust_id, year)
     
     # 6. carry over variables that need to be populated for multi-year & lifetime (e.g., res)
-    # this is pretty clunky, would be nice if it could be simplified
-    # the standard evaluation works, but it's a bit difficult to grok
+    # uses dplyr-based tidyeval: http://dplyr.tidyverse.org/articles/programming.html
     if (!is.null(carry_vars)) {
         for (var in carry_vars) {
             # initialize
             y <- sale_ranked %>%
-                select_(.dots = c("cust_id", "year", var))
+                select(cust_id, year, .data[[var]])
             
-            # get the latest non-missing value of var
-            # using standard evaluation to pass as.name(var)
-            var_expression <- lazyeval::interp(
-                ~ last(x),
-                x = as.name(var)
-            )
-            first_var <- y %>%
-                filter_(paste0("!is.na(", var, ")")) %>%
+            # get the latest (by year) non-missing value of var
+            # it would probably better to get "most recent" value of var
+            # but this is simpler & will likely produce the same result in 99% of cases
+            latest <- y %>%
+                filter(!is.na(.data[[var]])) %>%
                 group_by(cust_id) %>%
-                # summarise_("first_var" = paste0("last(", var, ")")) # alternative
-                summarise_(.dots = setNames(list(var_expression), "first_var"))
+                arrange(year) %>%
+                summarise(latest_value = last(.data[[var]]))
             
-            # update missing values where appropriate
-            var_expression <- lazyeval::interp(
-                ~ ifelse(has_priv & !bought, first_var, x), 
-                x = as.name(var)
-            )
+            # update missing values of var to latest value
             out <- out %>%
                 left_join(y, by = c("cust_id", "year")) %>%
-                left_join(first_var, by = "cust_id") %>%
-                mutate_(.dots = setNames(list(var_expression), var)) %>%
-                select(-first_var)
+                left_join(latest, by = "cust_id") %>%
+                mutate(!!var := ifelse(has_priv & is.na(.data[[var]]),  
+                                       latest_value, .data[[var]])) %>%
+                select(-latest_value)
         }
     }
     out
@@ -398,6 +392,36 @@ check_history_summary <- function(lic_history) {
         tidyr::spread(year, n) %>%
         arrange(desc(bought)) %>%
         data.frame()
+}
+
+#' Check the carry_vars output of \code{\link{make_lic_history}}
+#' 
+#' A test to insure the carry_vars were coded correctly in the license history
+#' table
+#' @inheritParams identify_R3
+#' @inheritParams check_rank_sale
+#' @param carry_vars character: variables to carry over from previous year
+#' (for multi-year and lifetime licenses). 
+#' @import dplyr
+#' @family license history functions
+#' @export
+#' @examples
+#' # check_carry_vars()
+check_carry_vars <-  function(lic_history, sale_ranked, carry_vars) {
+    for (var in carry_vars) {
+        x <- sale_ranked %>%
+            group_by(!!var := .data[[var]]) %>% 
+            summarise(count_sales = n())
+        y <- lic_history %>%
+            filter(has_priv) %>% 
+            group_by(!!var := .data[[var]]) %>% 
+            summarise(count_privs = n())
+        left_join(x, y, by = var) %>%  
+            print_dat(
+                paste0(var, ": Compare sales to privs by count"),  
+                "'count_privs == NA' should be <= 'count_sales == NA'"
+            )
+    }
 }
 
 #' Sample the output of \code{\link{make_lic_history}}

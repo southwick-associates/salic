@@ -1,5 +1,5 @@
 # functions for printing headers, notes, and tables
-# these will probably be deprecated
+# these will probably be deprecated eventually
 
 #' Format numbers for printing
 #'

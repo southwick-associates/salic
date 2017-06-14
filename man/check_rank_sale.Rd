@@ -24,7 +24,8 @@ A test to insure that sale ranking was performed correctly
 # See ?salic::rank_sale
 }
 \seealso{
-Other license history functions: \code{\link{check_history_samp}},
+Other license history functions: \code{\link{check_carry_vars}},
+  \code{\link{check_history_samp}},
   \code{\link{check_history_summary}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},

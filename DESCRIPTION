@@ -1,7 +1,7 @@
 Package: salic
 Type: Package
 Title: Prepare License Data from Wildlife Agencies
-Version: 0.2.8
+Version: 0.2.9
 Date: 2015-08-17
 Author: Dan Kary
 Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
@@ -10,10 +10,10 @@ Description: A set of functions for getting license data into a standard format
 License: Only share within Southwick Associates
 LazyData: FALSE
 Depends:
-    R (>= 3.2.1)
+    R (>= 3.3.3)
 Imports:
-    dplyr (>= 0.4.1),
-    tidyr (>= 0.2.0),
+    dplyr (>= 0.7.0),
+    tidyr (>= 0.6.3),
     saproj (>= 0.3.0),
     ggplot2 (>= 2.2.1)
 RoxygenNote: 5.0.1

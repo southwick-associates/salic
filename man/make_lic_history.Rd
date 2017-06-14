@@ -13,7 +13,8 @@ make_lic_history(sale_ranked, yrs, carry_vars = NULL)
 to create license history}
 
 \item{carry_vars}{character: variables to carry over from previous year
-(for multi-year and lifetime licenses)}
+(for multi-year and lifetime licenses). See
+\code{\link{check_carry_vars}} for checking the output.}
 }
 \description{
 Output table is stored in a data frame (n = C * Y). Where C = Number of 
@@ -60,7 +61,8 @@ check_history_summary(lic_history)
 check_history_samp(lic_history)
 }
 \seealso{
-Other license history functions: \code{\link{check_history_samp}},
+Other license history functions: \code{\link{check_carry_vars}},
+  \code{\link{check_history_samp}},
   \code{\link{check_history_summary}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
