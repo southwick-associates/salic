@@ -1,5 +1,8 @@
 
 Todo:
+IMPORTANT: change new_section_yr1() so that individual files can't be overwritten
+Finish templates in 1-prep-license-data (this is currently incomplete and confusing)
+
 1. Improve "4-dashboard-results", probably with some ggplot visuals at least
 2. Work on vignette (just an initial, creating directory, intializing w/templates)
 

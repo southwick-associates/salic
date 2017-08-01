@@ -9,8 +9,7 @@ output:
 ---
 
 ```{r setup, message=FALSE}
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 knitr::opts_chunk$set(comment = NA)
 ```
 
@@ -46,5 +45,9 @@ lic <- lic_raw
 ```{r}
 write.csv(lic, file = "../../data/1-prep-license-data/lic_types.csv", 
           row.names = FALSE)
+```
+
+```{r}
+sessionInfo()
 ```
 

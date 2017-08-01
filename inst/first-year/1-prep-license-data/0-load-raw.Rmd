@@ -9,9 +9,7 @@ output:
 ---
 
 ```{r setup, message=FALSE}
-library(dplyr)
-library(tidyr)
-library(readr)
+library(tidyverse)
 knitr::opts_chunk$set(comment = NA)
 ```
 
@@ -123,9 +121,12 @@ tail(sale$raw_id_sale)
 ```{r}
 dir <- "~/Data/" # directory for sqlite database
 f <- file.path(dir, "raw.sqlite3")
-if (!file.exists(f)) db <- src_sqlite(f, create = TRUE)
+db <- src_sqlite(f, create = TRUE)
 copy_to(db, lic, temporary = FALSE)
 copy_to(db, cust, temporary = FALSE)
 copy_to(db, sale, temporary = FALSE)
 ```
 
+```{r}
+sessionInfo()
+```
