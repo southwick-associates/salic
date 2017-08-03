@@ -35,7 +35,64 @@ knitr::opts_chunk$set(comment = NA)
 
 ### Prepped License Types
 
-### Raw Sales & Customers
+### Raw Sales
+
+### Raw Customers
+
+## Prep Customers
+
+**Guidelines**
+
+- Recoding enables standardization for checking demographics (varies by state)
+
+### Sex
+
+```{r}
+# sex
+cust <- cust %>% mutate(
+    sex_in = sex,
+    sex = ifelse(!(sex %in% c("M", "F")), NA, sex)
+)
+count(cust, sex, sex_in)
+```
+
+### State & Residency
+
+- Where Res == 1 & Nonres == 0
+
+```{r}
+# load data from salic
+data(state_abbreviations) 
+
+# count(cust, state)
+cust <- salic::recode_state(cust, state_abbreviations) %>%
+    rename(state_in = state, state = state_new) %>%
+    mutate(res = ifelse(state == "XX", 1, 0))
+count(cust, res, state, state_in) %>% 
+    left_join(state_abbreviations) %>%
+    select(res, country, name, state:n) %>%
+    DT::datatable()
+```
+
+### DOB
+
+- Ensure date of birth in date format
+
+```{r}
+# dob
+cust <- cust %>% mutate(
+    dob_in = dob, 
+    dob = lubridate::ymd(dob)
+)
+sample_n(cust, 5) %>%
+    select(dob, dob_in)
+```
+
+## Prep Sales
+
+**Guidelines**
+
+- Might not be needed (depending on state)
 
 ## Check customers IDs
 
@@ -60,9 +117,8 @@ select(cust, dob, last_name, first_name) %>%
 
 ```{r}
 # this can take a few minutes to run
-dup <- group_by(cust, first_name, last_name, dob) %>%
-	summarise(count = n() - 1, min_cust_id = min(cust_id)) %>% 
-	filter(count != 0)
+dup <- count(cust, first_name, last_name, dob) %>%
+    filter(n > 1)
 ```
 
 ```{r}
@@ -78,53 +134,10 @@ sample_n(dup, 100) %>%
 
 **Guidelines**
 
-- Note: This type of duplicate won't exist if a customer table (with one row per customer) was provided separately
+- Note: This type of duplicate probably won't exist if a customer table (with one row per customer) was provided separately
 
 ```{r}
 length(unique(cust$cust_id)) == length(cust$cust_id)
-```
-
-## Recode Demographic Variables
-
-**Guidelines**
-
-- This enables standardization for checking demographics
-- The recoding specification varies by state
-
-### Gender
-
-```{r}
-cust <- mutate(cust, sex_new = ifelse(!(sex %in% c("M", "F")), NA, sex))
-count(cust, sex_new, sex)
-```
-
-### State & Residency
-
-```{r}
-data(state_abbreviations) # loads data from salic
-DT::datatable(state_abbreviations)
-```
-
-```{r}
-count(cust, state)
-cust <- salic::recode_state(cust, state_abbreviations)
-count(cust, state_new, state) %>% DT::datatable()
-```
-
-```{r}
-cust <- mutate(cust, res = ifelse(state_new == "XX", "res", "nonres"))
-count(cust, res, state_new) %>% DT::datatable()
-```
-
-### Age
-
-```{r}
-# convert string dob to date > varies by state
-# run on sample to test
-head(cust) %>% select(dob) %>% mutate(dob_new = lubridate::mdy_hms(dob))
-
-cust <- mutate(cust, dob_new = lubridate::mdy_hms(dob))
-sample_n(cust, 5) %>% select(dob, dob_new)
 ```
 
 ## Check Hunter Demographics
@@ -146,11 +159,12 @@ glimpse(hunt)
 - Female percentage is typically increasing over time
 
 ```{r}
-count(hunt, sex_new)
-filter(hunt, !is.na(sex_new)) %>%
-    count(year, sex_new) %>% 
+count(hunt, sex)
+filter(hunt, !is.na(sex)) %>%
+    count(year, sex) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
-    select(-n) %>% spread(sex_new, pct) %>% data.frame()
+    select(-n) %>% spread(sex, pct) %>% data.frame()
 ```
 
 ### Residency
@@ -161,6 +175,7 @@ filter(hunt, !is.na(sex_new)) %>%
 count(hunt, res)
 filter(hunt, !is.na(res)) %>%
     count(year, res) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
     select(-n) %>% spread(res, pct) %>% data.frame()
 ```
@@ -172,7 +187,7 @@ age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+")
 age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf)
 
 hunt <- hunt %>% mutate(
-    age = year - lubridate::year(dob_new),
+    age = year - lubridate::year(dob),
     agecat = cut(age, breaks = age_breaks, labels = age_labs)
 )
 sample_n(hunt, 5) %>% select(dob, year, age, agecat)
@@ -184,6 +199,7 @@ sample_n(hunt, 5) %>% select(dob, year, age, agecat)
 count(hunt, agecat) %>% data.frame()
 filter(hunt, !is.na(agecat)) %>%
     count(year, agecat) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
     select(-n) %>% spread(agecat, pct) %>% data.frame()
 ```
@@ -207,11 +223,12 @@ glimpse(fish)
 - Female percentage is typically increasing over time
 
 ```{r}
-count(fish, sex_new)
-filter(fish, !is.na(sex_new)) %>%
-    count(year, sex_new) %>% 
+count(fish, sex)
+filter(fish, !is.na(sex)) %>%
+    count(year, sex) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
-    select(-n) %>% spread(sex_new, pct) %>% data.frame()
+    select(-n) %>% spread(sex, pct) %>% data.frame()
 ```
 
 ### Residency
@@ -222,6 +239,7 @@ filter(fish, !is.na(sex_new)) %>%
 count(fish, res)
 filter(fish, !is.na(res)) %>%
     count(year, res) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
     select(-n) %>% spread(res, pct) %>% data.frame()
 ```
@@ -233,7 +251,7 @@ age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+")
 age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf)
 
 fish <- fish %>% mutate(
-    age = year - lubridate::year(dob_new),
+    age = year - lubridate::year(dob),
     agecat = cut(age, breaks = age_breaks, labels = age_labs)
 )
 sample_n(fish, 5) %>% select(dob, year, age, agecat)
@@ -245,6 +263,7 @@ sample_n(fish, 5) %>% select(dob, year, age, agecat)
 count(fish, agecat) %>% data.frame()
 filter(fish, !is.na(agecat)) %>%
     count(year, agecat) %>% 
+    group_by(year) %>%
     mutate(pct = round(n / sum(n) * 100, 1)) %>%
     select(-n) %>% spread(agecat, pct) %>% data.frame()
 ```
@@ -252,4 +271,3 @@ filter(fish, !is.na(agecat)) %>%
 ```{r}
 sessionInfo()
 ```
-

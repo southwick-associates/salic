@@ -46,7 +46,7 @@ names(lic) <- c("lic_id", "description", "type")
 glimpse(lic)
 ```
 
-### Raw Sales & Customers
+### Raw Sales
 
 ```{r}
 db <- src_sqlite("~/Data/")
@@ -61,6 +61,8 @@ sale <- tbl(db, "sale") %>%
 names(sale) <- c("cust_id", "year", "lic_id")
 glimpse(sale)
 ```
+
+### Raw Customers
 
 ```{r}
 tbl(db, "cust") %>% glimpse()
@@ -187,4 +189,3 @@ count(all_sale, type, lic_id, description, year) %>%
 ```{r}
 sessionInfo()
 ```
-

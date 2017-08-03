@@ -34,8 +34,7 @@ The purpose is to check sales data for:
 
 ### Prepped License Types
 
-### Raw Sales & Customers
-
+### Raw Sales
 
 ## Prep - varies by state
 
