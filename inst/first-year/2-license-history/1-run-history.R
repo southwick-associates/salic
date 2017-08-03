@@ -3,7 +3,7 @@
 # this function runs the parameterized Rmd for different license types
 run_lichist <- function(
     priv_nm, lic_filter, priv_hist = "NONE", yrs = "2007:2016", test = FALSE, 
-    path = "code/4-license-history" # location of by-priv.Rmd (may vary by state)
+    path = "code/2-license-history" # location of by-priv.Rmd (may vary by state)
 ) {
     rmarkdown::render(file.path(path, "by-priv.Rmd"),
         params = list(

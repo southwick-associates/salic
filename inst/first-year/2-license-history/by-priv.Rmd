@@ -12,7 +12,7 @@ params:
     lic_filter: type %in% c("hunt", "trap", "combo")
     yrs: 2007:2016   # (first_year:last_year)
     test: TRUE  # (TRUE, FALSE) > if TRUE, runs a sample & doesn't write output to sqlite
-    db_file: "~/data2/MO_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
+    db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
 ---
 
 <!-- Allows horizontal scrollbars in wide html output (e.g., license sales by year) --> 
@@ -67,9 +67,6 @@ tibble::tribble(
 db <- src_sqlite(params$db_file)
 lic_all <- tbl(db, "lic") %>% collect()
 lic <- filter_(lic_all, .dots = params$lic_filter)
-
-# MO specific, setting all duration to 1, so lifetime license are only counted in first year
-lic <- mutate(lic, duration = 1)
 DT::datatable(lic)
 ```
 
@@ -85,13 +82,6 @@ sale <- select(sale, cust_id, lic_id, year, res) %>%
     filter(year %in% yrs) %>%
     collect(n = Inf)
 glimpse(sale)
-```
-
-```{r}
-# MO-specific residency recoding
-# daily small game are actually nonresident only
-if (params$priv_nm == "daily_small_game") sale$res <- 0
-if (params$priv_nm == "sg_and_fish") sale$res <- 1
 ```
 
 ### Sample
@@ -141,8 +131,10 @@ salic::check_rank_sale(sale, sale_unranked)
 
 - Note that each of the 3 steps produces an output for checking
     + it might be helpful to run these one at a time during testing
+    + the data format is described in _Analyst Docs > Data Dictionary > license history
     
 ```{r, message = FALSE}
+# this can take a while to run
 options(width = 180) # for wide year-spread layout
 
 ### processing code block
@@ -154,12 +146,13 @@ if (params$priv_hist == "NONE") {
     g <- ggplot_lic_history(lic_history, yrs, "duration_run")
     ggplotly(g)
     
-    # 2. Identify R3 & lapse
+    # 2. Identify R3
     lic_history <- identify_R3(lic_history, yrs)
     check_identify_R3(lic_history)
     g <- ggplot_lic_history(lic_history, yrs, "R3")
     ggplotly(g)
     
+    # 3. Identify lapse
     lic_history <- identify_lapse(lic_history, yrs)
     check_identify_lapse(lic_history)
     g <- ggplot_lic_history(lic_history, yrs, "lapse")
@@ -206,7 +199,7 @@ options(width = 80) # back to a normal width
 -  This should show TRUE (i.e., all relevant sales are included)
 
 ```{r}
-nrow(sale) == nrow(priv)
+nrow(sale) == semi_join(priv, sale, by = c("cust_id", "year")) %>% nrow()
 ```
 
 ## Write to SQLite

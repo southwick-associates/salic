@@ -453,7 +453,7 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' @export
 #' @examples
 #' # See ?salic::identify_R3
-check_identify_R3 <- function(lic_history) {
+check_identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
         filter(!(year %in% yrs[1:5])) %>%
         mutate(
