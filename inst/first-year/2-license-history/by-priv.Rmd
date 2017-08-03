@@ -133,43 +133,43 @@ salic::check_rank_sale(sale, sale_unranked)
     + it might be helpful to run these one at a time during testing
     + the data format is described in _Analyst Docs > Data Dictionary > license history
     
-```{r, message = FALSE}
-# this can take a while to run
+```{r, eval = params$priv_hist == "NONE", message = FALSE}
+# if not in test mode then this can take a while to run
 options(width = 180) # for wide year-spread layout
 
-### processing code block
-if (params$priv_hist == "NONE") {
-    # 1. make license history
-    lic_history <- make_lic_history(sale, yrs, carry_vars = "res")
-    check_history_summary(lic_history)
-    check_history_samp(lic_history)
-    g <- ggplot_lic_history(lic_history, yrs, "duration_run")
-    ggplotly(g)
-    
-    # 2. Identify R3
-    lic_history <- identify_R3(lic_history, yrs)
-    check_identify_R3(lic_history)
-    g <- ggplot_lic_history(lic_history, yrs, "R3")
-    ggplotly(g)
-    
-    # 3. Identify lapse
-    lic_history <- identify_lapse(lic_history, yrs)
-    check_identify_lapse(lic_history)
-    g <- ggplot_lic_history(lic_history, yrs, "lapse")
-    ggplotly(g)
-    
-} else {
-    # get history for a specified reference privilege
-    priv_hist_nm <- paste("priv", params$priv_hist, sep = "_")
-    priv_hist <- tbl(db, priv_hist_nm) %>% 
-        select(cust_id, year, lapse, R3) %>%
-        collect(n = Inf)
-    
-    # identify R3/lapse (by year) depending on that privilege
-    priv <- select_(sale, .dots = c("cust_id", "year", "res")) %>%
-        inner_join(priv_hist, by = c("cust_id", "year"))
-    # todo: add a warning here if nrow(priv) < nrow(priv_sale)
-}
+# 1. make license history
+lic_history <- make_lic_history(sale, yrs, carry_vars = "res")
+check_history_summary(lic_history)
+check_history_samp(lic_history)
+g <- ggplot_lic_history(lic_history, yrs, "duration_run")
+ggplotly(g)
+
+# 2. Identify R3
+lic_history <- identify_R3(lic_history, yrs)
+check_identify_R3(lic_history, yrs)
+g <- ggplot_lic_history(lic_history, yrs, "R3")
+ggplotly(g)
+
+# 3. Identify lapse
+lic_history <- identify_lapse(lic_history, yrs)
+check_identify_lapse(lic_history)
+g <- ggplot_lic_history(lic_history, yrs, "lapse")
+ggplotly(g)
+```
+
+```{r, eval = params$priv_hist != "NONE", message = FALSE}
+# get history for a specified reference privilege
+options(width = 180) # for wide year-spread layout
+
+priv_hist_nm <- paste("priv", params$priv_hist, sep = "_")
+priv_hist <- tbl(db, priv_hist_nm) %>% 
+    select(cust_id, year, lapse, R3) %>%
+    collect(n = Inf)
+
+# identify R3/lapse (by year) depending on that privilege
+priv <- select_(sale, .dots = c("cust_id", "year", "res")) %>%
+    inner_join(priv_hist, by = c("cust_id", "year"))
+# todo: add a warning here if nrow(priv) < nrow(priv_sale)
 ```
 
 ### Make Final Priv

@@ -23,12 +23,12 @@ run_lichist("small_game", 'priv == "sg"', test = TRUE)
 # Run Tables -----------------------------------------------------------
 # note: the license history code can take a while to run
 
-# Overall Types
+# Overall Permissions
 run_lichist("hunt", 'type %in% c("hunt", "trap", "combo")')
 run_lichist("fish", 'type %in% c("fish", "combo")')
 run_lichist("all_sports", 'type %in% c("hunt", "trap", "fish", "combo")')
 
-# Specific Privs
+# Privilege Permissions
 run_lichist("trapping", 'type == "trap"')
 run_lichist("small_game", 'priv == "sg"')
 run_lichist("migratory_bird", 'priv == "mb"')
@@ -37,7 +37,7 @@ run_lichist("firearm_spring_turkey", 'priv %in% c("sp turkey", "fiream deer/turk
 run_lichist("firearm_fall_turkey", 'priv %in% c("fall turkey", "fiream deer/turkey")')
 run_lichist("archery_deer_turkey", 'priv == "bow"')
 
-# Subtype Privs
+# Subtype Permissions
 # run_lichist("daily_small_game", 'subtype == "sg daily"', "small_game", test = TRUE)
 run_lichist("daily_small_game", 'subtype == "sg daily"', "small_game")
 run_lichist("sg_and_fish", 'subtype == "sg and fish"', "all_sports")
