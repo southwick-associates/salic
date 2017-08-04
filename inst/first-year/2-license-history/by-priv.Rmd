@@ -145,16 +145,25 @@ g <- ggplot_lic_history(lic_history, yrs, "duration_run")
 ggplotly(g)
 
 # 2. Identify R3
-lic_history <- identify_R3(lic_history, yrs)
-check_identify_R3(lic_history, yrs)
-g <- ggplot_lic_history(lic_history, yrs, "R3")
-ggplotly(g)
+if (length(yrs) > 5) {
+    lic_history <- identify_R3(lic_history, yrs)
+    check_identify_R3(lic_history, yrs)
+    g <- ggplot_lic_history(lic_history, yrs, "R3")
+    ggplotly(g)
+} else {
+    lic_history$R3 <- NA 
+}
 
 # 3. Identify lapse
 lic_history <- identify_lapse(lic_history, yrs)
 check_identify_lapse(lic_history)
 g <- ggplot_lic_history(lic_history, yrs, "lapse")
 ggplotly(g)
+
+# 4. make priv table
+priv <- lic_history %>%
+    filter(has_priv) %>%
+    select(cust_id, year, lapse, R3, res)
 ```
 
 ```{r, eval = params$priv_hist != "NONE", message = FALSE}
@@ -172,18 +181,13 @@ priv <- select_(sale, .dots = c("cust_id", "year", "res")) %>%
 # todo: add a warning here if nrow(priv) < nrow(priv_sale)
 ```
 
-### Make Final Priv
+### Check Final Priv
 
 - Summarize lapse, R3, and count:
     + overall
     + by residency
 
 ```{r}
-# make priv table
-priv <- lic_history %>%
-    filter(has_priv) %>%
-    select(cust_id, year, lapse, R3, res)
-
 # display R3 labels
 r3_labs <- c("1-Carried", "2-Retained", "3-Reactivated", "4-Recruited")
 x <- mutate(priv,  R3 = factor(R3, levels = 1:4,  labels = r3_labs))
