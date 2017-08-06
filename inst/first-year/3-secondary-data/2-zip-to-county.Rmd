@@ -7,25 +7,24 @@ output:
         toc_float: true
         code_folding: show
 params:
-    state_name: Missouri
-    db_file: "~/data2/MO_Dashboard/lic.sqlite3"
-    csv_file: "~/data/MO_Dashboard/geocode-addresses/cust-for-geocode.csv"
+    state_name: Xxxxxx # e.g., Missouri, Georgia, etc.
+    db_file: "~/data2/XX_Dashboard/lic.sqlite3"
+    csv_file: "~/data/XX_Dashboard/geocode-addresses/cust-for-geocode.csv"
     crosswalk_file: "~/Data2/Zip_County_Crosswalk/Zipcodes.csv"
-    test: FALSE # If TRUE, won't write to sqlite database
+    test: TRUE # If TRUE, won't write to sqlite database
 ---
 
 ```{r setup, message=FALSE}
-library(dplyr)
+library(tidyverse)
 library(RSQLite)
-library(tidyr)
-library(readr)
 library(tibble)
 knitr::opts_chunk$set(comment = NA)
 ```
 
 ## Params
 
-- Note: Geocoding is a preferable way to identify zipcode. The zip-to-county is used (for now) because we don't have a reliable way to batch geocode millions of records.
+- This attaches a county fip to the standardized customer table
+- Note: Geocoding is a preferable way to identify zipcode. The zip-to-county is used (for now) because we haven't implemented a reliable way to geocode millions of records.
 
 ```{r}
 tribble(
@@ -41,6 +40,8 @@ tribble(
 ## Load Data
 
 ### Zip to County Relation
+
+- Tom sent this to Dan on 2/10/14. Not sure about data source or processing.
 
 ```{r}
 col_types <- cols(
@@ -99,7 +100,7 @@ count(fips, fips, county) %>% DT::datatable()
 # check missing
 missing_fips <- filter(fips, is.na(fips)) %>% nrow()
 tribble(
-    ~all_customers, ~missing_fips, ~pct_missing,
+    ~all_resident_customers, ~missing_fips, ~pct_missing,
     nrow(fips), missing_fips, missing_fips / nrow(fips) * 100
 )
 ```
@@ -111,10 +112,15 @@ cust <- left_join(cust, fips, by = "cust_id") %>%
     mutate(fips = as.integer(fips))
 count(cust, res, fips, county) %>% DT::datatable()
 cust <- select(cust, -county)
-glimpse(cust)
 ```
 
 ## Write to SQLite
+
+- The only change should be one additional column (fips)
+
+```{r}
+glimpse(cust)
+```
 
 ```{r}
 if (!params$test) {

@@ -7,22 +7,21 @@ output:
         toc_float: true
         code_folding: show
 params:
-    state: MO
-    state_name: Missouri
+    state: XX
+    state_name: Xxxxxx # Missouri, Georgia, etc.
     lic_yrs: 2007:2016  # years included in license data
     acs_last_yr: 2015
     census_pop1: "~/data2/_CENSUS_ACS/pop_by_state update/st-est00int-01.xls"
     census_pop2: "~/data2/_CENSUS_ACS/pop_by_state update/nst-est2016-01.xlsx"
-    test: FALSE  # (TRUE, FALSE) > if TRUE, doesn't write output to sqlite
-    db_file: "~/data2/MO_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
+    test: TRUE  # (TRUE, FALSE) > if TRUE, doesn't write output to sqlite
+    db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
 ---
 
 ```{r setup, message=FALSE}
 library(acs)
 library(stringr)
 library(plyr)
-library(tidyr)
-library(dplyr)
+library(tidyverse)
 library(readxl)
 library(DT)
 library(RSQLite)
@@ -190,6 +189,7 @@ glimpse(dat)
 ### Match Totals by Year
 
 - This insures the county totals match the most recent estimates available from the Census
+- The adjustments should be pretty small (maybe a couple percentage points)
 
 ```{r}
 # estimate necessary adjustment

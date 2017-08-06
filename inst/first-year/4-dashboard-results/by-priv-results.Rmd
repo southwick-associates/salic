@@ -12,7 +12,7 @@ params:
     yrs: 2007:2016  # (first_year:last_year)
     res_type: NONE # (NONE, res, nonres)
     res_filter: NONE # (NONE, res, nonres)
-    db_file: "~/data2/MO_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
+    db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
     out_dir: "../../data/6-dashboard-results"  # directory for output RData (may vary by state)
 ---
 
@@ -217,9 +217,9 @@ pop[["county"]] <- group_by(pop_county, year, county) %>%
 rm(pop_county)
 ```
 
-### Participants - START HERE
+### Participants
 
-- Do some work on checking and visualization
+- Future Todo: Do some work on checking and visualization
     + checking > see est_total_check() and notes below
     + visualization > include an interactive ggplot showing trends (like dashboard)
     + (see WI dive code in producing a nice faceted line plot)

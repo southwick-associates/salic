@@ -1,12 +1,10 @@
-# Functions Dan is working on for future dashboard projects
-
+# Shared functions
 
 # General Data Processing -------------------------------------------------
 
 # store all table in database as named objects
-# note: this is pretty lazy, so not certain
+# note: this is pretty lazy, so not certain if it's necessary
 fetch_sqlite <- function(path) {
-    
 }
 
 
@@ -91,6 +89,45 @@ factor_R3 <- function(
     factor(x, levels = levels, labels = labels)
 }
 
+# Priv Category Labeling on data frame ------------------------------------
+# similar to the factor_xxx functions above (but for data frames)
+# this is helpful for producing automatic checks of the recoding operation
+
+df_factor_sex <- function(df, levels = 1:2, labels = c("Male", "Female")) {
+    df <- df %>% mutate(
+        sex_old = sex,
+        sex = factor(sex, levels = levels, labels = labels)
+    )
+    count(df, sex, sex_old) %>% data.frame() %>% print()
+    select(df, -sex_old)
+}
+df_factor_res <- function(df, levels = c(1,0), labels = c("Resident", "Nonresident")) {
+    df <- df %>% mutate(
+        res_old = res,
+        res = factor(res, levels = levels, labels = labels)
+    )
+    count(df, res, res_old) %>% data.frame() %>% print()
+    select(df, -res_old)
+}
+df_factor_R3 <- function(df, levels = 1:4, labels = c("Carry", "Retain", "Reactivate", "Recruit")) {
+    df <- df %>% mutate(
+        R3_old = R3,
+        R3 = factor(R3, levels = levels, labels = labels)
+    )
+    count(df, R3, R3_old) %>% data.frame() %>% print()
+    select(df, -R3_old)
+}
+df_factor_age <- function(
+    df, levels = 1:7,  
+    labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+") 
+) {
+    df <- df %>% mutate(
+        age_old = age,
+        age = factor(age, levels = levels, labels = labels)
+    )
+    count(df, age, age_old) %>% data.frame() %>% print()
+    select(df, -age_old)
+}
 
 # Dashboard Calculatoins --------------------------------------------------
 
@@ -139,3 +176,8 @@ est_churn <- function(x) {
         filter(lapse == 1) %>%
         select(-n, -lapse)
 }
+
+
+# Visual Dashboard Checking -----------------------------------------------
+
+# grouped line plots with interactive widgets

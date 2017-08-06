@@ -7,14 +7,13 @@ output:
         toc_float: true
         code_folding: show
 params:
-    raw_db_file: "~/data/MO_Dashboard/raw.sqlite"
-    db_file: "~/data2/MO_Dashboard/lic.sqlite3"
-    csv_file: "~/data/MO_Dashboard/geocode-addresses/cust-for-geocode.csv"
+    raw_db_file: "~/data/XX_Dashboard/raw.sqlite3"
+    db_file: "~/data2/XX_Dashboard/lic.sqlite3"
+    csv_file: "~/data/XX_Dashboard/geocode-addresses/cust-for-geocode.csv"
 ---
 
 ```{r setup, message=FALSE}
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(tibble)
 knitr::opts_chunk$set(comment = NA)
 ```
@@ -50,16 +49,14 @@ glimpse(cust_raw)
 
 ### Cleaned data
 
-- Only residents are pulled, since the aim here is to identify county of residence
+- Only customers with state resident addresses are pulled, since the aim here is to identify county of residence
 
 ```{r}
 db <- src_sqlite(params$db_file)
-cust <- tbl(db, "sale") %>% 
-    select(cust_id) %>%
-    left_join(tbl(db, "cust")) %>%
+cust <- tbl(db, "cust") %>%
     filter(res == 1) %>%
-    select(cust_id) %>% collect(n = Inf) %>%
-    distinct()
+    select(cust_id) %>%
+    collect(n = Inf)
 glimpse(cust)
 ```
 
@@ -69,8 +66,8 @@ glimpse(cust)
 
 ```{r}
 cust_in <- cust
-cust <- left_join(cust, cust_raw)
-count(cust, state) %>% DT::datatable()
+cust <- left_join(cust, cust_raw, by = "cust_id")
+count(cust, state)
 ```
 
 ### Truncate Zips
@@ -88,6 +85,7 @@ count(cust, nchar(zip))
 ## Write to CSV
 
 ```{r}
+glimpse(cust)
 dir.create(dirname(params$csv_file))
 write.csv(cust, file = params$csv_file, row.names = FALSE)
 ```
