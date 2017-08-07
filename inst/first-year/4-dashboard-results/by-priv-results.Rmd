@@ -9,11 +9,11 @@ output:
 params:
     priv_nm: hunt  # (fish, hunt, all_sports) or (deer, trout, etc.)
     priv_ref: NONE  # (NONE, fish, hunt, all_sports) > denominator for privilege rate
-    yrs: 2007:2016  # (first_year:last_year)
+    yrs: 2010:2017  # (first_year:last_year)
     res_type: NONE # (NONE, res, nonres)
     res_filter: NONE # (NONE, res, nonres)
     db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
-    out_dir: "../../data/6-dashboard-results"  # directory for output RData (may vary by state)
+    out_dir: "../../data/4-dashboard-results"  # directory for output RData (may vary by state)
 ---
 
 ```{r setup, message=FALSE}
@@ -139,36 +139,6 @@ if (params$res_type == "nonres") {
 }
 ```
 
-### County Recoding - MO specific
-
-- Combine "St Lous City" & "St Louis" together
-
-```{r}
-priv <- priv %>% mutate(
-    county_old = county,
-    county = stringr::str_replace(county, "St. Louis city", "St. Louis")
-)
-filter(priv, county == "St. Louis") %>% count(county_old, county)
-# count(priv, county_old, county) %>% DT::datatable()
-priv <- select(priv, -county_old)
-```
-
-```{r}
-pop_county <- pop_county %>% mutate(
-    county_old = county,
-    county = stringr::str_replace(county, "St. Louis city", "St. Louis")
-)
-filter(pop_county, county == "St. Louis") %>% count(county_old, county)
-# count(pop_county, county_old, county) %>% DT::datatable()
-pop_county <- group_by(pop_county, year, county, sex, age) %>%
-    summarise(pop = sum(pop)) %>%
-    ungroup()
-
-length(unique(pop_county$county)) == 114
-length(unique(pop_county$county)) == length(setdiff(unique(priv$county), NA))
-```
-
-
 ### Calculate Age Categories 
 
 ```{r}
@@ -219,19 +189,22 @@ rm(pop_county)
 
 ### Participants
 
-- Future Todo: Do some work on checking and visualization
+**Future Template Todo**
+
+- Do some work on checking and visualization
     + checking > see est_total_check() and notes below
     + visualization > include an interactive ggplot showing trends (like dashboard)
     + (see WI dive code in producing a nice faceted line plot)
     + (use group: [tot, sex, ...] & compare: [down, across] for widgets)
 
-- Future: Maybe include a warning based on pct_diff threshold
+- Maybe include a warning based on pct_diff threshold
     + also a count of missing values would be useful (shows something similar), but a more direct measurement of the amount of estimation needed
 
 ```{r}
 # total counts - used for correcting for missing values in grouping variables
 tot <- count(priv, year)
 tot_residency <- count(priv, year, res) %>%
+    group_by(year) %>%
     est_total("res", tot)
 
 part <- list()
@@ -239,10 +212,12 @@ part[["tot"]] <- format_metric(tot) %>%
     mutate(segment = "All", category = "All")
 
 part[["sex"]] <- count(priv, year, sex) %>%
+    group_by(year) %>%
     est_total("sex", tot) %>% 
     format_metric() %>% format_grp("gender", "sex")
 
 part[["age"]] <- count(priv, year, age) %>%
+    group_by(year) %>%
     est_total("age", tot) %>%
     format_metric() %>% format_grp("age")
 
@@ -283,16 +258,19 @@ if (params$res_type != "nonres" & params$res_filter != "nonres") {
     part_res[["county"]] <- priv_res %>%
         filter(year %in% c(yrs[length(yrs)])) %>%
         count(year, county) %>%
+        group_by(year) %>%
         est_total("county", tot_res) %>%
         format_metric() %>% format_grp("county")
     
     # age & sex - for calculating participation rates
     # these won't be included in final dashboard table
     part_res[["sex"]] <- count(priv_res, year, sex) %>%
+        group_by(year) %>%
         est_total("sex", tot_res) %>% 
         format_metric() %>% format_grp("gender", "sex")
     
     part_res[["age"]] <- count(priv_res, year, age) %>%
+        group_by(year) %>%
         est_total("age", tot_res) %>%
         format_metric() %>% format_grp("age")
     
@@ -430,6 +408,7 @@ if (run_recruit) {
     # total counts - used for correcting for missing values in grouping variables
     tot <- count(priv_new, year)
     tot_residency <- count(priv_new, year, res) %>%
+        group_by(year) %>%
         est_total("res", tot)
     
     recruit <- list()
@@ -437,10 +416,12 @@ if (run_recruit) {
         mutate(segment = "All", category = "All")
     
     recruit[["sex"]] <- count(priv_new, year, sex) %>%
+        group_by(year) %>%
         est_total("sex", tot) %>% 
         format_metric("participants - recruited") %>% format_grp("gender", "sex")
     
     recruit[["age"]] <- count(priv_new, year, age) %>%
+        group_by(year) %>%
         est_total("age", tot) %>%
         format_metric("participants - recruited") %>% format_grp("age")
     
@@ -455,6 +436,7 @@ if (run_recruit) {
         recruit[["county"]] <- priv_new_res %>%
             filter(year %in% c(yrs[length(yrs)])) %>%
             count(year, county) %>%
+            group_by(year) %>%
             est_total("county", tot_res) %>%
             format_metric("participants - recruited") %>% format_grp("county")
     }
@@ -515,11 +497,13 @@ sale_new <- semi_join(sale, priv_new, by = c("cust_id", "year"))
 sale_month <- list()
 
 sale_month[["tot"]] <- count(sale, year, month) %>% 
+    group_by(year) %>%
     format_metric() %>% format_grp("month")
 
 # recruits - shown as their own metric
 if (run_recruit) {
     sale_month[["recruit"]] <- count(sale_new, year, month) %>%
+        group_by(year) %>%
         format_metric("participants - recruited") %>% format_grp("month")
 }
 

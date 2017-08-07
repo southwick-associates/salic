@@ -4,24 +4,18 @@ Todo:
    (ensure nothing can get overwritten, maybe have a follow-up prompt or something)
 2. Change counts so that groups are carried over with newer dplyr version breaking change
    (e.g., check_make_priv_final)
-   - also probably replace the scripts in 4-dashboard-results from GA
 
 1. Improve "4-dashboard-results", probably with some ggplot visuals at least
 2. Work on vignette (just an initial, creating directory, intializing w/templates)
 
-Priorities: Address largest time bottlenecks
-1. basic Rmd templates with auto-populating functions in salic
-   - 1-prep-license
-   - 4-dashboard-results (should improve OR update code)
-   - run OR "first-year" through the above
-2. More generic priv structure (lic_priv table)
-   - probably use this for OR > add new column for bow vs. rifle
-3. Update workflow
-   - first run OR through a new "first-year" process with changes above
-   - write update workflow scripts (maybe with some auto-populate templates)
-   - use last update as a reference, probably keep changes small
+Big Todo: Updating license data (e.g., new quarters/years)
+Update workflow
+- first run OR through a new "first-year" process with changes above
+- write update workflow scripts (maybe with some auto-populate templates)
+- use last update as a reference, probably keep changes small
 
-OLDER STUFF - take a look at this for reference
+
+OLDER STUFF - kept here for reference
 1. work on (make.R) functions, see corresponding functions in saproj
 -  (done) new()
 -  (done) section()
