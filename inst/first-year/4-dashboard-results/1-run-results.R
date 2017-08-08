@@ -21,7 +21,15 @@ run_dash("hunt")
 run_dash("fish")
 run_dash("all_sports")
 
-# Privileges that aren't residency-specific
+# check residency
+# library(tidyverse)
+# db <- src_sqlite("~/data2/GA_Dashboard/lic.sqlite3")
+# privs <- tbl(db, "lic_priv") %>% count(priv) %>% pull(priv)
+# for (i in 1:length(privs)) tbl(db, privs[i]) %>% count(res) %>% print()
+# tbl(db, privs[4]) %>% count(res)
+# resident only: sportsmans
+
+# Privs that aren't residency-specific
 run_dash("big_game", "hunt")
 run_dash("waterfowl", "hunt")
 run_dash("trout", "fish")

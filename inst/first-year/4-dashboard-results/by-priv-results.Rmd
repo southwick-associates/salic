@@ -12,7 +12,7 @@ params:
     yrs: 2010:2017  # (first_year:last_year)
     res_type: NONE # (NONE, res, nonres)
     res_filter: NONE # (NONE, res, nonres)
-    db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
+    db_file: "~/data2/GA_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
     out_dir: "../../data/4-dashboard-results"  # directory for output RData (may vary by state)
 ---
 
@@ -189,15 +189,13 @@ rm(pop_county)
 
 ### Participants
 
-**Future Template Todo**
-
 - Do some work on checking and visualization
     + checking > see est_total_check() and notes below
     + visualization > include an interactive ggplot showing trends (like dashboard)
     + (see WI dive code in producing a nice faceted line plot)
     + (use group: [tot, sex, ...] & compare: [down, across] for widgets)
 
-- Maybe include a warning based on pct_diff threshold
+- Future: Maybe include a warning based on pct_diff threshold
     + also a count of missing values would be useful (shows something similar), but a more direct measurement of the amount of estimation needed
 
 ```{r}
@@ -466,25 +464,26 @@ churn <- list()
 churn[["tot"]] <- est_churn(priv) %>% format_metric("churn", "churn") %>% 
     mutate(segment = "All", category = "All")
 
-churn[["sex"]] <- group_by(priv, sex) %>% est_churn() %>%
+churn[["sex"]] <- priv %>% est_churn("sex") %>%
     format_metric("churn", "churn") %>% format_grp("gender", "sex")
 
-churn[["age"]] <- group_by(priv, age) %>% est_churn() %>%
+churn[["age"]] <- priv %>% est_churn("age") %>%
     format_metric("churn", "churn") %>% format_grp("age")
 
-churn[["res"]] <- group_by(priv, res) %>% est_churn() %>%
+churn[["res"]] <- priv %>% est_churn("res") %>%
     format_metric("churn", "churn") %>% format_grp("Residency", "res")
 
 if (params$res_type != "nonres" & params$res_filter != "nonres") {
     churn[["county"]] <- priv_res %>%
         filter(year %in% c(yrs[length(yrs)-1])) %>%
-        group_by(county) %>% est_churn() %>%
+        est_churn("county") %>%
         format_metric("churn", "churn") %>% format_grp("county")
 }
 # rm(priv_res)
 
 # stack for dashboard
 churn_tbl <- bind_rows(churn)
+DT::datatable(churn_tbl)
 ```
 
 ### License History
