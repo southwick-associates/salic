@@ -96,6 +96,13 @@ rank_sale <- function(sale, rank_var = "duration",
 #' check_history_samp(lic_history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
+    ### NOTE - This will be coded differently in the future
+    # This function is too slow and memory hungry, doesn't really work once
+    #   you have over 1 million customers (or so)
+    # I'll code it so only new rows are added for carried privileges
+    #  instead of making one row per customer-year
+    #  I started some work on this in the FL Lic Analysis project
+    
     # 1. fill-in NAs for years where no license was purchased by customer in given year
     # this is a bit of a hacky way to fill all years for every customer (1 row per customer-year)
     # - which is used later to create a running duration

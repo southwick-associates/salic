@@ -81,6 +81,7 @@ glimpse(cust)
 
 - Compare output of `summary_sale()` to secondary data sources (Shift + click):
 - https://wsfrprograms.fws.gov/Subpages/LicenseInfo/Hunting.htm
+    + Note that USFWS track **paid** license holders, so excluding free transactions can sometimes reconcile perceived differences between USFWS-based and data-based counts
 
 ```{r}
 hunt_lic <- filter(lic, type %in% c("combo", "hunt", "trap"))
@@ -182,7 +183,7 @@ tribble(
 all_sale <- select(lic, lic_id, description, type) %>% right_join(sale)
 count(all_sale, type, lic_id, description, year) %>% 
     spread(year, n, fill = 0) %>% 
-    write.csv(file = "../../data/1-prep-license-data/sales-by-lic-year.csv", 
+    write.csv(file = "../../out/1-prep-license-data/sales-by-lic-year.csv", 
               row.names = FALSE)
 ```
 

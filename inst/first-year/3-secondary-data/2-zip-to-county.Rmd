@@ -25,6 +25,7 @@ knitr::opts_chunk$set(comment = NA)
 
 - This attaches a county fip to the standardized customer table
 - Note: Geocoding is a preferable way to identify zipcode. The zip-to-county is used (for now) because we haven't implemented a reliable way to geocode millions of records.
+    + Lisa Bragg can do this with ESRI Bus. Analyst. I'm not sure how much time/effort is required
 
 ```{r}
 tribble(

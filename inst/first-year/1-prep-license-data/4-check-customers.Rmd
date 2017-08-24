@@ -124,7 +124,7 @@ dup <- count(cust, first_name, last_name, dob) %>%
 ```{r}
 # investigate a sample of duplicates
 sample_n(dup, 100) %>%
-    select(first_name, last_name, dob, min_cust_id) %>%
+    select(first_name, last_name, dob) %>%
     left_join(cust, by = c("first_name", "last_name", "dob")) %>%
     left_join(sale, by = "cust_id") %>%
     DT::datatable()

@@ -95,6 +95,16 @@ pop_state <- bind_rows(pop_state) %>%
 data.frame(pop_state)
 ```
 
+```{r}
+# Example Code if years more recent than last needed
+# estimate 2017 - assume linear trend
+# model <- lm(pop_state ~ year, data = pop_state)
+# est <- predict(model, data.frame(year = lic_yrs))
+# pop_state <- add_row(pop_state, state = "Georgia", year = 2017, pop_state = est[8])
+# 
+# data.frame(pop_state)
+```
+
 ### County fips codes
 
 ```{r}

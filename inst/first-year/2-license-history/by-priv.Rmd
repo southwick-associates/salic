@@ -108,6 +108,14 @@ salic::summary_sale(sale)
 salic::summary_churn(sale, yrs)
 ```
 
+### Check Duration
+
+- State-specific coding may be required if duration is not completely accounted for in the license table
+
+```{r}
+count(lic, duration)
+```
+
 ### Rank Sales
 
 - Creates one row per customer-year
