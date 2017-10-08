@@ -138,7 +138,9 @@ if (params$test) {
 # if not in test mode then this can take a while to run
 
 # 1. make license history
-lic_history <- make_lic_history(sale_ranked, yrs, carry_vars = "res")
+lic_history <- sale_ranked %>%
+    select(cust_id, duration, year, res) %>%
+    make_lic_history(yrs, carry_vars = "res")
 
 # Compare privs and sales
 sale_count <- count(sale_ranked, res, year, duration) %>% 
