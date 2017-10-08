@@ -2,11 +2,8 @@
 Todo:
 1. IMPORTANT: change new_section_yr1() so that individual files can't be overwritten
    (ensure nothing can get overwritten, maybe have a follow-up prompt or something)
-2. Change counts so that groups are carried over with newer dplyr version breaking change
-   (e.g., check_make_priv_final)
 
-1. Improve "4-dashboard-results", probably with some ggplot visuals at least
-2. Work on vignette (just an initial, creating directory, intializing w/templates)
+1. Work on vignette (just an initial, creating directory, intializing w/templates)
 
 Big Todo: Updating license data (e.g., new quarters/years)
 Update workflow

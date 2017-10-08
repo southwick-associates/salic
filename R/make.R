@@ -33,13 +33,15 @@ new_section_yr1 <- function(num, cust_file = TRUE, projdir = NULL) {
 
     # copy template scripts to the section
     src_dir <- system.file("first-year", sect_names[num], package = "salic")
-    saproj::file_copy(src_dir, file.path("code"), projdir, recursive = TRUE)
+    saproj::file_copy(src_dir, file.path("code"), projdir, recursive = TRUE, 
+                      overwrite = FALSE)
     
     # copy any R files stored in parent directory for section 1 (num = 1)
     if (num == 1) {
         salic_path <- system.file("first-year", package = "salic")
         R_files <- list.files(salic_path, pattern = "\\.R", full.names = TRUE)
-        for (f in R_files) saproj::file_copy(f, file.path("code"), projdir)
+        for (f in R_files) saproj::file_copy(f, file.path("code"), projdir,
+                                             overwrite = FALSE)
     }
 }
 
