@@ -4,10 +4,13 @@
 \alias{check_identify_R3}
 \title{Check the output of \code{\link{identify_R3}}}
 \usage{
-check_identify_R3(lic_history)
+check_identify_R3(lic_history, yrs)
 }
 \arguments{
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+
+\item{yrs}{numeric: Years in sales data (column 'year') from which
+to create license history}
 }
 \description{
 A test to insure R3 was correctly coded
@@ -16,9 +19,7 @@ A test to insure R3 was correctly coded
 # See ?salic::identify_R3
 }
 \seealso{
-Other license history functions: \code{\link{check_carry_vars}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_history_summary}},
+Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},
   \code{\link{check_rank_sale}},

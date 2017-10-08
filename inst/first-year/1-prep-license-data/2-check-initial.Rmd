@@ -178,9 +178,11 @@ tribble(
 **Guidelines**
 
 - This can be useful for closer inspection of sales by year (by individual license type)
+    + the full join is used to look for any license types not included in the sales table (which may or may not be a cause for concern if it happens)
 
 ```{r}
-all_sale <- select(lic, lic_id, description, type) %>% right_join(sale)
+all_sale <- select(lic, lic_id, description, type) %>% 
+    full_join(sale)
 count(all_sale, type, lic_id, description, year) %>% 
     spread(year, n, fill = 0) %>% 
     write.csv(file = "../../out/1-prep-license-data/sales-by-lic-year.csv", 

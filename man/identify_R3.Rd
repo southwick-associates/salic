@@ -37,13 +37,10 @@ lic_history <- identify_R3(lic_history, yrs)
 
 # check
 ggplot_lic_history(lic_history, yrs, "R3")
-check_identify_R3(lic_history)
-check_history_samp(lic_history)
+check_identify_R3(lic_history, yrs)
 }
 \seealso{
-Other license history functions: \code{\link{check_carry_vars}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_history_summary}},
+Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},

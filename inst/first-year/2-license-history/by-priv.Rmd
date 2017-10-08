@@ -15,17 +15,6 @@ params:
     db_file: "~/data2/XX_Dashboard/lic.sqlite3"  # sqlite db location (varies by state)
 ---
 
-<!-- Allows horizontal scrollbars in wide html output (e.g., license sales by year) --> 
-<style>
-pre {
-  overflow-x: auto;
-}
-pre code {
-  word-wrap: normal;
-  white-space: pre;
-}
-</style>
-
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(RSQLite)
@@ -73,6 +62,8 @@ DT::datatable(lic)
 ### Sales
 
 ```{r}
+# get sales for relevant license types
+# the if conidtion just insures the logic works on the sqlite backend (== vs %in%)
 if (nrow(lic) == 1) {
    sale <- tbl(db, "sale") %>% filter(lic_id == lic$lic_id) 
 } else {
@@ -99,14 +90,7 @@ if (params$test) {
 }
 ```
 
-## Process Data
-
-### Initial Check
-
-```{r}
-salic::summary_sale(sale)
-salic::summary_churn(sale, yrs)
-```
+## Prepare Sales Data
 
 ### Check Duration
 
@@ -118,22 +102,31 @@ count(lic, duration)
 
 ### Rank Sales
 
-- Creates one row per customer-year
+- Creates one row per customer-year (grouping by cust_id, year)
+    + picks highest duration (e.g., a 5-year license would be chosen over a 1-year license)
+    + picks Resident (res == 1) over Nonresident (res == 0). A customer generally shouldn't have 2 different residencies in the same year, but it happens occasionally
 
 ```{r}
-# if no multi-year or lifetime licenses, durations all equal 1
-if ("duration" %in% names(lic)) {
-    sale <- select(lic, lic_id, duration) %>% 
-        right_join(sale) %>%
-        mutate(duration = ifelse(is.na(duration), 1, duration))
-} else {
-    sale <- mutate(sale, duration = 1) 
-}
-sale_unranked <- sale
+sale_ranked <- sale %>%
+    rank_sale(rank_var = c("duration", "res"), grp_var = c("cust_id", "year"))
 
-sale <- salic::rank_sale(sale, c("duration", "res")) # make tracking tables (in list)
-salic::check_rank_sale(sale, sale_unranked)
+# visual comparison
+ranked_sale_count <- count(sale_ranked, res, year, duration) %>% mutate(grp = "ranked-sales")
+sale_count <- count(sale, res, year, duration) %>% mutate(grp = "sales")
+chart <- bind_rows(sale_count, ranked_sale_count) %>%
+    ggplot(aes(factor(year), n, fill = factor(duration))) +
+    geom_bar(stat = "identity") +
+    facet_grid(factor_res(res) ~ grp, scales = "free_y")
+ggplotly(chart)
+
+if (params$test) {
+    # this usually takes too long to run on full set of sales
+    # it's also an extremely verbose output
+    salic::check_rank_sale(sale_ranked, sale)
+}
 ```
+
+## Prepare Privilege Data
 
 ### Make License History
 
@@ -143,40 +136,66 @@ salic::check_rank_sale(sale, sale_unranked)
     
 ```{r, eval = params$priv_hist == "NONE", message = FALSE}
 # if not in test mode then this can take a while to run
-options(width = 180) # for wide year-spread layout
 
 # 1. make license history
-lic_history <- make_lic_history(sale, yrs, carry_vars = "res")
-check_history_summary(lic_history)
-check_history_samp(lic_history)
-g <- ggplot_lic_history(lic_history, yrs, "duration_run")
-ggplotly(g)
+lic_history <- make_lic_history(sale_ranked, yrs, carry_vars = "res")
+
+# Compare privs and sales
+sale_count <- count(sale_ranked, res, year, duration) %>% 
+    mutate(duration_run = duration, grp = "sales")
+priv_count <- count(lic_history, res, year, duration_run) %>% 
+    mutate(grp = "privs")
+chart <- bind_rows(sale_count, priv_count) %>%
+    ggplot(aes(factor(year), n, fill = factor(duration_run))) +
+    geom_bar(stat = "identity") +
+    facet_grid(factor_res(res) ~ grp, scales = "free_y")
+ggplotly(chart)
+
 
 # 2. Identify R3
+# this condition means R3 won't be calcualated unless there is a sufficient license history
 if (length(yrs) > 5) {
     lic_history <- identify_R3(lic_history, yrs)
-    check_identify_R3(lic_history, yrs)
-    g <- ggplot_lic_history(lic_history, yrs, "R3")
-    ggplotly(g)
+    
+    chart <- count(lic_history, res, year, R3) %>%
+        ggplot(aes(factor(year), n, fill = factor_R3(R3))) +
+        geom_bar(stat = "identity") +
+        facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
+    ggplotly(chart)
+
 } else {
     lic_history$R3 <- NA 
 }
+check_identify_R3(lic_history, yrs) %>% DT::datatable()
+
 
 # 3. Identify lapse
 lic_history <- identify_lapse(lic_history, yrs)
-check_identify_lapse(lic_history)
-g <- ggplot_lic_history(lic_history, yrs, "lapse")
+
+g <- count(lic_history, res, year, lapse) %>%
+    ggplot(aes(factor(year), n, fill = factor(lapse))) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
 ggplotly(g)
 
-# 4. make priv table
+check_identify_lapse(lic_history) %>% DT::datatable()
+
+
+# 4. Overall Check
+# This samples a few customers, showing relevant calculation variables
+lic_history %>%
+    select(cust_id, year, res, bought, duration, duration_run, lag_duration_run, R3, lapse) %>%
+    check_history_samp() %>% DT::datatable()
+
+
+# 5. Make priv table
+# this drops the temporary cacluation variables (duration_run, etc.)
 priv <- lic_history %>%
-    filter(has_priv) %>%
     select(cust_id, year, lapse, R3, res)
 ```
 
 ```{r, eval = params$priv_hist != "NONE", message = FALSE}
 # get history for a specified reference privilege
-options(width = 180) # for wide year-spread layout
 
 priv_hist_nm <- paste("priv", params$priv_hist, sep = "_")
 priv_hist <- tbl(db, priv_hist_nm) %>% 
@@ -184,34 +203,17 @@ priv_hist <- tbl(db, priv_hist_nm) %>%
     collect(n = Inf)
 
 # identify R3/lapse (by year) depending on that privilege
-priv <- select_(sale, .dots = c("cust_id", "year", "res")) %>%
+priv <- select_(sale_ranked, .dots = c("cust_id", "year", "res")) %>%
     inner_join(priv_hist, by = c("cust_id", "year"))
-# todo: add a warning here if nrow(priv) < nrow(priv_sale)
+# todo: maybe add a warning here if nrow(priv) < nrow(priv_sale)
 ```
 
 ### Check Final Priv
 
-- Summarize lapse, R3, and count:
-    + overall
-    + by residency
-
-```{r}
-# display R3 labels
-r3_labs <- c("1-Carried", "2-Retained", "3-Reactivated", "4-Recruited")
-x <- mutate(priv,  R3 = factor(R3, levels = 1:4,  labels = r3_labs))
-
-# check overall and by residency
-salic::check_make_priv_final(x)
-group_by(x, res) %>% 
-    salic::check_make_priv_final()
-
-options(width = 80) # back to a normal width
-```
-
 -  This should show TRUE (i.e., all relevant sales are included)
 
 ```{r}
-nrow(sale) == semi_join(priv, sale, by = c("cust_id", "year")) %>% nrow()
+nrow(sale_ranked) == semi_join(priv, sale_ranked, by = c("cust_id", "year")) %>% nrow()
 ```
 
 ## Write to SQLite

@@ -12,23 +12,21 @@ make_lic_history(sale_ranked, yrs, carry_vars = NULL)
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
 
-\item{carry_vars}{character: variables to carry over from previous year
-(for multi-year and lifetime licenses). See
-\code{\link{check_carry_vars}} for checking the output.}
+\item{carry_vars}{character: additional variables to carry over from previous year
+(for multi-year and lifetime licenses).}
 }
 \description{
-Output table is stored in a data frame (n = C * Y). Where C = Number of 
-Customers & Y = Number of Years
+Output table is stored in a data frame with 1 row per customer-year
 }
 \details{
 The input data frame (sale) must have at least 3 columns
 (cust_id, year, duration) and should only have 1 record per customer per year
 (which can be insured by running \code{\link{rank_sale}}).
 
-Each data frame in the output data frame has 7 columns:
+Each data frame in the output data frame has at least 6 columns:
 \itemize{
 \item \emph{cust_id}: Customer ID
-\item \emph{year}: Customer ID
+\item \emph{year}: Privilege year
 \item \emph{duration}: Bought a license this year? (>=1: yes, ==0: no),
 where duration = 1 refers to annual or short-term, 2 to 2 yr, 3 to 3 yr, ...,
 duration = 99 is used to indicate lifetime licenses
@@ -36,8 +34,8 @@ duration = 99 is used to indicate lifetime licenses
 and lifetime licenses
 \item \emph{lag_duration_run}: Previous year duration_run. A temporary value
 used in coding and for downstream checking
-\item \emph{bought}: Bought a license this year? (TRUE, FALSE)
-\item \emph{has_priv}: Has a privilege this year? (TRUE, FALSE)
+\item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
+indicates a license carried over from a previous year
 }
 }
 \examples{
@@ -57,13 +55,10 @@ lic_history <- make_lic_history(sale_ranked, yrs)
 
 # check
 ggplot_lic_history(lic_history, yrs, "duration_run")
-check_history_summary(lic_history)
 check_history_samp(lic_history)
 }
 \seealso{
-Other license history functions: \code{\link{check_carry_vars}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_history_summary}},
+Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},

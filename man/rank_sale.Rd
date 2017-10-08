@@ -10,6 +10,8 @@ rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 \item{sale}{data frame: Input sales data}
 
 \item{rank_var}{character: name of variable(s) to use for ranking}
+
+\item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
 This function takes an input sale table and returns the max duration
@@ -33,9 +35,7 @@ check_rank_sale(sale_ranked, sale_unranked)
 \seealso{
 \code{\link{check_rank_sale}}
 
-Other license history functions: \code{\link{check_carry_vars}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_history_summary}},
+Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},

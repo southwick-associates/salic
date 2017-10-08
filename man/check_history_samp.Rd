@@ -10,15 +10,14 @@ check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
 }
 \description{
-Another test to insure that the license history table was built correctly
+Look at a sample of customers from license history table to check the 
+year over year dynamics
 }
 \examples{
 # See ?salic::make_lic_history
 }
 \seealso{
-Other license history functions: \code{\link{check_carry_vars}},
-  \code{\link{check_history_summary}},
-  \code{\link{check_identify_R3}},
+Other license history functions: \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{check_make_priv_final}},
   \code{\link{check_rank_sale}},
