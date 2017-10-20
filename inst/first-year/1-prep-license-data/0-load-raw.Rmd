@@ -55,6 +55,7 @@ glimpse(lic)
 f <- "~/Data/"
 read_lines(f, n_max = 5)
 read_csv(f, n_max = 5) %>% glimpse()
+count_lines_textfile(f) # to ensure correct number of rows after data import
 ```
 
 ```{r}
@@ -86,6 +87,7 @@ glimpse(cust)
 f <- "~/Data/"
 read_lines(f, n_max = 5)
 read_csv(f, n_max = 5) %>% glimpse()
+count_lines_textfile(f) # to ensure correct number of rows after data import
 ```
 
 ```{r}

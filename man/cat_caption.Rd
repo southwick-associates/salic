@@ -19,4 +19,3 @@ cat_caption("Here is a caption")
 Other functions for printing headers, notes, and tables: \code{\link{cat_note}},
   \code{\link{cat_title}}, \code{\link{print_dat}}
 }
-

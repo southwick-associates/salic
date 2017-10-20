@@ -38,8 +38,8 @@ lic_summary_revenue(x, c("lic_id", "description"), title = "Title", note = "Note
 }
 \seealso{
 Other functions for validating license data: \code{\link{calc_churn}},
+  \code{\link{count_lines_textfile}},
   \code{\link{cust_summary_demo}},
   \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_churn}}, \code{\link{summary_sale}}
 }
-

@@ -26,4 +26,3 @@ data(cust)
 x <- recode_state(cust, state_abbreviations)
 dplyr::count(x, state_new, state)
 }
-

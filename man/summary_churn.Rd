@@ -40,9 +40,9 @@ filter(sale, priv == "hunt") \%>\%
 }
 \seealso{
 Other functions for validating license data: \code{\link{calc_churn}},
+  \code{\link{count_lines_textfile}},
   \code{\link{cust_summary_demo}},
   \code{\link{lic_summary_revenue}},
   \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_sale}}
 }
-

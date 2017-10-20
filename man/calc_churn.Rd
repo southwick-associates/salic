@@ -30,9 +30,9 @@ y <- select(sale, cust_id, year) \%>\%
 calc_churn(y, 2013)
 }
 \seealso{
-Other functions for validating license data: \code{\link{cust_summary_demo}},
+Other functions for validating license data: \code{\link{count_lines_textfile}},
+  \code{\link{cust_summary_demo}},
   \code{\link{lic_summary_revenue}},
   \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_churn}}, \code{\link{summary_sale}}
 }
-

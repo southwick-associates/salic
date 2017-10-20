@@ -49,4 +49,3 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{identify_lapse}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
-

@@ -22,4 +22,3 @@ cat_title("here is a title", "with a note")
 Other functions for printing headers, notes, and tables: \code{\link{cat_caption}},
   \code{\link{cat_note}}, \code{\link{print_dat}}
 }
-

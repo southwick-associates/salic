@@ -24,4 +24,3 @@ saproj::new_project(projdir = "test-dir")
 salic::new_section_yr1(1, projdir = "test-dir")
 salic::section(2, projdir = "test-dir")
 }
-

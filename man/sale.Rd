@@ -19,4 +19,3 @@ Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
   \code{\link{state_abbreviations}}, \code{\link{track}}
 }
 \keyword{datasets}
-

@@ -18,4 +18,3 @@ catf()
 \seealso{
 Other functions for for checking license history summarization: \code{\link{printf}}
 }
-

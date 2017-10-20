@@ -18,4 +18,3 @@ Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
   \code{\link{sale}}, \code{\link{track}}
 }
 \keyword{datasets}
-

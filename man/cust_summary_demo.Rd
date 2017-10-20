@@ -19,8 +19,8 @@ cust_summary_demo()
 }
 \seealso{
 Other functions for validating license data: \code{\link{calc_churn}},
+  \code{\link{count_lines_textfile}},
   \code{\link{lic_summary_revenue}},
   \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_churn}}, \code{\link{summary_sale}}
 }
-

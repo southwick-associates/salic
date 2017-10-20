@@ -28,4 +28,3 @@ Other functions for checking license data: \code{\link{check_cust}},
   \code{\link{check_dups}}, \code{\link{get_dups}},
   \code{\link{show_dups}}
 }
-

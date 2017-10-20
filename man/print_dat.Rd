@@ -39,4 +39,3 @@ print_dat(x, "Customer Sales by Year", digits = 0)
 Other functions for printing headers, notes, and tables: \code{\link{cat_caption}},
   \code{\link{cat_note}}, \code{\link{cat_title}}
 }
-

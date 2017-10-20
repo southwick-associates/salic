@@ -1,5 +1,26 @@
 # functions for validating state license data
 
+#' Count rows in a text file
+#' 
+#' This is a quick way of counting lines in a text file, to insure the final # of rows in 
+#' the loaded dataset is correct: 
+#'  https://stackoverflow.com/questions/23456170/get-the-number-of-lines-in-a-text-file-using-r
+#' @param file_path
+#' @family functions for validating license data
+#' @export
+#' @examples
+#' count_lines_textfile
+count_lines_textfile <- function(file_path) {
+    f_bin <- file(file_path, open="rb")
+    nlines <- 0L
+    while (length(chunk <- readBin(f_bin, "raw", 65536)) > 0) {
+        nlines <- nlines + sum(chunk == as.raw(10L))
+    }
+    close(f_bin)
+    nlines
+}
+
+
 #' Summarize sales and customers by year
 #' @param x data frame: Table holding sales by year with a minimum of
 #' 2 variables (cust_id, year)
