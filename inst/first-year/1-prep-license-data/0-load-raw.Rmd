@@ -10,6 +10,7 @@ output:
 
 ```{r setup, message=FALSE}
 library(tidyverse)
+library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 

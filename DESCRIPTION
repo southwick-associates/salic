@@ -1,7 +1,7 @@
 Package: salic
 Type: Package
 Title: Prepare License Data from Wildlife Agencies
-Version: 0.3.3
+Version: 0.3.4
 Date: 2015-08-17
 Author: Dan Kary
 Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
