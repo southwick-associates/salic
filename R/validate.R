@@ -5,7 +5,7 @@
 #' This is a quick way of counting lines in a text file, to insure the final # of rows in 
 #' the loaded dataset is correct: 
 #'  https://stackoverflow.com/questions/23456170/get-the-number-of-lines-in-a-text-file-using-r
-#' @param file_path
+#' @param file_path character: Path to file
 #' @family functions for validating license data
 #' @export
 #' @examples

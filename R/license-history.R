@@ -220,7 +220,7 @@ identify_R3 <- function(lic_history, yrs) {
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} 
 #' and codes lapse: 0 = renew next year, 1 = lapse next year.
-#' @inheritParams get_R3
+#' @inheritParams make_lic_history
 #' @import dplyr
 #' @family license history functions
 #' @export

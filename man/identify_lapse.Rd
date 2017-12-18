@@ -6,6 +6,10 @@
 \usage{
 identify_lapse(lic_history, yrs)
 }
+\arguments{
+\item{yrs}{numeric: Years in sales data (column 'year') from which
+to create license history}
+}
 \description{
 This is intended to be called following \code{\link{make_lic_history}} 
 and codes lapse: 0 = renew next year, 1 = lapse next year.

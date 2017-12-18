@@ -6,6 +6,9 @@
 \usage{
 count_lines_textfile(file_path)
 }
+\arguments{
+\item{file_path}{character: Path to file}
+}
 \description{
 This is a quick way of counting lines in a text file, to insure the final # of rows in 
 the loaded dataset is correct: 
