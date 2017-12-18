@@ -155,7 +155,7 @@ est_total <- function(x, grp, total) {
         mutate(n = pct * n.y,
                pct_diff = (n - n.x) / n.x * 100) %>%
         select(-pct, -n.y)
-        # select(-n.x, -pct, -n.y)
+    # select(-n.x, -pct, -n.y)
 }
 
 est_total_check <- function(x) {
@@ -167,8 +167,10 @@ est_total_check <- function(x) {
         spread(year, pct_diff)
 }
 
-est_churn <- function(x) {
-    count(x, year, lapse) %>% 
+est_churn <- function(x, grp = NULL) {
+    cnt_grp <- c("year", grp, "lapse")
+    group_by(x, .dots = cnt_grp) %>%
+        summarise(n = n()) %>%
         mutate(churn = n / sum(n)) %>%
         ungroup() %>%
         # since churn in current year uses lapse from previous year

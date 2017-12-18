@@ -122,9 +122,9 @@ tail(sale$raw_id_sale)
 ## Write to sqlite
 
 ```{r}
-dir <- "~/Data/" # directory for sqlite database
-f <- file.path(dir, "raw.sqlite3")
-db <- src_sqlite(f, create = TRUE)
+# suggested naming: "raw-yyyy-qn.sqlite3", where n refers to quarter number
+# matching the intended dashboard timeframe (e.g., 2015 quarter 4)
+db <- src_sqlite("~/Data/", create = TRUE) 
 copy_to(db, lic, temporary = FALSE)
 copy_to(db, cust, temporary = FALSE)
 copy_to(db, sale, temporary = FALSE)
