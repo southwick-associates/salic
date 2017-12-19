@@ -3,7 +3,7 @@
 local({
     
 # Parameters
-r_version <- "3.4.3"
+r_version <- "3.4.2"
 proj_libname <- "southwick-packages"
 
 # Setup Project Library (/Program Files/R/project-library/)
