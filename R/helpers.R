@@ -1,5 +1,8 @@
 # helper functions for printing
 
+# TODO - might be able to drop these in final version
+# otherwise probably use as internal only (don't export)
+
 #' Convenience function to print contents of a data frame
 #'
 #' @param x data frame: data frame contents to print

@@ -1,5 +1,7 @@
 # functions for validating state license data
 
+# TODO - might be able to drop some of these (keep it parsimonious)
+
 #' Count rows in a text file
 #' 
 #' This is a quick way of counting lines in a text file, to insure the final # of rows in 

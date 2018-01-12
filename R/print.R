@@ -1,6 +1,8 @@
 # functions for printing headers, notes, and tables
 # these will probably be deprecated eventually
 
+# TODO - simplify by dropping functions and/or setting to internal only
+
 #' Format numbers for printing
 #'
 #' Helper function for use in print_dat

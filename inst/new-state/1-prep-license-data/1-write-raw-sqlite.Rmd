@@ -23,29 +23,30 @@ knitr::opts_chunk$set(comment = NA)
 
 - Regarding large data files:
     + I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large (and loading too much data into memory can cause your computer to freeze)
-    + I used to have this issue pretty regularly on a laptop with 8gb of memory
 
 ## Load
 
 ### License Types
 
 ```{r}
-f <- "~/Data/" # path to raw data file
+# path to raw data file
+f <- "E:/SA/Data-Dashboards/Data/"
 
 # test
 read_lines(f, n_max = 5)
 read_csv(f, n_max = 5) %>% glimpse() # see readr documentation for non-csv formats
+salic::count_lines_textfile(f) # to ensure correct number of rows after data import
+# note: this didn't work for IA license table, so might be worth troubleshooting
+# also just opening with a text editor (which shows line number counts) is an idea 
 ```
 
 ```{r}
-# column type specification (varies by state)
-# note: start with output above (Parsed with column specification:)
-coltyp <- cols(
-  TypeCode = col_integer(),
-  TypeName = col_character(),
-  Species = col_character(),
-  Category = col_character()
-)
+read_csv(f, n_max = 5) %>% spec() # readr column type specification
+
+# column type specification to use for import (varies by state)
+# note: start with output from read_csv() %>% spec()
+coltyp <- cols( )
+
 lic <- read_csv(f, col_types = coltyp, progress = FALSE)
 glimpse(lic)
 ```
@@ -53,30 +54,19 @@ glimpse(lic)
 ### Customers
 
 ```{r}
-f <- "~/Data/"
+f <- "E:/SA/Data-Dashboards/Data/"
+
+# test
 read_lines(f, n_max = 5)
 read_csv(f, n_max = 5) %>% glimpse()
-count_lines_textfile(f) # to ensure correct number of rows after data import
+count_lines_textfile(f)
 ```
 
 ```{r}
 # note: defaulting to col_character() tends to produce fewer import problems
-coltyp <- cols(
-  CustomerID = col_integer(),
-  FirstName = col_character(),
-  MiddleInitial = col_character(),
-  LastName = col_character(),
-  Suffix = col_character(),
-  MailStreet1 = col_character(),
-  MailStreet2 = col_character(),
-  MailCity = col_character(),
-  MailState = col_character(),
-  MailZip = col_character(),
-  MailCountry = col_character(),
-  DOB = col_character(),
-  Gender = col_character(),
-  statuscodeid = col_integer()
-)
+read_csv(f, n_max = 5) %>% spec()
+coltyp <- cols( )
+
 cust <- read_csv(f, n_max = Inf, col_types = coltyp, progress = FALSE)
 problems(cust)
 glimpse(cust)
@@ -85,25 +75,18 @@ glimpse(cust)
 ### Sales
 
 ```{r}
-f <- "~/Data/"
+f <- "E:/SA/Data-Dashboards/Data/"
+
+# test
 read_lines(f, n_max = 5)
 read_csv(f, n_max = 5) %>% glimpse()
 count_lines_textfile(f) # to ensure correct number of rows after data import
 ```
 
 ```{r}
-coltyp <- cols(
-  CustomerPrimaryID = col_integer(),
-  PermitNo = col_integer(),
-  Season = col_integer(),
-  PurchaseDate = col_character(),
-  typecode = col_character(),
-  Amount = col_character(),
-  Quantity = col_integer(),
-  AccountNo = col_character(),
-  SaleOriginID = col_integer(),
-  OriginalID = col_integer()
-)
+read_csv(f, n_max = 5) %>% spec()
+coltyp <- cols( )
+
 sale <- read_csv(f, n_max = Inf, col_types = coltyp, progress = FALSE)
 problems(sale)
 glimpse(sale)
@@ -112,11 +95,11 @@ glimpse(sale)
 ## Add Row IDs
 
 ```{r}
-cust$raw_id_cust <- as.integer(row.names(cust))
-tail(cust$raw_id_cust)
+cust$raw_cust_id <- as.integer(row.names(cust))
+tail(cust$raw_cust_id)
 
-sale$raw_id_sale <- as.integer(row.names(sale))
-tail(sale$raw_id_sale)
+sale$raw_sale_id <- as.integer(row.names(sale))
+tail(sale$raw_sale_id)
 ```
 
 ## Write to sqlite
@@ -124,7 +107,7 @@ tail(sale$raw_id_sale)
 ```{r}
 # suggested naming: "raw-yyyy-qn.sqlite3", where n refers to quarter number
 # matching the intended dashboard timeframe (e.g., 2015 quarter 4)
-db <- src_sqlite("~/Data/", create = TRUE) 
+db <- src_sqlite("E:/SA/Data-Dashboards/Data/", create = TRUE) 
 copy_to(db, lic, temporary = FALSE)
 copy_to(db, cust, temporary = FALSE)
 copy_to(db, sale, temporary = FALSE)

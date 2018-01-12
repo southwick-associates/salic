@@ -4,7 +4,7 @@
 \alias{new_section_yr1}
 \title{Create a new analysis data sub-directory with template scripts}
 \usage{
-new_section_yr1(num, cust_file = TRUE, projdir = NULL)
+new_section_yr1(num, cust_file = TRUE)
 }
 \arguments{
 \item{num}{integer: Number for script order (1 >> prep-state, etc.)}

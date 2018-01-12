@@ -1,6 +1,8 @@
 # functions for making & checking license history
 # including R3 and lapse coding
 
+# TODO - see if any of these can be dropped (or made internal only)
+
 # Making Tables -----------------------------------------------------------
 
 #' Aggregate a Sale Table to insure 1 row per customer per year.

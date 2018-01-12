@@ -1,5 +1,7 @@
 # Documentation for Sample Data
 
+# TODO - maybe drop these or replace with new data
+
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'
 #' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function

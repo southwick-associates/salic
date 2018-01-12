@@ -10,10 +10,9 @@ output:
 
 ```{r setup, message=FALSE}
 library(tidyverse)
-library(readxl)
 library(salic)
 library(tibble)
-library(d3heatmap)
+# library(d3heatmap)
 options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```
@@ -28,13 +27,50 @@ knitr::opts_chunk$set(comment = NA)
     + Results outside of expected ranges can indicate underlying data issues (incomplete data is probably the most common problem)
 - Note: churn calculations with `salic::summary_churn()` don't take multi-year & lifetime license sales into account (so churn may be overestimated)
 
-## Load Data
+## Check Overall
+
+### Load Sales
+
+```{r}
+db <- src_sqlite("E:/SA/Data-Dashboards/Data/IA/raw-2015.sqlite3")
+src_tbls(db)
+```
 
 **Guidelines**
 
-- only a subset of columns are needed for each table (names will vary by state)
+- only a subset of sales columns are needed:
+    + at least: cust_id, lic_id, year
 - renaming columns to standard values allows boilerplate code to be applied to different states
 - customer data is pulled only to check customer coverage (near end of this script)
+
+```{r}
+sale <- tbl(db, "sale") %>% 
+    select(year = TXNL_YEAR, cust_id = TXNL_CUST_ID, lic_id = TXNL_LICN_TYPE) %>%
+    collect()
+glimpse(sale)
+```
+
+### Summary Sale
+
+```{r}
+salic::summary_sale(sale)
+```
+
+
+## START HERE - Check by License Type
+
+### Load License Table
+
+- Pull in at least 2 columns: lic_id, description
+
+```{r}
+lic <- tbl(db, "lic") %>% 
+    select(lic_id = LTYPE_LICN_TYPE, lic_id_alt = LTYPE_ID, year = LTYPE_YEAR,
+           description = LTYPE_DESC) %>%
+    collect()
+glimpse(lic)
+```
+
 
 ### Prepped License Types
 
@@ -47,11 +83,6 @@ glimpse(lic)
 ```
 
 ### Raw Sales
-
-```{r}
-db <- src_sqlite("~/Data/")
-src_tbls(db)
-```
 
 ```{r}
 tbl(db, "sale") %>% glimpse()

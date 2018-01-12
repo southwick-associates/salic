@@ -4,19 +4,19 @@
 \alias{new_dashboard}
 \title{Setup a new state dashboard with default directories and template scripts}
 \usage{
-new_dashboard(state, time_period, proj_path = "E:/SA/Data-Dashboards",
-  R_version = "3.4.3", proj_library = "data-dashboards")
+new_dashboard(state, time_period, project_path = "E:/SA/Data-Dashboards",
+  R_version = "3.4.3", project_library = "data-dashboards")
 }
 \arguments{
 \item{state}{character: Two letter state designation}
 
 \item{time_period}{character: Time period for the first dashboard (e.g., "2015", "2016-q1", etc.)}
 
-\item{proj_path}{character: File path where the Data Dashboards project is stored}
+\item{project_path}{character: File path where the Data Dashboards project is stored}
 
 \item{R_version}{character: Version of R to use for this project}
 
-\item{proj_library}{character: Name of project-specific R package library}
+\item{project_library}{character: Name of project-specific R package library}
 }
 \description{
 This is intended to be run before data processing for a new state begins
