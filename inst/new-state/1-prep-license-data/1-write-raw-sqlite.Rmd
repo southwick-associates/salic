@@ -14,15 +14,14 @@ library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-## Guidelines
+**Guidelines**
 
 - Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)
-- Regarding dates:
-    + I recommend just importing with `col_character` (as per the examples below)
-    + If date fields are imported with `col_date` (or similar), it's probably best to convert with `as.character()` prior to writing to sqlite
+- Regarding dates: I recommend just importing with `col_character` (as per the examples below)
 
 - Regarding large data files:
-    + I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large (and loading too much data into memory can cause your computer to freeze)
+    + I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large and R can use up all of a computer's RAM (essentially freezing the machine)
+
 
 ## Load
 
@@ -30,14 +29,15 @@ knitr::opts_chunk$set(comment = NA)
 
 ```{r}
 # path to raw data file
-f <- "E:/SA/Data-Dashboards/Data/"
+f <- "E:/SA/Data-Dashboards/Data-sensitive/"
 
 # test
-read_lines(f, n_max = 5)
+read_lines(f, n_max = 3)
 read_csv(f, n_max = 5) %>% glimpse() # see readr documentation for non-csv formats
-salic::count_lines_textfile(f) # to ensure correct number of rows after data import
-# note: this didn't work for IA license table, so might be worth troubleshooting
-# also just opening with a text editor (which shows line number counts) is an idea 
+
+# check line count to ensure correct number of rows after data import
+# if this doesn't work, an alternative is to open the file with JujuEdit
+salic::count_lines_textfile(f)
 ```
 
 ```{r}
@@ -54,7 +54,7 @@ glimpse(lic)
 ### Customers
 
 ```{r}
-f <- "E:/SA/Data-Dashboards/Data/"
+f <- "E:/SA/Data-Dashboards/Data-sensitive/"
 
 # test
 read_lines(f, n_max = 5)
@@ -75,7 +75,7 @@ glimpse(cust)
 ### Sales
 
 ```{r}
-f <- "E:/SA/Data-Dashboards/Data/"
+f <- "E:/SA/Data-Dashboards/Data-sensitive/"
 
 # test
 read_lines(f, n_max = 5)
@@ -92,9 +92,13 @@ problems(sale)
 glimpse(sale)
 ```
 
+
 ## Add Row IDs
 
 ```{r}
+lic$raw_lic_id <- as.integer(row.names(lic))
+tail(lic$raw_lic_id)
+
 cust$raw_cust_id <- as.integer(row.names(cust))
 tail(cust$raw_cust_id)
 
@@ -102,12 +106,16 @@ sale$raw_sale_id <- as.integer(row.names(sale))
 tail(sale$raw_sale_id)
 ```
 
+
 ## Write to sqlite
 
+**Guidelines**
+
+- Naming (db) should match to relevant "raw-[year].sqlite3" folder used above:
+    + for example: "E:/SA/Data-Dashboards/Data-sensitive/IA/raw-2015.sqlite3"
+
 ```{r}
-# suggested naming: "raw-yyyy-qn.sqlite3", where n refers to quarter number
-# matching the intended dashboard timeframe (e.g., 2015 quarter 4)
-db <- src_sqlite("E:/SA/Data-Dashboards/Data/", create = TRUE) 
+db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/", create = TRUE) 
 copy_to(db, lic, temporary = FALSE)
 copy_to(db, cust, temporary = FALSE)
 copy_to(db, sale, temporary = FALSE)
