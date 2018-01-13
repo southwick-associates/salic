@@ -36,9 +36,9 @@ new_dashboard <- function(state, time_period, project_path = "E:/SA/Data-Dashboa
     
     # make directories
     dir.create(analysis_path, recursive = TRUE, showWarnings = FALSE)
-    dir.create(file.path(project_path, "Data", state, paste0("raw-", time_period)), 
+    dir.create(file.path(project_path, "Data-sensitive", state, paste0("raw-", time_period)), 
                recursive = TRUE, showWarnings = FALSE)
-    dir.create(file.path(project_path, "Data2", state), showWarnings = FALSE)
+    dir.create(file.path(project_path, "Data-production", state), showWarnings = FALSE)
     
     # copy project template to analysis_path
     template_paths <- list.files(system.file("new-state", package = "salic"),

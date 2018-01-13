@@ -1,7 +1,5 @@
 # functions for recoding license data
 
-# TODO - probably include the various factor() functions
-# maybe place these in a separate 'factor.R'
 
 #' Recode a state variable to deal with unusual values
 #' 
@@ -94,6 +92,8 @@ recode_month <- function(sale, month_range = 0:12) {
 #' @family functions for recoding license data
 #' @export
 #' @examples 
+#' library(salic)
+#' library(dplyr)
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 
 #'     mutate(birth_year = lubridate::year(dob)) %>% 

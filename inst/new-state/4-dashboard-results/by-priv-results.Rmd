@@ -20,7 +20,7 @@ params:
 library(tidyverse)
 library(stringr)
 library(salic)
-source("../shared/func.R")
+source("func.R")
 options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```

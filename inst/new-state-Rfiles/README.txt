@@ -10,6 +10,5 @@ Folder Structure:
 - 3-secondary-data
 - 4-dashboard-results
 
-- output (for output data/results)
-- shared (for functions shared by multiple scripts)
-- temp   (a place for temporary work - not part of script workflow)
+- data (input data to analysis)
+- out (for output data/results)
