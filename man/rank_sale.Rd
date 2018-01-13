@@ -30,7 +30,6 @@ sale_unranked <- select(lic, lic_id, duration) \%>\%
 
 # Perform ranking and check the result
 sale_ranked <- rank_sale(sale_unranked)
-check_rank_sale(sale_ranked, sale_unranked)
 }
 \seealso{
 \code{\link{check_rank_sale}}
@@ -38,9 +37,6 @@ check_rank_sale(sale_ranked, sale_unranked)
 Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
-  \code{\link{check_make_priv_final}},
-  \code{\link{check_rank_sale}},
-  \code{\link{ggplot_lic_history}},
   \code{\link{identify_R3}}, \code{\link{identify_lapse}},
   \code{\link{make_lic_history}}
 }

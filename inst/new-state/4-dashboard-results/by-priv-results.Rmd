@@ -21,7 +21,7 @@ library(dplyr)
 library(tidyr)
 library(tibble)
 library(stringr)
-source("../func.R")
+source("../shared/func.R")
 options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
 ```

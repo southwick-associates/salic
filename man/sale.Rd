@@ -16,6 +16,6 @@ A data frame with GA Hunting sales corresponding to the 1000 customer sample
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
-  \code{\link{state_abbreviations}}, \code{\link{track}}
+  \code{\link{state_abbreviations}}
 }
 \keyword{datasets}

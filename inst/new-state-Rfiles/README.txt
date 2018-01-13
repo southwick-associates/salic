@@ -9,6 +9,7 @@ Folder Structure:
 - 2-license-history
 - 3-secondary-data
 - 4-dashboard-results
-- output
-- shared
-- temp
+
+- output (for output data/results)
+- shared (for functions shared by multiple scripts)
+- temp   (a place for temporary work - not part of script workflow)

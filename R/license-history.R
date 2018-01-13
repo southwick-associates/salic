@@ -1,7 +1,5 @@
-# functions for making & checking license history
-# including R3 and lapse coding
+# license history functions
 
-# TODO - see if any of these can be dropped (or made internal only)
 
 # Making Tables -----------------------------------------------------------
 
@@ -29,7 +27,6 @@
 #'
 #' # Perform ranking and check the result
 #' sale_ranked <- rank_sale(sale_unranked)
-#' check_rank_sale(sale_ranked, sale_unranked)
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
     sale %>%
         # to insure highest value is picked - sort ascending, pick last
@@ -267,84 +264,6 @@ identify_lapse <- function(lic_history, yrs) {
 
 # Checking & Summarizing --------------------------------------------------
 
-#' Check the output of \code{\link{rank_sale}}
-#'
-#' A test to insure that sale ranking was performed correctly
-#' @param sale_ranked data frame: Data produced after running
-#' \code{\link{rank_sale}}
-#' @param sale_unranked data frame: Data used as input to \code{\link{rank_sale}}
-#' @param check_duration logical: If TRUE, runs a check to see if any
-#' customers have mutliple license sales (with different durations) in the same
-#' year (and insures these are ranked correctly if any are found). If this isn't
-#' a concern, set to FALSE to avoid this relatively time-consuming test.
-#' @import dplyr
-#' @family license history functions
-#' @export
-#' @examples
-#' # See ?salic::rank_sale
-check_rank_sale <- function(sale_ranked, sale_unranked, check_duration = TRUE) {
-    # Was Ranking performed?
-    catf("---CHECK SALES RANKING---")
-    catf("Do any Customers have multiple sales in single year?:")
-    catf2("(i.e., Was ranking performed in this operation?)")
-    mult_test <- nrow(sale_unranked) != nrow(sale_ranked)
-    print(mult_test)
-    data.frame(category = c("Unranked Sales", "Ranked Sales"),
-               count = c(nrow(sale_unranked), nrow(sale_ranked))) %>% printf()
-    
-    # Overall Comparison
-    if (mult_test) {
-        catf("Summary - Unranked Sales by year-duration:")
-        catf2("(i.e., Total Sales Count)")
-        count(sale_unranked, year, duration) %>%
-            tidyr::spread(duration, n) %>% printf()
-        catf("Summary - Ranked Sales by year-duration:")
-        catf2("(i.e., Total Customer Count)")
-        count(sale_ranked, year, duration) %>%
-            tidyr::spread(duration, n) %>% printf()
-    }
-    
-    # Were multiple duration values involved?
-    if (mult_test & check_duration) {
-        catf("Do any customers have multiple duration values in the same year?:")
-        ### this filter operation is slow (not sure how to speed it up)
-        mult <- count(sale_unranked, cust_id, year) %>%
-            filter(n > 1) %>% select(-n)
-        cust_diff <- left_join(mult, sale_unranked, by = c("cust_id", "year")) %>%
-            group_by(cust_id, year) %>%
-            filter(lag(duration) != duration) %>% ungroup()
-        diff_test <- nrow(cust_diff) > 0
-        print(diff_test)
-        if (diff_test) {
-            catf("Customers with multiple duration values (top 20):")
-            select(head(cust_diff, 20), cust_id, year) %>%
-                left_join(sale_unranked, by = c("cust_id", "year")) %>% printf()
-            catf("Ranking of customers with multiple duration values (top 20):")
-            catf2("(only the max duration value should be present)")
-            select(head(cust_diff, 20), cust_id, year) %>%
-                left_join(sale_ranked, by = c("cust_id", "year")) %>% printf()
-        }
-    }
-}
-
-#' Check the output of \code{\link{make_lic_history}} using a ggplot geom_bar
-#'
-#' A visual check of license history for a given variable (duration_run, R3, lapse)
-#' @param var character: Name of variable to use for "fill" parameter in 
-#'  \code{\link[ggplot2]{aes}} in \code{\link[ggplot2]{geom_bar}}
-#' @inheritParams identify_R3
-#' @import dplyr
-#' @family license history functions
-#' @export
-#' @examples
-#' # See ?salic::make_lic_history
-ggplot_lic_history <- function(lic_history, yrs, var = "duration_run") {
-    lic_history %>%
-        mutate_at(var, "factor") %>%
-        ggplot2::ggplot(aes(factor(year))) + 
-        ggplot2::geom_bar(ggplot2::aes_string(fill = var))
-}
-
 #' Sample the output of \code{\link{make_lic_history}}
 #'
 #' Look at a sample of customers from license history table to check the 
@@ -405,68 +324,4 @@ check_identify_lapse <- function(lic_history) {
         ) %>%
         count(lapse, year, yrs_till_next) %>%
         tidyr::spread(year, n)
-}
-
-
-#' Check Final Privilege Table Creation
-#' 
-#' Produces a summary of the priv table with (1) total counts, (2) lapse, and (3) R3
-#' @param priv data frame: license privilege table
-#' @param rnd numeric: number of decimals to round pct change results
-#' @import dplyr
-#' @family license history functions
-#' @export
-#' @examples
-#' ### Run ranking with sample data
-#' library(tidyverse)
-#' library(salic)
-#' data(lic, sale, package = "salic")
-#'
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' ### Make license history
-#' yrs <- 2004:2013
-#' lic_history <- make_lic_history(sale_ranked, yrs)
-#' 
-#' ### Identify R3 & lapse
-#' lic_history <- identify_R3(lic_history, yrs)
-#' lic_history <- identify_lapse(lic_history, yrs)
-#' 
-#' # make priv table & check
-#' priv <- lic_history %>%
-#'     filter(has_priv) %>%
-#'     select(cust_id, year, R3, lapse)
-#' check_make_priv_final(priv)
-check_make_priv_final <- function(priv, rnd = 1) {
-    if (is.grouped_df(priv)) {
-        grp <- groups(priv)
-    } else {
-        grp <- NULL
-    }
-    grouping <- c(grp, "year")
-    catf("---CHECK FINAL PRIVILEGE TABLE---")
-    catf("Lapse Count:")
-    count_(priv, c(grp, "year", "lapse")) %>%
-        tidyr::spread(year, n, fill = "") %>%
-        data.frame() %>% printf()
-    catf("Lapse %:")
-    count_(priv, c(grp, "year", "lapse")) %>%
-        mutate(pct = round(n / sum(n) * 100, rnd)) %>%
-        select(-n) %>% tidyr::spread(year, pct, fill = "") %>%
-        data.frame() %>% printf()
-    catf("R3 Count:")
-    count_(priv, c(grp, "year", "R3")) %>%
-        tidyr::spread(year, n, fill = "") %>%
-        data.frame() %>% printf()
-    catf("R3 %:")
-    count_(priv, c(grp, "year", "R3")) %>%
-        mutate(pct = round(n / sum(n) * 100, rnd)) %>%
-        select(-n) %>% tidyr::spread(year, pct, fill = "") %>%
-        data.frame() %>% printf()
-    catf("Final Count of License Holders:")
-    catf2("(will be larger than previous counts if there are multi-year or lifetime licenses)")
-    count(priv, year) %>% data.frame() %>% printf()
 }

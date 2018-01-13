@@ -2,10 +2,9 @@
 % Please edit documentation in R/print.R
 \name{print_dat}
 \alias{print_dat}
-\title{Convenience function to print contents of a data frame}
+\title{Print a data frame with caption/note (internal salic only - not exported)}
 \usage{
-print_dat(x, caption = NULL, note = NULL, title = NULL, digits = 1,
-  big.mark = ",")
+print_dat(x, caption = NULL, note = NULL, digits = 1, big.mark = ",")
 }
 \arguments{
 \item{x}{data frame: data frame contents to print}
@@ -14,8 +13,6 @@ print_dat(x, caption = NULL, note = NULL, title = NULL, digits = 1,
 
 \item{note}{character: Optional note(s) to print.
 for multiple lines of notes}
-
-\item{title}{character: Title to print}
 
 \item{digits}{number of digits for rounding}
 
@@ -30,12 +27,11 @@ x <- data.frame(yr = c(2005, 2006), cust = c(100000, 131000),
 print_dat(x)
 print_dat(x, "Customer Sales by Year")
 print_dat(x, "Customer Sales by Year", "A note!")
-print_dat(x, "Title", "note)\\n(long note to show dash printing")
-
 print_dat(x, "Customer Sales by Year", big.mark = "")
 print_dat(x, "Customer Sales by Year", digits = 0)
 }
 \seealso{
-Other functions for printing headers, notes, and tables: \code{\link{cat_caption}},
-  \code{\link{cat_note}}, \code{\link{cat_title}}
+Other internal helper functions: \code{\link{calc_churn}},
+  \code{\link{format_num}}, \code{\link{pct_round}}
 }
+\keyword{internal}

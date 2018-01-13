@@ -24,6 +24,3 @@ This is intended to be run before data processing for a new state begins
 \examples{
 salic::new_dashboard("XX", "2017")
 }
-\seealso{
-Other functions for making directories and files: \code{\link{new_section_yr1}}
-}

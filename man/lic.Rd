@@ -17,6 +17,6 @@ A data frame describing hunting licenses
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}, \code{\link{track}}
+  \code{\link{state_abbreviations}}
 }
 \keyword{datasets}

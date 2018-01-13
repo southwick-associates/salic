@@ -28,7 +28,7 @@ licenses, so it should only be used for initial data validation
 \examples{
 library(tidyverse)
 library(salic)
-load(sale, lic, package = "salic")
+data(sale, lic, package = "salic")
 
 summary_churn(sale, 2004:2013)
 summary_churn(sale, 2004:2013, out = "summary_churn.csv")
@@ -39,10 +39,7 @@ filter(sale, priv == "hunt") \%>\%
     summary_churn(2004:2013, title = "Hunting Churn", note = "An additional note")
 }
 \seealso{
-Other functions for validating license data: \code{\link{calc_churn}},
+Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{count_lines_textfile}},
-  \code{\link{cust_summary_demo}},
-  \code{\link{lic_summary_revenue}},
-  \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_sale}}
 }

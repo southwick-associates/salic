@@ -27,7 +27,7 @@ library(DT)
 library(RSQLite)
 library(tibble)
 source("acs-pop-functions.R")
-source("../func.R")
+source("../shared/func.R")
 knitr::opts_chunk$set(comment = NA)
 ```
 

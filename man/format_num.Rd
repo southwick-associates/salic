@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{format_num}
 \alias{format_num}
-\title{Format numbers for printing}
+\title{Format numbers for printing (internal salic only - not exported)}
 \usage{
 format_num(x, digits = 1, big.mark = ",")
 }
@@ -24,3 +24,8 @@ format_num(c(27.456, 25.234, 30.679, NA))
 format_num(c(27, 25, 30))
 format_num(c("6.2\%", "13.9\%", "8.2\%", NA))
 }
+\seealso{
+Other internal helper functions: \code{\link{calc_churn}},
+  \code{\link{pct_round}}, \code{\link{print_dat}}
+}
+\keyword{internal}

@@ -18,9 +18,6 @@ the loaded dataset is correct:
 count_lines_textfile
 }
 \seealso{
-Other functions for validating license data: \code{\link{calc_churn}},
-  \code{\link{cust_summary_demo}},
-  \code{\link{lic_summary_revenue}},
-  \code{\link{lic_summary}}, \code{\link{pct_round}},
+Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{summary_churn}}, \code{\link{summary_sale}}
 }

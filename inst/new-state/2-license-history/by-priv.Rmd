@@ -21,7 +21,6 @@ library(RSQLite)
 library(salic)
 library(DT)
 library(stringr)
-library(plotly)
 knitr::opts_chunk$set(comment = NA)
 ```
 
@@ -113,17 +112,10 @@ sale_ranked <- sale %>%
 # visual comparison
 ranked_sale_count <- count(sale_ranked, res, year, duration) %>% mutate(grp = "ranked-sales")
 sale_count <- count(sale, res, year, duration) %>% mutate(grp = "sales")
-chart <- bind_rows(sale_count, ranked_sale_count) %>%
+bind_rows(sale_count, ranked_sale_count) %>%
     ggplot(aes(factor(year), n, fill = factor(duration))) +
     geom_bar(stat = "identity") +
     facet_grid(factor_res(res) ~ grp, scales = "free_y")
-ggplotly(chart)
-
-if (params$test) {
-    # this usually takes too long to run on full set of sales
-    # it's also an extremely verbose output
-    salic::check_rank_sale(sale_ranked, sale)
-}
 ```
 
 ## Prepare Privilege Data
@@ -142,16 +134,15 @@ lic_history <- sale_ranked %>%
     select(cust_id, duration, year, res) %>%
     make_lic_history(yrs, carry_vars = "res")
 
-# Compare privs and sales
+# Visual Compare privs and sales
 sale_count <- count(sale_ranked, res, year, duration) %>% 
     mutate(duration_run = duration, grp = "sales")
 priv_count <- count(lic_history, res, year, duration_run) %>% 
     mutate(grp = "privs")
-chart <- bind_rows(sale_count, priv_count) %>%
+bind_rows(sale_count, priv_count) %>%
     ggplot(aes(factor(year), n, fill = factor(duration_run))) +
     geom_bar(stat = "identity") +
     facet_grid(factor_res(res) ~ grp, scales = "free_y")
-ggplotly(chart)
 
 
 # 2. Identify R3
@@ -159,11 +150,11 @@ ggplotly(chart)
 if (length(yrs) > 5) {
     lic_history <- identify_R3(lic_history, yrs)
     
-    chart <- count(lic_history, res, year, R3) %>%
+    # visual check
+    count(lic_history, res, year, R3) %>%
         ggplot(aes(factor(year), n, fill = factor_R3(R3))) +
         geom_bar(stat = "identity") +
         facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
-    ggplotly(chart)
 
 } else {
     lic_history$R3 <- NA 
@@ -174,11 +165,11 @@ check_identify_R3(lic_history, yrs) %>% DT::datatable()
 # 3. Identify lapse
 lic_history <- identify_lapse(lic_history, yrs)
 
-g <- count(lic_history, res, year, lapse) %>%
+# check
+count(lic_history, res, year, lapse) %>%
     ggplot(aes(factor(year), n, fill = factor(lapse))) +
     geom_bar(stat = "identity") +
     facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
-ggplotly(g)
 
 check_identify_lapse(lic_history) %>% DT::datatable()
 

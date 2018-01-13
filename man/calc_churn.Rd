@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate.R
 \name{calc_churn}
 \alias{calc_churn}
-\title{Calculate churn for a single year}
+\title{Calculate churn for a single year (internal salic only - not exported)}
 \usage{
 calc_churn(x, yr)
 }
@@ -30,9 +30,7 @@ y <- select(sale, cust_id, year) \%>\%
 calc_churn(y, 2013)
 }
 \seealso{
-Other functions for validating license data: \code{\link{count_lines_textfile}},
-  \code{\link{cust_summary_demo}},
-  \code{\link{lic_summary_revenue}},
-  \code{\link{lic_summary}}, \code{\link{pct_round}},
-  \code{\link{summary_churn}}, \code{\link{summary_sale}}
+Other internal helper functions: \code{\link{format_num}},
+  \code{\link{pct_round}}, \code{\link{print_dat}}
 }
+\keyword{internal}

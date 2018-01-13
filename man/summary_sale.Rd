@@ -27,24 +27,18 @@ Summarize sales and customers by year
 \examples{
 library(tidyverse)
 library(salic)
-load(sale, lic, package = "salic")
+data(sale, lic, package = "salic")
 
 summary_sale(sale)
 summary_sale(sale, out = "summary_sale.csv")
 
-sale <- left_join(sale, lic)
-filter(sale, priv == "hunt") \%>\%
-    summary_sale(title = "Hunting Sales/Cust", note = "An additional note")
-
 # example with made-up license revenue
+sale <- left_join(sale, lic)
 sale <- mutate(sale, revenue = 30)
 summary_sale(sale, rnd = 2, include_revenue = T)
 }
 \seealso{
-Other functions for validating license data: \code{\link{calc_churn}},
+Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{count_lines_textfile}},
-  \code{\link{cust_summary_demo}},
-  \code{\link{lic_summary_revenue}},
-  \code{\link{lic_summary}}, \code{\link{pct_round}},
   \code{\link{summary_churn}}
 }

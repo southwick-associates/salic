@@ -1,6 +1,79 @@
-# functions for validating state license data
+# functions for validating license data
 
-# TODO - might be able to drop some of these (keep it parsimonious)
+
+# Helper Functions --------------------------------------------------------
+
+#' Round numeric values and print as percent (internal salic only - not exported)
+#'
+#' This is a helper function for conveniently displaying percentages. It is used
+#' in other summary functions in salic.
+#' @param x numeric: Vector of values to display as rounded percentages
+#' @param rnd numeric: number of decimals to round pct change results
+#' @param scale numeric: scaling paramter - defaults to 100 for showing percentages
+#' @family internal helper functions
+#' @keywords internal
+#' @examples
+#' x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
+#' x$pct <- pct_round(x$pop / sum(x$pop))
+pct_round <- function(x, rnd = 1, scale = 100) {
+    # sprintf is used to insure trailing zeroes are included
+    sprintf_param <- paste0("%.", rnd, "f")
+    paste0(sprintf(sprintf_param, round(x * scale, rnd)), "%")
+}
+
+
+#' Calculate churn for a single year (internal salic only - not exported)
+#'
+#' This is a simple calculation that doesn't take into account multi-year
+#' licenses, so it should only be used for initial data validation
+#' @param x data frame: Table holding sales by year
+#' @param year numeric: year to calculate churn (e.g., churn for 2014 uses sales
+#' for 2 years: 2013 and 2014)
+#' @import dplyr
+#' @return Returns a numeric vector of length 1
+#' @family internal helper functions
+#' @keywords internal
+#' @examples
+#' library(tidyverse)
+#' library(salic)
+#' load(sale, lic, package = "salic")
+#' 
+#' y <- select(sale, cust_id, year) %>%
+#'     filter(year %in% 2012:2013) %>% distinct()
+#'
+#' calc_churn(y, 2013)
+calc_churn <- function(x, yr) {
+    y1 <- filter(x, year == yr-1)
+    y2 <- filter(x, year == yr)
+    renew <- inner_join(y1, y2, by = "cust_id")
+    # churn calculation
+    held_license_y1 <- nrow(y1)
+    didnt_renew <- held_license_y1 - nrow(renew)
+    didnt_renew / held_license_y1
+}
+
+
+# Validation Functions ----------------------------------------------------
+
+#' Check for duplicates in a table
+#' @param x data frame: Table holding records
+#' @import dplyr
+#' @family functions for validating license data
+#' @export
+#' @examples
+#' library(dplyr)
+#' cust <- data.frame(id = 1:3, nm = c("dan k","dan k","dan r"))
+#' x <- select(cust, id, nm) %>% distinct()
+#' select(x, nm) %>% check_dups()
+check_dups <- function(x) {
+    all_records <- summarise(x, n()) #%>% collect()
+    # this might be slow
+    unique_records <- distinct(x) %>% summarise(n()) #%>% collect()
+    out <- bind_cols(data.frame(all_records), data.frame(unique_records))
+    names(out) <- c("all", "unique")
+    mutate(out, pct_dup = pct_round((all - unique) / unique, 3))
+}
+
 
 #' Count rows in a text file
 #' 
@@ -37,16 +110,13 @@ count_lines_textfile <- function(file_path) {
 #' @examples
 #' library(tidyverse)
 #' library(salic)
-#' load(sale, lic, package = "salic")
+#' data(sale, lic, package = "salic")
 #' 
 #' summary_sale(sale)
 #' summary_sale(sale, out = "summary_sale.csv")
 #'
-#' sale <- left_join(sale, lic)
-#' filter(sale, priv == "hunt") %>%
-#'     summary_sale(title = "Hunting Sales/Cust", note = "An additional note")
-#'
 #' # example with made-up license revenue
+#' sale <- left_join(sale, lic)
 #' sale <- mutate(sale, revenue = 30)
 #' summary_sale(sale, rnd = 2, include_revenue = T)
 summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
@@ -98,7 +168,7 @@ summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
 #' @examples
 #' library(tidyverse)
 #' library(salic)
-#' load(sale, lic, package = "salic")
+#' data(sale, lic, package = "salic")
 #' 
 #' summary_churn(sale, 2004:2013)
 #' summary_churn(sale, 2004:2013, out = "summary_churn.csv")
@@ -127,142 +197,3 @@ summary_churn <- function(x, years, rnd = 1, out = NULL,
     print_dat(out_print, title, note_out)
 }
 
-#' Calculate churn for a single year
-#'
-#' This is a simple calculation that doesn't take into account multi-year
-#' licenses, so it should only be used for initial data validation
-#' @param x data frame: Table holding sales by year
-#' @param year numeric: year to calculate churn (e.g., churn for 2014 uses sales
-#' for 2 years: 2013 and 2014)
-#' @import dplyr
-#' @family functions for validating license data
-#' @return Returns a numeric vector of length 1
-#' @export
-#' @examples
-#' library(tidyverse)
-#' library(salic)
-#' load(sale, lic, package = "salic")
-#' 
-#' y <- select(sale, cust_id, year) %>%
-#'     filter(year %in% 2012:2013) %>% distinct()
-#'
-#' calc_churn(y, 2013)
-calc_churn <- function(x, yr) {
-    y1 <- filter(x, year == yr-1)
-    y2 <- filter(x, year == yr)
-    renew <- inner_join(y1, y2, by = "cust_id")
-    # churn calculation
-    held_license_y1 <- nrow(y1)
-    didnt_renew <- held_license_y1 - nrow(renew)
-    didnt_renew / held_license_y1
-}
-
-#' Summarize license sales by selected grouping variables
-#' 
-#' Note: This function is deprecated. I recommend using dpylr/tidyr instead (see examples).
-#' @param x data frame: Table holding sales by year
-#' @param groups character: grouping variables to be used for the summary
-#' @param show_change logical: If TRUE, include a table showing percent changes
-#' by year
-#' @inheritParams summary_sale
-#' @import dplyr
-#' @family functions for validating license data
-#' @export
-#' @examples
-#' library(tidyverse)
-#' library(salic)
-#' load(sale, lic, package = "salic")
-#' 
-#' # I recommend just using dplyr/tidyr (count-spread) rather than lic_summary()
-#' x <- select(lic, lic_id, description) %>% left_join(sale)
-#' count(x, description) %>% spread(year, n) %>% View()
-#'
-#' lic_summary(x, c("lic_id", "description"))
-#' lic_summary(x, c("lic_id", "description"), show_change = T)
-#' lic_summary(x, c("lic_id", "description"), out = "lic_summary.csv")
-#'
-#' lic_summary(x, c("lic_id", "description"), title = "Title", note = "Note")
-#' lic_summary(x, c("lic_id", "description"),
-#'     show_change = T, title = "Title", note = "Note")
-lic_summary <- function(x, groups, show_change = FALSE, out = NULL,
-                        title = "License Counts by Year", note = NULL) {
-    y <- filter(x, !is.na(year)) %>%
-        count_(c("year", groups)) %>% ungroup()
-    output <- tidyr::spread(y, year, n, fill = "")
-    print_dat(output, title, digits = 0, big.mark = "", note = note)
-    if (show_change) {
-        cat("\n")
-        group_by_(y, groups) %>% arrange_(groups) %>%
-            mutate(change = round((n - lag(n)) / lag(n) * 100, 0),
-                   change = ifelse(is.na(change), "", change)) %>%
-            select(-n) %>% tidyr::spread(year, change, fill = "") %>%
-            print_dat(paste(title, "Percent Change"),
-                          digits = 0, big.mark = "", note = note)
-    }
-    if (!is.null(out)) write.csv(output, file = out, row.names = FALSE)
-}
-
-#' Summarize license revenue by selected grouping variables
-#' @param x data frame: Table holding sales by year
-#' @param groups character: grouping variables to be used for the summary
-#' @param show_change logical: If TRUE, include a table showing percent changes
-#' by year
-#' @inheritParams summary_sale
-#' @import dplyr
-#' @family functions for validating license data
-#' @export
-#' @examples
-#' library(tidyverse)
-#' library(salic)
-#' load(sale, lic, package = "salic")
-#' 
-#' x <- select(lic, lic_id, description) %>% left_join(sale) %>% mutate(revenue = 30)
-#'
-#' lic_summary_revenue(x, c("lic_id", "description"))
-#' lic_summary_revenue(x, c("lic_id", "description"), out = "lic_summary_rev.csv")
-#'
-#' lic_summary_revenue(x, c("lic_id", "description"), title = "Title", note = "Note")
-lic_summary_revenue <- function(x, groups, show_change = FALSE, out = NULL,
-                                title = "Revenue Sum by Year", note = NULL) {
-    y <- filter(x, !is.na(year)) %>%
-        group_by_(.dots = c("year", groups)) %>%
-        summarise(revenue = sum(revenue, na.rm = TRUE)) %>%
-        ungroup()
-    output <- mutate(y, revenue = round(revenue, 0)) %>%
-        tidyr::spread(year, revenue, fill = 0)
-    print_dat(output, title, digits = 0, big.mark = "", note = note)
-    if (show_change) {
-        cat("\n")
-        group_by_(y, groups) %>% arrange_(groups) %>%
-            mutate(change = round((revenue - lag(revenue)) / lag(revenue) * 100, 0),
-                   change = ifelse(is.na(change), "", change)) %>%
-            select(-revenue) %>% spread(year, change, fill = "") %>%
-            print_dat(paste(title, "Percent Change"),
-                              digits = 0, big.mark = "", note = note)
-    }
-    if (!is.null(out)) write.csv(output, file = out, row.names = FALSE)
-}
-
-#' Summarize customers by year for a specified demographic
-#'
-#' Note - this needs work to provide more info and the option for csv output
-#' @param x data frame: Table holding sales by year
-#' @param groups character: grouping variables to be used for the summary
-#' @import dplyr
-#' @family functions for validating license data
-#' @export
-#' @examples
-#' cust_summary_demo()
-cust_summary_demo <- function(x, groups) {
-    y <- distinct(x)
-    calc <- filter(y, !is.na(year)) %>%
-        count_(c("year", groups))
-    # counts
-    ungroup(calc) %>% tidyr::spread(year, n, fill = 0) %>% printf()
-    cat("\n")
-    # proportions
-    mutate(calc, pct = round(n / sum(n) * 100, 1) %>% paste0("%")) %>%
-        select(-n) %>% ungroup() %>%
-        tidyr::spread(year, pct, fill = "0%") %>%
-        printf()
-}

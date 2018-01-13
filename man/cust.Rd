@@ -16,6 +16,6 @@ A data frame with a random sample of 1000 GA hunting customers
 }
 \seealso{
 Other Sample Data: \code{\link{lic}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}, \code{\link{track}}
+  \code{\link{state_abbreviations}}
 }
 \keyword{datasets}

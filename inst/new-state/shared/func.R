@@ -1,13 +1,5 @@
 # Shared functions
 
-# General Data Processing -------------------------------------------------
-
-# store all table in database as named objects
-# note: this is pretty lazy, so not certain if it's necessary
-fetch_sqlite <- function(path) {
-}
-
-
 # Priv Categorical Variable Recoding --------------------------------------
 
 # set to missing for anyone over 110 (since it's probably a data mistake)
@@ -53,18 +45,11 @@ recode_month <- function(x, month_range = NULL) {
     x
 }
 
-# rank_sale <- function(sale, rank_var = "duration", 
-#                       grp_var = c("cust_id", "year")) {
-#     group_by_(sale, .dots = grp_var) %>%
-#         # to insure highest value is picked - sort ascending, pick last
-#         arrange_(.dots = rank_var) %>%
-#         summarise_each(funs(last)) %>%
-#         ungroup()
-# }    
-
 
 # Priv Category Labeling --------------------------------------------------
+
 # basically just calling as.factor() with default labels
+
 factor_age <- function(
     x, levels = 1:7, labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+")
 ) {
@@ -90,6 +75,7 @@ factor_R3 <- function(
 }
 
 # Priv Category Labeling on data frame ------------------------------------
+
 # similar to the factor_xxx functions above (but for data frames)
 # this is helpful for producing automatic checks of the recoding operation
 
@@ -101,6 +87,7 @@ df_factor_sex <- function(df, levels = 1:2, labels = c("Male", "Female")) {
     count(df, sex, sex_old) %>% data.frame() %>% print()
     select(df, -sex_old)
 }
+
 df_factor_res <- function(df, levels = c(1,0), labels = c("Resident", "Nonresident")) {
     df <- df %>% mutate(
         res_old = res,
@@ -109,7 +96,9 @@ df_factor_res <- function(df, levels = c(1,0), labels = c("Resident", "Nonreside
     count(df, res, res_old) %>% data.frame() %>% print()
     select(df, -res_old)
 }
-df_factor_R3 <- function(df, levels = 1:4, labels = c("Carry", "Retain", "Reactivate", "Recruit")) {
+
+df_factor_R3 <- function(df, levels = 1:4, 
+                         labels = c("Carry", "Retain", "Reactivate", "Recruit")) {
     df <- df %>% mutate(
         R3_old = R3,
         R3 = factor(R3, levels = levels, labels = labels)
@@ -117,6 +106,7 @@ df_factor_R3 <- function(df, levels = 1:4, labels = c("Carry", "Retain", "Reacti
     count(df, R3, R3_old) %>% data.frame() %>% print()
     select(df, -R3_old)
 }
+
 df_factor_age <- function(
     df, levels = 1:7,  
     labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+") 
@@ -183,3 +173,5 @@ est_churn <- function(x, grp = NULL) {
 # Visual Dashboard Checking -----------------------------------------------
 
 # grouped line plots with interactive widgets
+# not currently implemented
+

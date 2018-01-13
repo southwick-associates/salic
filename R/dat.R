@@ -1,6 +1,5 @@
 # Documentation for Sample Data
 
-# TODO - maybe drop these or replace with new data
 
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'
@@ -17,6 +16,10 @@
 #' }
 #' @family Sample Data
 NULL
+
+
+# 3 License Data Tables ---------------------------------------------------
+
 
 #' Sample Data: GA Hunting Customers
 #'
@@ -66,23 +69,6 @@ NULL
 #' \item{lic_id}{License ID}
 #' \item{dot}{Date of Transaction}
 #' \item{year}{License Year}
-#' }
-#' @family Sample Data
-NULL
-
-#' Sample Data: GA Hunting purchase History
-#'
-#' A list of data frames corresponding to the 1000 customer sample
-#'
-#' @docType data
-#' @keywords datasets
-#' @name track
-#' @format A list of data frames, each with 1000 rows and 3 variables
-#' \describe{
-#' \item{cust_id}{Customer ID}
-#' \item{left}{Time remaining on previous license (==0: need to renew,
-#' >0: don't need to renew, ==NA: haven't bought before, <0 didn't buy last year)}
-#' \item{duration}{Bought a license this year? (>=1: yes, ==0: no)}
 #' }
 #' @family Sample Data
 NULL
