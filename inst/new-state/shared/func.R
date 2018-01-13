@@ -1,50 +1,5 @@
 # Shared functions
 
-# Priv Categorical Variable Recoding --------------------------------------
-
-# set to missing for anyone over 110 (since it's probably a data mistake)
-recode_age <- function(
-    x, 
-    age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"), 
-    age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf)) 
-{
-    out <- x %>% 
-        mutate(age_year = year - birth_year,
-               age_year = ifelse(age_year > 110, NA, age_year),
-               age = cut(age_year, breaks = age_breaks, labels = FALSE),
-               agecat = cut(age_year, breaks = age_breaks, labels = age_labs))
-    count(out, age_year, age, agecat) %>% data.frame() %>% print()
-    out
-}
-
-# 13+ issue months (dec through dec, and beyond for certain privs)
-# create new month variable (0 = Dec, 1 = Jan, 12 = Dec, 13 = Jan, ...)
-recode_month <- function(x, month_range = NULL) {
-    # calculate standardized month
-    x <- x %>% mutate(
-        dot2 = lubridate::ymd(dot), 
-        issue_month = lubridate::month(dot2), 
-        issue_year = lubridate::year(dot2), 
-        yr_diff = issue_year - year, 
-        month = issue_month + yr_diff * 12
-    )
-    # enforce specific range (bottom or top coding as necessary)
-    if (!is.null(month_range)) {
-        x <- x %>% mutate(
-            month = ifelse(month < min(month_range), min(month_range), month),
-            month = ifelse(month > max(month_range), max(month_range), month)
-        )
-    }
-    # salic::catf("Check new month specification:")
-    test <- count(x, year, month, issue_year, issue_month)
-    last_year <- max(test$year)
-    filter(test, year == (last_year-1)) %>% data.frame() %>% print() 
-    
-    # finalize
-    x$yr_diff <- NULL
-    x
-}
-
 
 # Priv Category Labeling --------------------------------------------------
 
@@ -119,7 +74,7 @@ df_factor_age <- function(
     select(df, -age_old)
 }
 
-# Dashboard Calculatoins --------------------------------------------------
+# Dashboard Functions --------------------------------------------------
 
 # formatting column names in output for Tableau
 format_metric <- function(x, metric = "participants", val = "n") {

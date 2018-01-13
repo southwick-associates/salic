@@ -26,3 +26,7 @@ data(cust)
 x <- recode_state(cust, state_abbreviations)
 dplyr::count(x, state_new, state)
 }
+\seealso{
+Other functions for recoding license data: \code{\link{recode_agecat}},
+  \code{\link{recode_month}}
+}

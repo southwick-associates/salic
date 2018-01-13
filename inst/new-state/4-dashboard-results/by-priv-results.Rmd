@@ -17,10 +17,9 @@ params:
 ---
 
 ```{r setup, message=FALSE}
-library(dplyr)
-library(tidyr)
-library(tibble)
+library(tidyverse)
 library(stringr)
+library(salic)
 source("../shared/func.R")
 options(scipen = 999)
 knitr::opts_chunk$set(comment = NA)
@@ -142,7 +141,7 @@ if (params$res_type == "nonres") {
 ### Calculate Age Categories 
 
 ```{r}
-priv <- recode_age(priv)
+priv <- salic::recode_agecat(priv)
 sample_n(priv, 10) %>% select(year, birth_year, age_year, age, agecat) %>% data.frame()
 ```
 
