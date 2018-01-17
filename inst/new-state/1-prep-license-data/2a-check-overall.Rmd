@@ -1,0 +1,53 @@
+---
+title: "Initial Overall Data Check"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+knitr::opts_chunk$set(comment = NA)
+```
+
+**Notes**
+
+**Guidelines**
+
+If the data from the state has problems, it often shows up in the `summary_sale()`. The number of customers doesn't usually change more than around 10% per year. Big fluctuations might indicate data issues.
+
+This isn't intended to separate out hunters vs anglers (vs neither). Code for those more detailed checks are included in `2c-check-license-types.Rmd`, which likely will require some additional preparation of the license table.
+
+## Load
+
+only two sales columns are needed (cust_id, year)
+
+```{r}
+db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/")
+src_tbls(db)
+```
+
+**Guidelines**
+
+Column names will vary by state. Converting to standard names here for `summary_sale()`
+
+```{r}
+sale <- tbl(db, "sale") %>% 
+    select(year = TXNL_YEAR, cust_id = TXNL_CUST_ID) %>%
+    collect()
+glimpse(sale)
+```
+
+### Summarize
+
+```{r}
+salic::summary_sale(sale)
+```
+
+```{r}
+sessionInfo()
+```

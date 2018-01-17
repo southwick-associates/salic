@@ -1,0 +1,77 @@
+---
+title: "Prepare License Table to Distinguish Hunters vs Anglers"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+knitr::opts_chunk$set(comment = NA)
+```
+
+**Notes**
+
+**Guidelines**
+
+A license table preparation step is likely needed to distinguish licenses/permits that confer hunting vs fishing privileges (vs neither). The code below provides a direction, although typically it will ultimately involve some by-hand editing in a spreadsheet.
+
+## Load
+
+Pull in at least 2 columns: lic_id, description
+
+```{r}
+db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/")
+src_tbls(db)
+```
+
+```{r}
+lic <- tbl(db, "lic") %>% 
+    select(lic_id = LTYPE_ID, year = LTYPE_YEAR, description = LTYPE_DESC) %>%
+    collect()
+glimpse(lic)
+```
+
+## Prep
+
+**Guidelines**
+
+It's usually worth insuring that lic_id uniquely identifies license type (it usually does). There are typically 100s of unique lic_ids, and they don't always confer hunting or fishing privileges. This step is more about getting a rough count of hunters and anglers (in `2c-check-license-types`), so getting things exactly correct isn't necessary until later (when license history tables are built).
+
+Some states may require more preparation than others (for example Iowa provided a table with a unique row for each year, which was condensed at this step).
+
+### Check for dups
+
+**Guidelines**
+
+The lic_id should uniquely identify rows. If it doesn't, additional work will be needed to clean things up.
+
+```{r}
+length(unique(lic$lic_id))
+```
+
+## Export
+
+**Guidelines**
+
+One of the license table's functions is to distinguish sales (hunting vs fishing). The easiest way to do this is to usually edit the table by hand with a spreadsheet and add a 'type' variable with 4 possible values:
+
+- fish (a license/permit that bestows a fishing privilege)
+- hunt (a license/permit that bestows a hunting privilege)
+- combo (a license/permit that bestows both a fishing and hunting privilege)
+- trap (a license/permit that bestows a trapping privilege, typically counted in hunting)
+
+I recommend exporting to a csv, and then saving an edited csv (or xlsx) with at least 3 variables (lic_id, description, type). This will be used in the next step (`2c-check-license-types`)
+
+```{r}
+dir.create("../data/1-prep-license-data")
+write_csv(lic, "../data/1-prep-license-data/license-type.csv")
+```
+
+```{r}
+sessionInfo()
+```

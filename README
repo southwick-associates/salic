@@ -1,3 +1,15 @@
 
+A good reference for making R packages: http://r-pkgs.had.co.nz/
+
+Functions are separated into xx files:
+- 
+
+Additional Material:
+- vignettes/salic-intro
+- inst/new-state-Rfiles (some default template files)
+- inst/new-state (detailed license workflow templates)
+
 Installed project packages:
-install.packages(c("devtools", "roxygen2", "testthat"))
+- install.packages(c("devtools", "roxygen2", "testthat"))
+
+--- OVERVIEW ---

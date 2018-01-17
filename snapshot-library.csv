@@ -4,6 +4,7 @@
 "desc","1.1.1"
 "devtools","1.13.4"
 "git2r","0.19.0"
+"memoise","1.1.0"
 "praise","1.0.0"
 "roxygen2","6.0.1"
 "testthat","2.0.0"

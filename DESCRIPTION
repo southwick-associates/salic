@@ -1,7 +1,7 @@
 Package: salic
 Type: Package
 Title: Prepare License Data from Wildlife Agencies
-Version: 0.9.3
+Version: 0.9.4
 Date: 2015-08-17
 Author: Dan Kary
 Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
@@ -14,7 +14,7 @@ Depends:
 Imports:
     dplyr (>= 0.7.0),
     tidyr (>= 0.6.3),
-    saproj (>= 0.3.0),
+    saproj (>= 2.0),
     ggplot2 (>= 2.2.1),
     lubridate (>= 1.7.1)
 RoxygenNote: 6.0.1
