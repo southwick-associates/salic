@@ -25,7 +25,7 @@ A license table preparation step is likely needed to distinguish licenses/permit
 Pull in at least 2 columns: lic_id, description
 
 ```{r}
-db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/")
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
 src_tbls(db)
 ```
 
@@ -65,7 +65,7 @@ One of the license table's functions is to distinguish sales (hunting vs fishing
 - combo (a license/permit that bestows both a fishing and hunting privilege)
 - trap (a license/permit that bestows a trapping privilege, typically counted in hunting)
 
-I recommend exporting to a csv, and then saving an edited csv (or xlsx) with at least 3 variables (lic_id, description, type). This will be used in the next step (`2c-check-license-types`)
+I recommend saving the edited csv (or xlsx) as "license-type-prepped" with at least 3 variables (lic_id, description, type). This will be imported in the next step (`2c-check-license-types`)
 
 ```{r}
 dir.create("../data/1-prep-license-data")

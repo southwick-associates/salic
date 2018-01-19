@@ -27,7 +27,7 @@ This isn't intended to separate out hunters vs anglers (vs neither). Code for th
 only two sales columns are needed (cust_id, year)
 
 ```{r}
-db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/")
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
 src_tbls(db)
 ```
 

@@ -26,6 +26,8 @@ In case you want to include some easily accessible final notes
 - Regarding large data files:
     + I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large and R can use up all of a computer's RAM (essentially freezing the machine)
 
+- Regarding file paths:
+    + Using relative paths to data by going backward (with ../../etc) is a bit awkward, but it will make the code easier to re-run if the path to the SA folder ever changes
 
 ## Load
 
@@ -33,7 +35,7 @@ In case you want to include some easily accessible final notes
 
 ```{r}
 # path to raw data file
-f <- "E:/SA/Data-Dashboards/Data-sensitive/"
+f <- "../../../../../Data-sensitive/Data-Dashboards/"
 
 # test
 read_lines(f, n_max = 3)
@@ -58,7 +60,7 @@ glimpse(lic)
 ### Customers
 
 ```{r}
-f <- "E:/SA/Data-Dashboards/Data-sensitive/"
+f <- "../../../../../Data-sensitive/Data-Dashboards/"
 
 # test
 read_lines(f, n_max = 5)
@@ -79,7 +81,7 @@ glimpse(cust)
 ### Sales
 
 ```{r}
-f <- "E:/SA/Data-Dashboards/Data-sensitive/"
+f <- "../../../../../Data-sensitive/Data-Dashboards/"
 
 # test
 read_lines(f, n_max = 5)
@@ -116,10 +118,10 @@ tail(sale$raw_sale_id)
 **Guidelines**
 
 - Naming (db) should match to relevant "raw-[year].sqlite3" folder used above:
-    + for example: "E:/SA/Data-Dashboards/Data-sensitive/IA/raw-2015.sqlite3"
+    + for example: "../../../../../Data-sensitive/Data-Dashboards/IA/raw-2015.sqlite3"
 
 ```{r}
-db <- src_sqlite("E:/SA/Data-Dashboards/Data-sensitive/", create = TRUE) 
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/", create = TRUE)
 copy_to(db, lic, temporary = FALSE)
 copy_to(db, cust, temporary = FALSE)
 copy_to(db, sale, temporary = FALSE)

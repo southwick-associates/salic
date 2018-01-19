@@ -7,21 +7,25 @@
 #' 
 #' This is intended to be run before data processing for a new state begins
 #' @param state character: Two letter state designation
-#' @param time_period character: Time period for the first dashboard (e.g., "2015", "2016-q1", etc.)
-#' @param project_path character: File path where the Data Dashboards project is stored
+#' @param time_period character: Time period for the first dashboard 
+#' (e.g., "2015", "2016-q1", etc.)
+#' @param sa_path character: File path to the Southwick main folder 
+#' (for analysis and data, etc.)
 #' @param R_version character: Version of R to use for this project
 #' @param project_library character: Name of project-specific R package library
 #' @family functions for making directories and files
 #' @export
 #' @examples
 #' salic::new_dashboard("XX", "2017")
-new_dashboard <- function(state, time_period, project_path = "E:/SA/Data-Dashboards",
-                          R_version = "3.4.3", project_library = "data-dashboards") {
+new_dashboard <- function(
+    state, time_period, sa_path = "E:/SA", 
+    R_version = "3.4.3", project_library = "data-dashboards"
+) {
     
     # initial variable prep
     state <- toupper(state)
     time_period <- as.character(time_period)
-    analysis_path <- file.path(project_path, "Analysis", state, time_period)
+    analysis_path <- file.path(sa_path, "Projects", "Data-Dashboards",state, time_period)
     
     # error - don't run if a directory with that time period already exists
     if (dir.exists(analysis_path)) {
@@ -40,9 +44,12 @@ new_dashboard <- function(state, time_period, project_path = "E:/SA/Data-Dashboa
     dir.create(file.path(analysis_path, "out"), showWarnings = FALSE)
     
     # make data folders
-    dir.create(file.path(project_path, "Data-sensitive", state, paste0("raw-", time_period)), 
-               recursive = TRUE, showWarnings = FALSE)
-    dir.create(file.path(project_path, "Data-production", state), showWarnings = FALSE)
+    dir.create(file.path(
+        sa_path, "Data-sensitive", "Data-Dashboards", state, paste0("raw-", time_period)), 
+        recursive = TRUE, showWarnings = FALSE
+    )
+    dir.create(file.path(sa_path, "Data-production", "Data-Dashboards", state), 
+               showWarnings = FALSE)
     
     # copy project template files to analysis_path
     template_paths <- list.files(system.file("new-state", package = "salic"),

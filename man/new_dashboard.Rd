@@ -4,15 +4,17 @@
 \alias{new_dashboard}
 \title{Setup a new state dashboard with default directories and template scripts}
 \usage{
-new_dashboard(state, time_period, project_path = "E:/SA/Data-Dashboards",
-  R_version = "3.4.3", project_library = "data-dashboards")
+new_dashboard(state, time_period, sa_path = "E:/SA", R_version = "3.4.3",
+  project_library = "data-dashboards")
 }
 \arguments{
 \item{state}{character: Two letter state designation}
 
-\item{time_period}{character: Time period for the first dashboard (e.g., "2015", "2016-q1", etc.)}
+\item{time_period}{character: Time period for the first dashboard 
+(e.g., "2015", "2016-q1", etc.)}
 
-\item{project_path}{character: File path where the Data Dashboards project is stored}
+\item{sa_path}{character: File path to the Southwick main folder 
+(for analysis and data, etc.)}
 
 \item{R_version}{character: Version of R to use for this project}
 
