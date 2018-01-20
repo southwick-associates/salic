@@ -1,0 +1,94 @@
+---
+title: "Load Raw License Type Data into sqlite database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+knitr::opts_chunk$set(comment = NA)
+```
+
+**Notes**
+
+In case you want to include some easily accessible final notes
+
+**Guidelines**
+
+- Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)
+
+- Regarding file paths:
+    + Using relative paths to data by going backward (with ../../etc) is a bit awkward, but it will make the code easier to re-run if the path to the SA folder ever changes
+
+
+## Load
+
+**Guidelines**
+
+I recommend using the package readr functions (read_csv, etc.) because they are fast (for loading large data files) and provide useful ways to work around problems that often arise when loading data (parsing errors, etc.)
+
+```{r}
+# path to raw data file
+f <- "../../../../../Data-sensitive/Data-Dashboards/"
+
+# test import method
+read_lines(f, n_max = 3)
+read_csv(f, n_max = 5) %>% glimpse() # see readr documentation for non-csv formats
+
+# check line count to ensure correct number of rows after data import
+# if this doesn't work, an alternative is to open the file with JujuEdit
+salic::count_lines_textfile(f)
+```
+
+
+**Guidelines** 
+
+Running `spec()` is useful to see the decisions readr is making about choosing variable type. Incorrectly specifying type can often lead to problems. Using `col_character()` tends to lead to the least problems, but this is less space-efficient for storing integers or numbers.
+
+```{r}
+# check readr column type specification
+read_csv(f, n_max = 5) %>% spec() 
+
+# column type specification to use for import (varies by state)
+# note: start with output from read_csv() %>% spec()
+coltyp <- cols( )
+
+# load full dataset
+lic <- read_csv(f, col_types = coltyp, progress = FALSE)
+
+# check for problems
+problems(lic)
+
+# get an overview of imported data
+glimpse(lic)
+```
+
+
+## Add Row IDs
+
+```{r}
+lic$raw_lic_id <- as.integer(row.names(lic))
+tail(lic$raw_lic_id)
+```
+
+
+## Write to sqlite
+
+**Guidelines**
+
+- Naming (db) should match to relevant "raw-[year].sqlite3" folder used above:
+    + for example: "../../../../../Data-sensitive/Data-Dashboards/IA/raw-2015.sqlite3"
+
+```{r}
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/", create = TRUE)
+copy_to(db, lic, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```

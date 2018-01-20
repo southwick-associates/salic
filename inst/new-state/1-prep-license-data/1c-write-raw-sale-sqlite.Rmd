@@ -1,0 +1,71 @@
+---
+title: "Load Raw Sales Data into sqlite database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+knitr::opts_chunk$set(comment = NA)
+```
+
+**Notes**
+
+**Guidelines**
+
+- Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)
+
+- Regarding dates: These should be imported with `col_character()` since sqlite probably won't translate R dates in a useful way
+
+- Regarding large data files: I recommend monitoring Task Manager (Windows) when loading data since state data files can be quite large and R can use up all of a computer's RAM (essentially freezing the machine)
+    
+
+## Load
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/"
+
+# test
+read_lines(f, n_max = 5)
+read_csv(f, n_max = 5) %>% glimpse()
+count_lines_textfile(f) # to ensure correct number of rows after data import
+```
+
+
+```{r}
+read_csv(f, n_max = 5) %>% spec()
+coltyp <- cols( )
+
+sale <- read_csv(f, n_max = Inf, col_types = coltyp, progress = FALSE)
+problems(sale)
+glimpse(sale)
+```
+
+
+## Add Row IDs
+
+```{r}
+sale$raw_sale_id <- as.integer(row.names(sale))
+tail(sale$raw_sale_id)
+```
+
+
+## Write to sqlite
+
+**Guidelines**
+
+Use the same sqlite database specified `1a-write-raw-lic-sqlite`
+
+```{r}
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
+copy_to(db, sale, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```
