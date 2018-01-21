@@ -25,7 +25,7 @@ A license table preparation step is likely needed to distinguish licenses/permit
 Pull in at least 2 columns: lic_id, description
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
 src_tbls(db)
 ```
 

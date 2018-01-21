@@ -34,7 +34,7 @@ I recommend using the package readr functions (read_csv, etc.) because they are 
 
 ```{r}
 # path to raw data file
-f <- "../../../../../Data-sensitive/Data-Dashboards/"
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__/"
 
 # test import method
 read_lines(f, n_max = 3)
@@ -79,13 +79,9 @@ tail(lic$raw_lic_id)
 
 ## Write to sqlite
 
-**Guidelines**
-
-- Naming (db) should match to relevant "raw-[year].sqlite3" folder used above:
-    + for example: "../../../../../Data-sensitive/Data-Dashboards/IA/raw-2015.sqlite3"
-
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/", create = TRUE)
+db_path <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db <- src_sqlite(db_path, create = TRUE)
 copy_to(db, lic, temporary = FALSE)
 ```
 

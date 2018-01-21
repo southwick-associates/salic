@@ -28,7 +28,7 @@ knitr::opts_chunk$set(comment = NA)
 ## Load
 
 ```{r}
-f <- "../../../../../Data-sensitive/Data-Dashboards/"
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__/"
 
 # test
 read_lines(f, n_max = 5)
@@ -62,12 +62,8 @@ tail(cust$raw_cust_id)
 
 ## Write to sqlite
 
-**Guidelines**
-
-Use the same sqlite database specified `1a-write-raw-lic-sqlite`
-
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
 copy_to(db, cust, temporary = FALSE)
 ```
 

@@ -38,7 +38,7 @@ glimpse(lic)
 ### Raw Sales
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/")
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
 src_tbls(db)
 ```
 

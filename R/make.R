@@ -25,7 +25,8 @@ new_dashboard <- function(
     # initial variable prep
     state <- toupper(state)
     time_period <- as.character(time_period)
-    analysis_path <- file.path(sa_path, "Projects", "Data-Dashboards",state, time_period)
+    analysis_path <- file.path(sa_path, "Projects", "Data-Dashboards",
+                               state, time_period)
     
     # error - don't run if a directory with that time period already exists
     if (dir.exists(analysis_path)) {
@@ -70,9 +71,59 @@ new_dashboard <- function(
     file.copy(system.file("new-state-Rfiles", "XX.Rproj", package = "salic"), 
               file.path(analysis_path, paste0(state, "-", time_period, ".Rproj")))
     
+    # replace placeholder strings in Rmd templates
+    # doing this saves the analyst some time and helps enforce naming conventions
+    replace_strings(analysis_path, "__state__", state, showmessage = FALSE)
+    replace_strings(analysis_path, "__period__", time_period, showmessage = FALSE)
+    
     # print message
     message("A new dashboard project has been initialized:\n  ", analysis_path)
     
+}
+
+#' Search and replace string across files with R
+#' 
+#' This is a helper function for preparing templates in salic. It uses 
+#' \code{\link[base]{gsub}} (https://gist.github.com/mages/1544009)
+#' @inheritParams base::list.files
+#' @param find_string character: String (to find) that will be replaced
+#' @param replacement_string character: New string to use
+#' @param showmessage logical: If TRUE, prints a message about replacement
+#' @keywords internal
+#' @export
+#' @examples
+#' salic::replace_strings()
+replace_strings <- function(
+    path = ".", find_string, replacement_string, pattern = ".Rmd", showmessage = TRUE
+) {
+    
+    # get file names in which to apply replacement
+    filenames <- list.files(path, pattern = pattern,  
+                            full.names = TRUE, recursive = TRUE)
+    
+    # stop with error if no filenames in path match pattern (i.e., no files to replace)
+    if (length(filenames) == 0) {
+        stop(
+            "There are no files matching pattern '", pattern, "' in:\n  ",
+            normalizePath(path), call. = FALSE
+        )    
+    }
+    
+    # Replace find_string with replacement_string
+    for( f in filenames ) {
+        x <- readLines(f)
+        y <- gsub( find_string, replacement_string, x)
+        cat(y, file=f, sep="\n")
+    }
+    
+    # Print output message about replacements
+    if (showmessage) {
+        message(
+            "Occurences of '", find_string, "' have been replaced with '",
+            replacement_string, "' in '", pattern, "' files at:\n  ", 
+            normalizePath(path)
+        )
+    }
 }
 
 update_project <- function() {}
