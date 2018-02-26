@@ -36,7 +36,6 @@ lic_history <- make_lic_history(sale_ranked, yrs)
 lic_history <- identify_R3(lic_history, yrs)
 
 # check
-ggplot_lic_history(lic_history, yrs, "R3")
 check_identify_R3(lic_history, yrs)
 }
 \seealso{

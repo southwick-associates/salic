@@ -18,7 +18,7 @@ Depends:
     R (>= 3.3.3)
 Imports:
     dplyr (>= 0.7.0),
-    tidyr (>= 0.6.3)
+    tidyr (>= 0.6.3),
     ggplot2 (>= 2.2.1),
     lubridate (>= 1.7.1)
 RoxygenNote: 6.0.1

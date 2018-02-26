@@ -33,7 +33,6 @@ lic_history <- make_lic_history(sale_ranked, yrs)
 lic_history <- identify_lapse(lic_history, yrs)
 
 # check
-ggplot_lic_history(lic_history, yrs, "lapse")
 check_identify_lapse(lic_history)
 }
 \seealso{

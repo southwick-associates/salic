@@ -54,7 +54,6 @@ yrs <- 2004:2013
 lic_history <- make_lic_history(sale_ranked, yrs)
 
 # check
-ggplot_lic_history(lic_history, yrs, "duration_run")
 check_history_samp(lic_history)
 }
 \seealso{
