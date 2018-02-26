@@ -1,21 +1,25 @@
 Package: salic
 Type: Package
 Title: Prepare License Data from Wildlife Agencies
-Version: 0.9.5
-Date: 2015-08-17
+Version: 0.9.6
+Date: 2018-02-26
 Author: Dan Kary
 Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
 Description: A set of functions for getting license data into a standard format
-    that facilitates further analysis (churn, R3, etc.)
-License: Only share within Southwick Associates
+    that facilitates further analysis (churn, R3, etc.). Much of this functionality
+    was built for producing state data dashboards, originally developed under the
+    leadership of the Western Association of Fish and Wildlife Agencies R3
+    Committee. Chris Willard at Oregon Dept of Fish and Wildlife spearheaded
+    the initial effort to develop graphical "scorecards", which evolved into
+    interactive data dashboards.
+License: GPL-3
 LazyData: FALSE
 Depends:
     R (>= 3.3.3)
 Imports:
     dplyr (>= 0.7.0),
-    tidyr (>= 0.6.3),
-    saproj (>= 2.0),
+    tidyr (>= 0.6.3)
     ggplot2 (>= 2.2.1),
     lubridate (>= 1.7.1)
 RoxygenNote: 6.0.1
-Suggests: saproj
+Suggests: saproj (>= 2.0)

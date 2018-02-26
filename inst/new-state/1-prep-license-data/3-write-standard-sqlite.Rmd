@@ -1,0 +1,174 @@
+---
+title: "Write Standardized Data Intermediate Data to Sqlite"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+Dan Kary Note 02-27-18: Untested template code
+
+**Guidelines**
+
+Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data. This also gets us about halfway toward the final production data, which simplifies `5-write-production-sqlite.Rmd`. 
+
+A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx). It may be worthwhile to include additional variables for certain states, if we expect extra variables to be useful in the dashboard production.
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(stringr)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load
+
+```{r}
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/IA/raw-2015.sqlite3")
+src_tbls(db)
+```
+
+### Customers
+
+```{r}
+# tbl(db, "cust") %>% glimpse()
+cust_in <- tbl(db, "cust") %>% 
+    select(cust_id = CUST_ID, raw_cust_id, sex = CUST_GENDER, dob = CUST_BIRTH_DATE,
+           last = CUST_LAST_NAME, first = CUST_FIRST_NAME, state = CUST_STATE,
+           zip = CUST_POSTAL_CODE, county_id = CUST_CNTY_ID) %>%
+    collect()
+glimpse(cust_in)
+```
+
+### Sales
+
+```{r}
+```
+
+```{r}
+# tbl(db, "sale") %>% glimpse()
+sale_in <- tbl(db, "sale") %>%
+    select(raw_sale_id, cust_id = TXNL_CUST_ID, lic_id = TXNL_LICN_TYPE,
+           year = TXNL_YEAR, source_year, dot = TXNL_TIMESTAMP, 
+           start_date = TXNL_EFFECT_DATE, end_date = TXNL_EXPIRE_DATE,
+           revenue = TXNL_STATE_COST) %>%
+    collect()
+glimpse(sale_in)
+```
+
+
+```{r}
+sale_in <- tbl(db, "sale") %>% collect()
+glimpse(sale_in)
+```
+
+### License Types
+
+Pull in license type data (see xlsx)
+
+```{r}
+lic <- tbl(db, "lic") %>% 
+    collect()
+glimpse(lic)
+```
+
+## Prep 
+
+### Cust
+
+Recoding to Standard
+
+```{r}
+cust <- cust_in
+```
+
+```{r}
+cust <- cust %>% mutate(
+    cust_res_in = cust_res,
+    cust_res = ifelse(cust_res == "N", 0L,
+                      ifelse(cust_res == "R", 1L, NA))
+)
+cust %>%
+    count(cust_res, cust_res_in)
+```
+
+```{r}
+cust <- cust %>% mutate(
+    sex_old = sex,
+    sex = ifelse(sex == "M", 1L, 2L)
+)
+cust %>%
+    count(sex, sex_old)
+```
+
+#### Customer Name
+
+```{r}
+cust <- cust %>%
+    inner_join(cust_raw, by = "raw_id") %>%
+    mutate(
+        last = str_trim(cust_last_name) %>% str_to_lower(),
+        first = str_trim(cust_first_name) %>% str_to_lower()
+    )
+cust %>%
+    sample_n(5) %>%
+    select(last, cust_last_name, first, cust_first_name)
+```
+
+### Sales
+
+```{r}
+sale <- sale_in
+```
+
+### License Types
+
+```{r}
+lic <- lic %>% mutate(
+    lic_res = ifelse(res == "R", 1L,
+                     ifelse(res == "N", 0L, NA))
+)
+lic %>%
+    count(lic_res, res)
+```
+
+### Finalize
+
+Add source info and drop extra rows
+
+```{r}
+cust <- cust %>%
+    mutate(source = 2015L) %>%
+    select(-cust_res_in, -sex_old, -cust_last_name, -cust_first_name)
+glimpse(cust)
+```
+
+```{r}
+sale$source <- 2015L
+sale <- select(sale, -res)
+glimpse(sale)
+```
+
+```{r}
+lic <- lic %>%
+    mutate(source = 2015L) %>%
+    select(-res)
+glimpse(lic)
+```
+
+## Write to Sqlite
+
+```{r}
+db2 <- src_sqlite("~/data/IA_dashboard_2016/standard.sqlite3", create = T)
+copy_to(db2, cust, temporary = FALSE)
+copy_to(db2, sale, temporary = FALSE)
+copy_to(db2, lic, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```

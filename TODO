@@ -1,40 +1,11 @@
 
 Todo:
-1. Work on vignette (just an initial, creating directory, intializing w/templates)
+1. Complete Rmd templates
+2. Write vignette (just an initial, creating directory, intializing w/templates)
 
 Big Todo: Updating license data (e.g., new quarters/years)
 Update workflow
 - first run OR through a new "first-year" process with changes above
 - write update workflow scripts (maybe with some auto-populate templates)
 - use last update as a reference, probably keep changes small
-
-
-OLDER STUFF - kept here for reference
-1. work on (make.R) functions, see corresponding functions in saproj
--  (done) new()
--  (done) section()
--  others...? > not now but maybe later > work on WI scripts first
-
-2. Modify some customer checking functions (for WI) to shown more info
--  customer distributions, with typical values
--  cust_summary_demo(), check_fields(), etc.
--  do similar with sales and license checking functions (if needed)
-
-3. Add examples and finish 1-make-priv.R
-- Write a vignette
-- (maybe) functions for summarizing results (e.g., churn)
-  - (probably isn't really necessary since it's basically querying a table)
-
-
-FUNCTION ORGANIZATION:
-- import.R      (maybe) for getting license data into R
-- import-check.R
-
-- reshape.R     for reshaping the data into a related format (cust, sale, lic)
-- reshape-check.R
-- validate.R    for validating license data
-
-- summarize.R   for summarizing license history to easily calculate R3, churn
-                (specifically - making a privilege table with lapse & R3 variables)
-- summarize-check.R
 

@@ -5,11 +5,9 @@ Functions are separated into xx files:
 - 
 
 Additional Material:
-- vignettes/salic-intro
+- vignettes/salic-intro (not yet written)
 - inst/new-state-Rfiles (some default template files)
 - inst/new-state (detailed license workflow templates)
 
-Installed project packages:
-- install.packages(c("devtools", "roxygen2", "testthat"))
 
 --- OVERVIEW ---

@@ -1,0 +1,201 @@
+---
+title: "Write to Production Database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+Dan Kary Note 02-27-18: Untested template code
+
+**Guidelines**
+
+Produce a standardized anonymized database, excluding data that isn't needed to produce a license history table.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+# source("../func.R")
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load
+
+### Sale
+
+```{r}
+db <- src_sqlite("~/data/IA_dashboard_2016/standard.sqlite3")
+sale <- tbl(db, "sale") %>%
+   collect()
+glimpse(sale)
+```
+
+### Cust
+
+```{r}
+cust <- tbl(db, "cust") %>%
+    select(-first, -last) %>%
+    collect()
+glimpse(cust)
+```
+
+### Lic
+
+```{r}
+lic <- tbl(db, "lic") %>%
+    collect()
+glimpse(lic)
+```
+
+## Prep Sales
+
+### Transaction Month
+
+- Calculation of standardized sale month
+
+```{r}
+# sample_n(sale, 1000) %>% recode_month()
+
+sale <- salic::recode_month(sale, 0:12)
+sale <- select(sale, -issue_month, -issue_year)
+sale$month <- as.integer(sale$month)
+```
+
+## Prep Customers
+
+### Keep most recent
+
+```{r}
+cust <- cust %>%
+    arrange(cust_id, desc(source)) %>%
+    group_by(cust_id) %>%
+    slice(1L) %>%
+    ungroup()
+nrow(cust)
+```
+
+### Drop Customers Not in Sales
+
+**Guidelines**
+
+- Customers that don't make it into the final sales table probably shouldn't be included in the standardized data
+
+```{r}
+cust <- cust %>%
+    semi_join(sale, by = "cust_id")
+nrow(cust)
+```
+
+### Birth year
+
+**Guidelines**
+
+- Keeping date-of-birth out of standardized data so that it is more anonymous
+
+```{r}
+cust <- mutate(cust, birth_year = lubridate::year(lubridate::ymd(dob)))
+sample_n(cust, 5) %>% select(dob, birth_year)
+```
+
+## Identify Sales Residency
+
+- by license type, other sales, state in address
+
+### License Type
+
+```{r}
+sale <- lic %>%
+    select(lic_id, lic_res) %>% 
+    left_join(sale, by = "lic_id") %>%
+    mutate(res = lic_res)
+count(sale, lic_res, res) %>% mutate(pct = n / sum(n) * 100)
+```
+
+### Other Sales
+
+- Choose the most recent identified residency
+
+```{r}
+sale$id <- as.integer(row.names(sale))
+
+# get sales without residency defined
+sale_nores <- filter(sale, is.na(res)) %>% select(cust_id, id, year)
+
+# identify res
+# - preferentially pick another sale by that customer that is nearest in year
+# - prefer res == 1 if there are 2 sales in the same year
+other_res <- filter(sale, !is.na(res)) %>% 
+    select(cust_id, year, res) %>%
+    right_join(sale_nores, by = "cust_id") %>%
+    mutate(diff = abs(year.y - year.x)) %>%
+    select(-cust_id, -year.x, -year.y) %>%
+    arrange(id, diff, desc(res)) %>%
+    distinct(id, .keep_all = TRUE)
+sale <- select(other_res, id, res2 = res) %>%
+    full_join(sale, by = "id") %>%
+    mutate(res = ifelse(is.na(res), res2, res)) %>%
+    select(-res2)
+rm(sale_nores, other_res)
+
+count(sale, res) %>% mutate(pct = n / sum(n) * 100)
+```
+
+### Address State
+
+- Choose remaining based on address (represented by `cust_res`)
+
+```{r}
+sale_nores <- filter(sale, is.na(res)) %>% select(cust_id, id)
+
+other_res <- select(cust, cust_id, cust_res) %>%
+    right_join(sale_nores, by = "cust_id")
+sale <- select(other_res, id, cust_res) %>%
+    full_join(sale, by = "id") %>%
+    mutate(res = ifelse(is.na(res), cust_res, res)) %>%
+    select(-cust_res)
+rm(sale_nores, other_res)
+
+count(sale, res) %>% mutate(pct = n / sum(n) * 100)
+```
+
+## Finalize Tables
+
+```{r}
+cust <- cust %>% 
+    select(cust_id, raw_id, sex, birth_year, cust_res, source) %>%
+    mutate(birth_year = as.integer(birth_year))
+glimpse(cust)
+```
+
+```{r}
+sale <- sale %>%
+    select(sale_id, raw_id, cust_id, lic_id, year, month, dot, res, revenue, source) %>%
+    mutate(lic_id = as.integer(lic_id))
+glimpse(sale)
+```
+
+```{r}
+lic <- lic %>%
+    mutate(lic_id = as.integer(lic_id), type = "hunt") %>%
+    select(lic_id, description, type, priv = priv2, duration, lic_res, 
+           age_min, age_max, source)
+glimpse(lic)
+```
+
+## Write to Sqlite
+
+```{r}
+dir <- "~/data2/IA_dashboard_2016/"
+db_out <- src_sqlite(file.path(dir, "lic.sqlite3"), create = TRUE)
+copy_to(db_out, lic, temporary = FALSE)
+copy_to(db_out, cust, temporary = FALSE)
+copy_to(db_out, sale, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```

@@ -82,7 +82,6 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' lic_history <- make_lic_history(sale_ranked, yrs)
 #' 
 #' # check
-#' ggplot_lic_history(lic_history, yrs, "duration_run")
 #' check_history_samp(lic_history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
@@ -179,7 +178,6 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' lic_history <- identify_R3(lic_history, yrs)
 #' 
 #' # check
-#' ggplot_lic_history(lic_history, yrs, "R3")
 #' check_identify_R3(lic_history, yrs)
 identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
@@ -242,7 +240,6 @@ identify_R3 <- function(lic_history, yrs) {
 #' lic_history <- identify_lapse(lic_history, yrs)
 #' 
 #' # check
-#' ggplot_lic_history(lic_history, yrs, "lapse")
 #' check_identify_lapse(lic_history)
 identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
