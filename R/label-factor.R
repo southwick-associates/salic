@@ -28,6 +28,7 @@ factor_var <- function(x, levels, labels, ...) {
 }
 
 #' @rdname factor_var
+#' @export
 factor_age <- function(
     x,  levels = 1:7, 
     labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"),
@@ -37,16 +38,19 @@ factor_age <- function(
 }
 
 #' @rdname factor_var
+#' @export
 factor_sex <- function( x, levels = 1:2, labels = c("Male", "Female"), ...) {
     factor(x, levels = levels, labels = labels, ...)
 }
 
 #' @rdname factor_var
+#' @export
 factor_res <- function(x, levels = c(1,0), labels = c("Resident", "Nonresident"), ...) {
     factor(x, levels = levels, labels = labels, ...)
 }
 
 #' @rdname factor_var
+#' @export
 factor_R3 <- function(x, levels = 1:4,  
                       labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...) {
     factor(x, levels = levels, labels = labels, ...)
@@ -82,6 +86,7 @@ df_factor_var <- function(df, var, levels, labels, ...) {
 }
 
 #' @rdname df_factor_var
+#' @export
 df_factor_sex <- function(df, var = "sex", levels = 1:2, 
                           labels = c("Male", "Female"), ...
 ) {
@@ -89,6 +94,7 @@ df_factor_sex <- function(df, var = "sex", levels = 1:2,
 }
 
 #' @rdname df_factor_var
+#' @export
 df_factor_res <- function(df, var = "res", levels = c(1,0), 
                           labels = c("Resident", "Nonresident"), ...
 ) {
@@ -96,6 +102,7 @@ df_factor_res <- function(df, var = "res", levels = c(1,0),
 }
 
 #' @rdname df_factor_var
+#' @export
 df_factor_R3 <- function(df, var = "R3", levels = 1:4, 
                          labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...
 ) {
@@ -103,6 +110,7 @@ df_factor_R3 <- function(df, var = "R3", levels = 1:4,
 }
 
 #' @rdname df_factor_var
+#' @export
 df_factor_age <- function(
     df, var = "age", levels = 1:7,    
     labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"), 
