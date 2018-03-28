@@ -1,0 +1,95 @@
+---
+title: "Write Standardized Intermediate Sales Data to Sqlite"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+**Guidelines**
+
+Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data. This also gets us about halfway toward the final production data, which simplifies the final step of writing production data. 
+
+A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx). It may be worthwhile to include additional variables for certain states, if we expect extra variables to be useful in the dashboard production.
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(stringr)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load Sales
+
+```{r}
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db)
+```
+
+```{r}
+# tbl(db, "sale") %>% glimpse()
+sale <- tbl(db, "sale") %>%
+    select(raw_sale_id, cust_id = TXNL_CUST_ID, lic_id = TXNL_LICN_TYPE,
+           year = TXNL_YEAR, source_year, dot = TXNL_TIMESTAMP, 
+           start_date = TXNL_EFFECT_DATE, end_date = TXNL_EXPIRE_DATE,
+           revenue = TXNL_STATE_COST) %>%
+    collect()
+glimpse(sale)
+```
+
+## Prep 
+
+```{r}
+```
+
+### License Types
+
+```{r}
+lic <- lic %>% mutate(
+    lic_res = ifelse(res == "R", 1L,
+                     ifelse(res == "N", 0L, NA))
+)
+lic %>%
+    count(lic_res, res)
+```
+
+### Finalize
+
+Add source info and drop extra rows
+
+```{r}
+cust <- cust %>%
+    mutate(source = 2015L) %>%
+    select(-cust_res_in, -sex_old, -cust_last_name, -cust_first_name)
+glimpse(cust)
+```
+
+```{r}
+sale$source <- 2015L
+sale <- select(sale, -res)
+glimpse(sale)
+```
+
+```{r}
+lic <- lic %>%
+    mutate(source = 2015L) %>%
+    select(-res)
+glimpse(lic)
+```
+
+## Write to Sqlite
+
+```{r}
+db2 <- src_sqlite("~/data/IA_dashboard_2016/standard.sqlite3", create = T)
+copy_to(db2, cust, temporary = FALSE)
+copy_to(db2, sale, temporary = FALSE)
+copy_to(db2, lic, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```

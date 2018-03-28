@@ -1,0 +1,186 @@
+---
+title: "Write Standardized Intermediate Customer Data to Sqlite"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+**Guidelines**
+
+Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data. This also gets us about halfway toward the final production data, which simplifies the final step of writing production data. 
+
+A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx). It may be worthwhile to include additional variables for certain states, if we expect extra variables to be useful in the dashboard production.
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(stringr)
+library(salic)
+library(lubridate)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load
+
+```{r}
+db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db)
+```
+
+```{r}
+# tbl(db, "cust") %>% glimpse()
+cust <- tbl(db, "cust") %>% 
+    select(cust_id = CUST_ID, raw_cust_id, sex = CUST_GENDER, dob = CUST_BIRTH_DATE,
+           last = CUST_LAST_NAME, first = CUST_FIRST_NAME, state = CUST_STATE,
+           zip = CUST_POSTAL_CODE) %>%
+    collect()
+glimpse(cust)
+```
+
+
+## Prep
+
+**Guidelines**
+
+The code below will need to be modified for state-specific data formats 
+
+### Gender
+
+```{r}
+# count(cust, sex)
+cust <- cust %>% mutate(
+    sex_new = ifelse(sex == "M", 1L, ifelse(sex == "F", 2L, NA))
+)
+cust %>%
+    count(sex_new, sex)
+```
+
+### Date of Birth
+
+**Guidelines**
+
+It's a good idea to look for odd values here, which could be stand-ins for missing values
+
+```{r}
+# select(cust, dob) %>% sample_n(5)
+cust <- cust %>%
+    mutate(
+        dob_date = ymd(dot),
+        dob_new = as.character(dob_date)
+    ) %>%
+    select(-year, -month, -day)
+
+cust %>%
+    sample_n(5) %>%
+    select(dob_new, dob_date, dob)
+
+cust %>%
+    filter(is.na(year(dob_date))) %>%
+    nrow()
+
+cust %>%
+    count(year = year(dob_date)) %>%
+    ggplot(aes(year, n)) +
+    geom_col() +
+    ggtitle("Birth Year customer distribution")
+```
+
+### Name
+
+```{r}
+# select(cust, first, last) %>% sample_n(5)
+cust <- cust %>% mutate(
+    last_new = str_trim(last) %>% str_to_lower(),
+    first_new = str_trim(first) %>% str_to_lower()
+)
+cust %>%
+    sample_n(5) %>%
+    select(first_new, first, last_new, last)
+
+cust %>%
+    filter(is.na(first_new) | is.na(last_new)) %>%
+    nrow()
+```
+
+### State
+
+```{r}
+# select(cust, state) %>% sample_n(5)
+data(state_abbreviations)
+cust <- cust %>%
+    recode_state(state_abbreviations)
+
+cust %>%
+    count(state_new, state) %>%
+    arrange(desc(n)) %>%
+    DT::datatable()
+
+cust %>%
+    filter(is.na(state_new)) %>%
+    nrow()
+```
+
+### Residency
+
+```{r}
+cust <- cust %>% mutate(
+    cust_res = ifelse(state_new == "__state__", 1L, ifelse(!is.na(state_new), 0L, NA))
+)
+cust %>%
+    count(cust_res, state_new) %>%
+    arrange(desc(cust_res), desc(n)) %>%
+    DT::datatable()
+```
+
+### Zipcode
+
+```{r}
+# count(cust, nchar(zip))
+cust <- cust %>% mutate(
+    zip_new = ifelse(nchar(zip) == 5, zip,  
+                     ifelse(nchar(zip) == 9, str_sub(zip, end = 5), NA))
+)
+cust %>%
+    sample_n(5) %>%
+    select(zip_new, zip)
+
+cust %>%
+    filter(nchar(zip) == 9) %>%
+    select(zip_new, zip) %>%
+    head()
+
+cust %>%
+    count(nchar(zip_new), nchar(zip)) %>%
+    arrange(desc(n))
+```
+
+## Finalize
+
+- Renaming "new" columns and dropping old and unnecessary
+- Adding a "source" column in case future data is appended
+
+```{r}
+cust <- cust %>% select(
+    cust_id, sex = sex_new, dob = dob_new, last = last_new, first = first_new,
+    state = state_new, cust_res, zip, raw_cust_id
+) %>%
+    mutate(source_cust = as.integer("__period__"))
+glimpse(cust)
+```
+
+## Write to Sqlite
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_out <- src_sqlite(f, create = T)
+copy_to(db_out, cust, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```
