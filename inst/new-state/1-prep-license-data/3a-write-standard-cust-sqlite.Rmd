@@ -57,7 +57,8 @@ cust <- cust %>% mutate(
     sex_new = ifelse(sex == "M", 1L, ifelse(sex == "F", 2L, NA))
 )
 cust %>%
-    count(sex_new, sex)
+    count(sex_new, sex) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
 ```
 
 ### Date of Birth
@@ -70,15 +71,14 @@ It's a good idea to look for odd values here, which could be stand-ins for missi
 # select(cust, dob) %>% sample_n(5)
 cust <- cust %>%
     mutate(
-        dob_date = ymd(dot),
+        dob_date = ymd(dob),
         dob_new = as.character(dob_date)
-    ) %>%
-    select(-year, -month, -day)
-
+    )
 cust %>%
     sample_n(5) %>%
     select(dob_new, dob_date, dob)
 
+# check missing
 cust %>%
     filter(is.na(year(dob_date))) %>%
     nrow()
@@ -102,9 +102,11 @@ cust %>%
     sample_n(5) %>%
     select(first_new, first, last_new, last)
 
+# check missing
+cust %>% filter(is.na(first_new) | is.na(last_new)) %>% nrow()
 cust %>%
     filter(is.na(first_new) | is.na(last_new)) %>%
-    nrow()
+    select(first_new, first, last_new, last)
 ```
 
 ### State
@@ -120,21 +122,31 @@ cust %>%
     arrange(desc(n)) %>%
     DT::datatable()
 
+# check missing
+# cust %>% filter(is.na(state_new)) %>% nrow()
 cust %>%
     filter(is.na(state_new)) %>%
-    nrow()
+    count(state_new, state) %>%
+    arrange(desc(n))
 ```
 
 ### Residency
 
 ```{r}
 cust <- cust %>% mutate(
-    cust_res = ifelse(state_new == "__state__", 1L, ifelse(!is.na(state_new), 0L, NA))
+    cust_res = ifelse(!is.na(state_new) & state_new == "__state__", 1L, 
+                      ifelse(!is.na(state), 0L, NA))
 )
 cust %>%
     count(cust_res, state_new) %>%
     arrange(desc(cust_res), desc(n)) %>%
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
     DT::datatable()
+
+# check missing
+cust %>%
+    filter(is.na(cust_res)) %>%
+    count(state_new, state)
 ```
 
 ### Zipcode
@@ -142,21 +154,27 @@ cust %>%
 ```{r}
 # count(cust, nchar(zip))
 cust <- cust %>% mutate(
-    zip_new = ifelse(nchar(zip) == 5, zip,  
-                     ifelse(nchar(zip) == 9, str_sub(zip, end = 5), NA))
+    # drop non-numeric characters
+    zip_clean = str_replace_all(zip, "[^0-9.]", "") %>% str_trim(),  
+    zip_new = ifelse(nchar(zip_clean) == 5, zip_clean,
+                     # some zips are often zip+4 coded (truncating simplifies things)
+                     ifelse(nchar(zip_clean) >= 9, str_sub(zip_clean, end = 5), NA))
 )
 cust %>%
     sample_n(5) %>%
     select(zip_new, zip)
 
 cust %>%
-    filter(nchar(zip) == 9) %>%
-    select(zip_new, zip) %>%
-    head()
-
-cust %>%
     count(nchar(zip_new), nchar(zip)) %>%
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
     arrange(desc(n))
+
+# check 9-digit+ truncation
+cust %>%
+    filter(nchar(zip) >= 9) %>%
+    select(zip_new, zip) %>%
+    group_by(nchar(zip)) %>%
+    sample_n(2)
 ```
 
 ## Finalize

@@ -20,6 +20,7 @@ A select set of variables should be included in the standardized database (see O
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(stringr)
+library(lubridate)
 knitr::opts_chunk$set(comment = NA)
 ```
 
@@ -43,51 +44,136 @@ glimpse(sale)
 
 ## Prep 
 
+### License Year
+
 ```{r}
+sale %>% count(year) %>% data.frame()
 ```
 
-### License Types
+### Transaction Date
 
 ```{r}
-lic <- lic %>% mutate(
-    lic_res = ifelse(res == "R", 1L,
-                     ifelse(res == "N", 0L, NA))
-)
-lic %>%
-    count(lic_res, res)
+# select(sale, dot) %>% sample_n(5)
+sale <- sale %>% mutate(
+    dot_date = str_sub(dot, end = 10) %>% ymd(),
+    dot_new = as.character(dot_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(dot_new, dot)
+
+# check missing
+sale %>%
+    filter(is.na(dot_new)) %>%
+    nrow()
+
+sale %>%
+    count(year, year_dot = year(dot_date)) %>%
+    mutate(dot_lead_yrs = factor(year - year_dot)) %>%
+    ggplot(aes(year, n, fill = dot_lead_yrs)) +
+    geom_col() +
+    ggtitle(
+        "Count of Sales by License Year", 
+        "Where dot_lead_yrs shows relative transaction year (1: previous, 0: same, etc.)"
+    )
 ```
 
-### Finalize
-
-Add source info and drop extra rows
+### Start Date
 
 ```{r}
-cust <- cust %>%
-    mutate(source = 2015L) %>%
-    select(-cust_res_in, -sex_old, -cust_last_name, -cust_first_name)
-glimpse(cust)
+# select(sale, start_date) %>% sample_n(5)
+sale <- sale %>% mutate(
+    start_date_date = mdy(start_date),
+    start_date_new = as.character(start_date_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(start_date_new, start_date)
+
+# check missing
+sale %>%
+    filter(is.na(start_date_new)) %>%
+    nrow()
+
+sale %>%
+    count(year, year_start_date = year(start_date_date)) %>%
+    mutate(start_lead_yrs = factor(year - year_start_date)) %>%
+    ggplot(aes(year, n, fill = start_lead_yrs)) +
+    geom_col() +
+    ggtitle(
+        "Count of Sales by License Year", 
+        "Where start_lead_yrs shows relative start year (1: previous, 0: same, etc.)"
+    )
 ```
 
+
+### End Date
+
 ```{r}
-sale$source <- 2015L
-sale <- select(sale, -res)
+# select(sale, end_date) %>% sample_n(5)
+sale <- sale %>% mutate(
+    end_date_date = mdy(end_date),
+    end_date_new = as.character(end_date_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(end_date_new, end_date)
+
+# check missing
+sale %>%
+    filter(is.na(end_date_new)) %>%
+    nrow()
+
+sale %>%
+    count(year, year_end_date = year(end_date_date)) %>%
+    mutate(end_lead_yrs = factor(year - year_end_date)) %>%
+    ggplot(aes(year, n, fill = end_lead_yrs)) +
+    geom_col() +
+    ggtitle(
+        "Count of Sales by License Year", 
+        "Where end_lead_yrs shows relative end year (1: previous, 0: same, etc.)"
+    )
+```
+
+### Revenue
+
+```{r}
+sale %>% 
+    count(revenue) %>% 
+    DT::datatable()
+
+sale %>%
+    ggplot(aes(revenue)) +
+    geom_histogram() +
+    scale_x_log10() +
+    xlab("revenue (log10)")
+
+# check missing 
+sale %>%
+    filter(is.na(revenue)) %>%
+    nrow()
+```
+
+## Finalize
+
+- Renaming "new" columns and dropping old and unnecessary
+- Adding a "source" column in case future data is appended
+
+```{r}
+sale <- sale %>% select(
+    cust_id, lic_id, year, dot = dot_new, start_date = start_date_new,
+    end_date = end_date_new, revenue, raw_sale_id
+) %>%
+    mutate(source_cust = as.integer("__period__"))
 glimpse(sale)
-```
-
-```{r}
-lic <- lic %>%
-    mutate(source = 2015L) %>%
-    select(-res)
-glimpse(lic)
 ```
 
 ## Write to Sqlite
 
 ```{r}
-db2 <- src_sqlite("~/data/IA_dashboard_2016/standard.sqlite3", create = T)
-copy_to(db2, cust, temporary = FALSE)
-copy_to(db2, sale, temporary = FALSE)
-copy_to(db2, lic, temporary = FALSE)
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_out <- src_sqlite(f)
+copy_to(db_out, sale, temporary = FALSE)
 ```
 
 ```{r}
