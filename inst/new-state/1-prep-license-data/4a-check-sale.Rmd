@@ -26,8 +26,8 @@ knitr::opts_chunk$set(comment = NA)
 ## Load
 
 ```{r}
-db <- src_sqlite("~/data/IA_dashboard_2016/standard.sqlite3")
-sale <- tbl(db, "sale") %>% 
+db_standard <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3")
+sale <- tbl(db_standard, "sale") %>% 
     collect() %>%
     mutate(dot = ymd(dot))
 glimpse(sale)
@@ -52,6 +52,18 @@ sale <- sale %>% mutate(
 ```
 
 ## Check Dates
+
+```{r}
+sale %>%
+    count(year, year_dot = year(dot_date)) %>%
+    mutate(dot_lead_yrs = factor(year - year_dot)) %>%
+    ggplot(aes(year, n, fill = dot_lead_yrs)) +
+    geom_col() +
+    ggtitle(
+        "Count of Sales by License Year", 
+        "Where dot_lead_yrs shows relative transaction year (1: previous, 0: same, etc.)"
+    )
+```
 
 **Guidelines**
 

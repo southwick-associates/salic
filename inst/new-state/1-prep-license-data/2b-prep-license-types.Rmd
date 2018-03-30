@@ -25,12 +25,12 @@ A license table preparation step is likely needed to distinguish licenses/permit
 Pull in at least 2 columns: lic_id, description
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-src_tbls(db)
+db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db_raw)
 ```
 
 ```{r}
-lic <- tbl(db, "lic") %>% 
+lic <- tbl(db_raw, "lic") %>% 
     select(lic_id = LTYPE_ID, year = LTYPE_YEAR, description = LTYPE_DESC) %>%
     collect()
 glimpse(lic)

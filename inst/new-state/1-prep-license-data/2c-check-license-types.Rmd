@@ -38,13 +38,13 @@ glimpse(lic)
 ### Raw Sales
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-src_tbls(db)
+db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db_raw)
 ```
 
 ```{r}
-# tbl(db, "sale") %>% glimpse()
-sale_in <- tbl(db, "sale") %>%
+# tbl(db_raw, "sale") %>% glimpse()
+sale_in <- tbl(db_raw, "sale") %>%
     select(cust_id = TXNL_CUST_ID, year = TXNL_YEAR, lic_id = TXNL_LICN_TYPE) %>%
     collect()
 glimpse(sale_in)
@@ -55,8 +55,8 @@ glimpse(sale_in)
 Only customer ID is pulled, because we will just use this table to check customer coverage in the sale vs cust table (to insure we don't have obviously missing data).
 
 ```{r}
-# tbl(db, "cust") %>% glimpse()
-cust <- tbl(db, "cust") %>% 
+# tbl(db_raw, "cust") %>% glimpse()
+cust <- tbl(db_raw, "cust") %>% 
     select(cust_id = CUST_ID) %>% 
     collect()
 glimpse(cust)

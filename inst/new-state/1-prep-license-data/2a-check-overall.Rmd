@@ -27,8 +27,8 @@ This isn't intended to separate out hunters vs anglers (vs neither). Code for th
 only two sales columns are needed (cust_id, year)
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-src_tbls(db)
+db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db_raw)
 ```
 
 **Guidelines**
@@ -36,7 +36,7 @@ src_tbls(db)
 Column names will vary by state. Converting to standard names here for `summary_sale()`
 
 ```{r}
-sale <- tbl(db, "sale") %>% 
+sale <- tbl(db_raw, "sale") %>% 
     select(year = TXNL_YEAR, cust_id = TXNL_CUST_ID) %>%
     collect()
 glimpse(sale)

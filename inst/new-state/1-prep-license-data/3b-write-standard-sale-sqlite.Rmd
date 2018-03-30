@@ -12,9 +12,7 @@ output:
 
 **Guidelines**
 
-Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data. This also gets us about halfway toward the final production data, which simplifies the final step of writing production data. 
-
-A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx). It may be worthwhile to include additional variables for certain states, if we expect extra variables to be useful in the dashboard production.
+A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx).
 
 
 ```{r setup, message=FALSE}
@@ -24,16 +22,16 @@ library(lubridate)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-## Load Sales
+## Load
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-src_tbls(db)
+db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db_raw)
 ```
 
 ```{r}
-# tbl(db, "sale") %>% glimpse()
-sale <- tbl(db, "sale") %>%
+# tbl(db_raw, "sale") %>% glimpse()
+sale <- tbl(db_raw, "sale") %>%
     select(raw_sale_id, cust_id = TXNL_CUST_ID, lic_id = TXNL_LICN_TYPE,
            year = TXNL_YEAR, source_year, dot = TXNL_TIMESTAMP, 
            start_date = TXNL_EFFECT_DATE, end_date = TXNL_EXPIRE_DATE,
@@ -46,8 +44,13 @@ glimpse(sale)
 
 ### License Year
 
-```{r}
-sale %>% count(year) %>% data.frame()
+```{r, fig.height=3}
+summary(sale$year)
+sale %>%
+    count(year) %>%
+    ggplot(aes(year, n)) +
+    geom_col() +
+    ggtitle("Sales by License Year")
 ```
 
 ### Transaction Date
@@ -63,19 +66,7 @@ sale %>%
     select(dot_new, dot)
 
 # check missing
-sale %>%
-    filter(is.na(dot_new)) %>%
-    nrow()
-
-sale %>%
-    count(year, year_dot = year(dot_date)) %>%
-    mutate(dot_lead_yrs = factor(year - year_dot)) %>%
-    ggplot(aes(year, n, fill = dot_lead_yrs)) +
-    geom_col() +
-    ggtitle(
-        "Count of Sales by License Year", 
-        "Where dot_lead_yrs shows relative transaction year (1: previous, 0: same, etc.)"
-    )
+sale %>% filter(is.na(dot_new)) %>% nrow()
 ```
 
 ### Start Date
@@ -91,21 +82,8 @@ sale %>%
     select(start_date_new, start_date)
 
 # check missing
-sale %>%
-    filter(is.na(start_date_new)) %>%
-    nrow()
-
-sale %>%
-    count(year, year_start_date = year(start_date_date)) %>%
-    mutate(start_lead_yrs = factor(year - year_start_date)) %>%
-    ggplot(aes(year, n, fill = start_lead_yrs)) +
-    geom_col() +
-    ggtitle(
-        "Count of Sales by License Year", 
-        "Where start_lead_yrs shows relative start year (1: previous, 0: same, etc.)"
-    )
+sale %>% filter(is.na(start_date_new)) %>% nrow()
 ```
-
 
 ### End Date
 
@@ -120,38 +98,34 @@ sale %>%
     select(end_date_new, end_date)
 
 # check missing
-sale %>%
-    filter(is.na(end_date_new)) %>%
-    nrow()
+sale %>% filter(is.na(end_date_new)) %>% nrow()
+```
 
-sale %>%
-    count(year, year_end_date = year(end_date_date)) %>%
-    mutate(end_lead_yrs = factor(year - year_end_date)) %>%
-    ggplot(aes(year, n, fill = end_lead_yrs)) +
+#### Summarize Dates
+
+```{r, fig.width=6}
+x <- list()
+x[[1]] <- count(sale, year = year(dot_date)) %>% mutate(timing = "transaction year")
+x[[2]] <- count(sale, year = year(start_date_date)) %>% mutate(timing = "start year")
+x[[3]] <- count(sale, year = year(end_date_date)) %>% mutate(timing = "end year")
+
+bind_rows(x) %>%
+    ggplot(aes(year, n)) +
     geom_col() +
-    ggtitle(
-        "Count of Sales by License Year", 
-        "Where end_lead_yrs shows relative end year (1: previous, 0: same, etc.)"
-    )
+    facet_wrap(~ timing, ncol = 1) +
+    ggtitle("Sales by Year - Viewed with 3 different date metrics")
 ```
 
 ### Revenue
 
 ```{r}
-sale %>% 
-    count(revenue) %>% 
-    DT::datatable()
-
+summary(sale$revenue)
 sale %>%
     ggplot(aes(revenue)) +
     geom_histogram() +
     scale_x_log10() +
-    xlab("revenue (log10)")
-
-# check missing 
-sale %>%
-    filter(is.na(revenue)) %>%
-    nrow()
+    xlab("revenue (log10)") +
+    ggtitle("Revenue Histogram")
 ```
 
 ## Finalize
@@ -172,8 +146,8 @@ glimpse(sale)
 
 ```{r}
 f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
-db_out <- src_sqlite(f)
-copy_to(db_out, sale, temporary = FALSE)
+db_standard <- src_sqlite(f)
+copy_to(db_standard, sale, temporary = FALSE)
 ```
 
 ```{r}

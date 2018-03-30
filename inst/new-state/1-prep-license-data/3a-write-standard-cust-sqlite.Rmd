@@ -28,20 +28,19 @@ knitr::opts_chunk$set(comment = NA)
 ## Load
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-src_tbls(db)
+db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+src_tbls(db_raw)
 ```
 
 ```{r}
-# tbl(db, "cust") %>% glimpse()
-cust <- tbl(db, "cust") %>% 
+# tbl(db_raw, "cust") %>% glimpse()
+cust <- tbl(db_raw, "cust") %>% 
     select(cust_id = CUST_ID, raw_cust_id, sex = CUST_GENDER, dob = CUST_BIRTH_DATE,
            last = CUST_LAST_NAME, first = CUST_FIRST_NAME, state = CUST_STATE,
            zip = CUST_POSTAL_CODE) %>%
     collect()
 glimpse(cust)
 ```
-
 
 ## Prep
 
@@ -78,16 +77,14 @@ cust %>%
     sample_n(5) %>%
     select(dob_new, dob_date, dob)
 
-# check missing
-cust %>%
-    filter(is.na(year(dob_date))) %>%
-    nrow()
-
 cust %>%
     count(year = year(dob_date)) %>%
     ggplot(aes(year, n)) +
     geom_col() +
     ggtitle("Birth Year customer distribution")
+
+# check missing
+cust %>% filter(is.na(year(dob_date))) %>% nrow()
 ```
 
 ### Name
@@ -103,7 +100,6 @@ cust %>%
     select(first_new, first, last_new, last)
 
 # check missing
-cust %>% filter(is.na(first_new) | is.na(last_new)) %>% nrow()
 cust %>%
     filter(is.na(first_new) | is.na(last_new)) %>%
     select(first_new, first, last_new, last)
@@ -195,8 +191,8 @@ glimpse(cust)
 
 ```{r}
 f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
-db_out <- src_sqlite(f, create = T)
-copy_to(db_out, cust, temporary = FALSE)
+db_standard <- src_sqlite(f, create = TRUE)
+copy_to(db_standard, cust, temporary = FALSE)
 ```
 
 ```{r}

@@ -76,7 +76,7 @@ glimpse(lic)
 Adding a unique row ID ensures that we always have some means of joining production data back to raw data in the future (if needed for investigation or pulling address data). It may prove redundant (e.g., if rows are uniquely identified with a state-supplied ID). Since it isn't always obvious whether that is the case at the import stage, a good rule of thumb is just to add a row ID to each raw data table stored in sqlite.
 
 ```{r}
-lic$raw_lic_id <- as.integer(row.names(lic))
+lic <- mutate(lic, raw_lic_id = row_number())
 tail(lic$raw_lic_id)
 ```
 
@@ -84,9 +84,9 @@ tail(lic$raw_lic_id)
 ## Write to sqlite
 
 ```{r}
-db_path <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
-db <- src_sqlite(db_path, create = TRUE)
-copy_to(db, lic, temporary = FALSE)
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f, create = TRUE)
+copy_to(db_raw, lic, temporary = FALSE)
 ```
 
 ```{r}

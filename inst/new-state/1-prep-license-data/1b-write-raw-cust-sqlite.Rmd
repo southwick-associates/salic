@@ -55,7 +55,7 @@ glimpse(cust)
 ## Add Row IDs
 
 ```{r}
-cust$raw_cust_id <- as.integer(row.names(cust))
+cust <- mutate(cust, raw_cust_id = row_number())
 tail(cust$raw_cust_id)
 ```
 
@@ -63,8 +63,9 @@ tail(cust$raw_cust_id)
 ## Write to sqlite
 
 ```{r}
-db <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
-copy_to(db, cust, temporary = FALSE)
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
+copy_to(db_raw, cust, temporary = FALSE)
 ```
 
 ```{r}
