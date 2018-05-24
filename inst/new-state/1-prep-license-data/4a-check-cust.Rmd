@@ -1,0 +1,287 @@
+---
+title: "Check Customers"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(readxl)
+library(salic)
+library(scales)
+knitr::opts_chunk$set(comment = NA)
+```
+
+
+## Load
+
+### Customers 
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_standard <- src_sqlite(f)
+
+cust_in <- tbl(db_standard, "cust") %>%
+    select(cust_id, sex, dob, last, first, cust_res) %>%
+    collect()
+glimpse(cust_in)
+```
+
+
+### Sales
+
+*Guidelines: For looking at hunters & anglers over time*
+
+```{r}
+# license type to identify hunters & anglers
+lic <- read_excel("../data/1-prep-license-data/license-types-prepped.xlsx")
+
+sale <- tbl(db_standard, "sale") %>%
+    select(cust_id, lic_id, year, dot) %>%
+    collect()
+glimpse(sale)
+```
+
+
+## Prep
+
+```{r}
+# if needed - drop customers who aren't hunters or anglers
+sale <- sale %>%
+    left_join(lic, by = "lic_id") %>%
+    filter(type %in% c("fish", "hunt", "trap", "combo"), !is.na(type))
+
+cust <- cust_in %>%
+    semi_join(sale, by = "cust_id")
+
+# prepare standard variables
+cust <- cust %>%
+    mutate(dob = ymd(dob), birth_year = year(dob)) %>%
+    salic::df_factor_sex() %>%
+    salic::df_factor_res("cust_res")
+
+rm(cust_in)
+glimpse(cust)
+```
+
+
+## Check customer IDs
+
+### Dups: One customer (last3, first2, dob) - multiple cust_ids
+
+*Guidelines: Names are truncated, which seems to provide a good balance between false negatives (e.g., inconsistent spellings for the same customer) and false positives (e.g., the same last3-first2-dob for different customers)*
+
+*Some number of duplicates is common, probably not a concern if it's fewer than 1 percent or so*
+
+```{r}
+# create truncated names
+cust <- cust %>%
+    mutate(first2 = str_sub(first, end = 2), last3 = str_sub(last, end = 3))
+
+# check coding
+cust %>%
+    sample_n(5) %>%
+    select(last3, last, first2, first)
+
+# check duplication
+cust %>%
+    select(dob, last3, first2) %>%
+    salic::check_dups()
+```
+
+*Guidelines: It's worth taking a closer look at duplicates to see if there are any patterns that might lead to skewed results when tracking customers across years.*
+
+```{r}
+# select duplicated customers
+dup <- cust %>%
+    count(first2, last3, dob) %>%
+    filter(n > 1)
+
+# investigate a sample of duplicates
+sample_n(dup, 20) %>%
+    select(first2, last3, dob) %>%
+    left_join(cust, by = c("first2", "last3", "dob")) %>%
+    left_join(sale, by = "cust_id")
+```
+
+
+### Dups: One cust_id - multiple customers
+
+*Guidelines: Note that this type of duplicate probably won't exist if a customer table (with one row per customer) was provided separately*
+
+```{r}
+length(unique(cust$cust_id)) == length(cust$cust_id)
+```
+
+
+
+## Check Hunter Demographics
+
+```{r}
+hunt_sale <- sale %>%
+    filter(type %in% c("hunt", "trap", "combo")) %>%
+    distinct(cust_id, year)
+    
+hunters <- cust %>%
+    right_join(hunt_sale, by ="cust_id")
+
+rm(hunt_sale)
+glimpse(hunters)
+```
+
+
+### Gender
+
+*Guidelines: Males typically make up 80 to 95% of hunters, but the female percentage is usually increasing over time.*
+
+```{r, fig.height=2.5, fig.width=4.5}
+x <- hunters %>%
+    count(year, sex) %>%
+    group_by(year) %>%
+    mutate(pct = n / sum(n))
+
+x %>%
+    filter(sex != "Male") %>%
+    ggplot(aes(year, pct, fill = sex)) +
+    geom_col() +
+    scale_fill_brewer(type = "div") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Female Hunters: % of All Hunters")
+```
+
+
+### Residency
+
+*Guidelines: Typical Resident Hunting: 70-95%*
+
+```{r, fig.height=2.5, fig.width=5}
+x <- hunters %>%
+    count(year, cust_res) %>%
+    group_by(year) %>%
+    mutate(pct = n / sum(n))
+
+x %>%
+    filter(cust_res != "Resident") %>%
+    ggplot(aes(year, pct, fill = cust_res)) +
+    geom_col() +
+    scale_fill_brewer(type = "div") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Nonresident Hunters: % of All Hunters")
+```
+
+
+### Age
+
+*Guidelines: Typical Hunting Age Group Peak: 40s*
+
+```{r, fig.height=4}
+# identify age by year (and age category)
+hunters <- salic::recode_agecat(hunters)
+
+hunters %>%
+    ggplot(aes(age_year, group = year, color = year)) +
+    geom_freqpoly()
+```
+
+*Guidelines: Breaking out by residency & gender can be interesting*
+
+Looking closer at age distributions by gender-residency. Apparent big trend in decreasing hunters. Only young resident women appear to be on the rise.
+
+```{r}
+hunters %>%
+    filter(!is.na(age_year), !is.na(cust_res)) %>%
+    ggplot(aes(age_year, group = year, color = year)) +
+    geom_freqpoly() +
+    facet_wrap(sex ~ cust_res, scales = "free_y")
+```
+
+
+## Check Angler Demographics
+
+```{r}
+fish_sale <- sale %>%
+    filter(type %in% c("fish", "combo")) %>%
+    distinct(cust_id, year)
+    
+fishers <- cust %>%
+    right_join(fish_sale, by ="cust_id")
+
+rm(fish_sale)
+glimpse(fishers)
+```
+
+
+### Gender
+
+*Guidelines: Males typically make up 70 to 85% of anglers, but the female proportion is usually increasing.*
+
+```{r, fig.height=2.5, fig.width=4.5}
+x <- fishers %>%
+    count(year, sex) %>%
+    group_by(year) %>%
+    mutate(pct = n / sum(n))
+
+x %>%
+    filter(sex != "Male") %>%
+    ggplot(aes(year, pct, fill = sex)) +
+    geom_col() +
+    scale_fill_brewer(type = "qual") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Female Anglers: % of All Anglers")
+```
+
+
+### Residency
+
+*Guidelines: Typical Resident fishing: 65-85%*
+
+```{r, fig.height=2.5, fig.width=5}
+x <- fishers %>%
+    count(year, cust_res) %>%
+    group_by(year) %>%
+    mutate(pct = n / sum(n))
+
+x %>%
+    filter(cust_res != "Resident") %>%
+    ggplot(aes(year, pct, fill = cust_res)) +
+    geom_col() +
+    scale_fill_brewer(type = "qual") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Nonresident Anglers: % of All Anglers")
+```
+
+
+### Age
+
+*Guidelines: Typical fishing Age Group Peak: 40s*
+
+```{r, fig.height=4}
+# identify age by year (and age category)
+fishers <- salic::recode_agecat(fishers)
+
+fishers %>%
+    ggplot(aes(age_year, group = year, color = year)) +
+    geom_freqpoly()
+```
+
+```{r}
+fishers %>%
+    filter(!is.na(sex), !is.na(cust_res)) %>%
+    ggplot(aes(age_year, group = year, color = year)) +
+    geom_freqpoly() +
+    facet_wrap(sex ~ cust_res, scales = "free_y")
+```
+
+
+```{r}
+sessionInfo()
+```

@@ -8,29 +8,27 @@ output:
         code_folding: show
 ---
 
+**Notes**
+
+In case you want to include some top-level notes
+
+
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-**Notes**
+*Guidelines*
 
-In case you want to include some easily accessible final notes
+- *Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)*
 
-**Guidelines**
-
-- Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)
-
-- Regarding file paths:
-    + Using relative paths to data by going backward (with ../../etc) is a bit awkward, but it will make the code easier to re-run if the path to the SA folder ever changes
+- *Regarding file paths: Using relative paths to data by going backward (with ../../etc) is a bit awkward, but it will make the code easier to re-run if the path to the SA folder ever changes*
 
 
 ## Load
 
-**Guidelines**
-
-I recommend using the package readr functions (read_csv, etc.) because they are fast (for loading large data files) and provide useful ways to work around problems that often arise when loading data (parsing errors, etc.)
+*Guidelines: I recommend using the package readr functions (read_csv, etc.) because they are fast (for loading large data files) and provide useful ways to work around problems that often arise when loading data (parsing errors, etc.)*
 
 ```{r}
 # path to raw data file
@@ -46,9 +44,7 @@ salic::count_lines_textfile(f)
 ```
 
 
-**Guidelines** 
-
-Running `spec()` is useful to see the decisions readr is making about choosing variable type. Incorrectly specifying type can often lead to problems. Using `col_character()` tends to lead to the least problems, but this is less space-efficient for storing integers or numbers.
+*Guidelines: Running `spec()` is useful to see the decisions readr is making about choosing variable type. Incorrectly specifying type can often lead to problems. Using `col_character()` tends to lead to the least problems, but this is less space-efficient for storing integers or numbers.*
 
 ```{r}
 # check readr column type specification
@@ -71,9 +67,7 @@ glimpse(lic)
 
 ## Add Row IDs
 
-**Guidelines**
-
-Adding a unique row ID ensures that we always have some means of joining production data back to raw data in the future (if needed for investigation or pulling address data). It may prove redundant (e.g., if rows are uniquely identified with a state-supplied ID). Since it isn't always obvious whether that is the case at the import stage, a good rule of thumb is just to add a row ID to each raw data table stored in sqlite.
+*Guidelines: Adding a unique row ID ensures that we always have some means of joining production data back to raw data in the future (if needed for investigation or pulling address data). It may prove redundant (e.g., if rows are uniquely identified with a state-supplied ID). Since it isn't always obvious whether that is the case at the import stage, a good rule of thumb is just to add a row ID to each raw data table stored in sqlite.*
 
 ```{r}
 lic <- mutate(lic, raw_lic_id = row_number())

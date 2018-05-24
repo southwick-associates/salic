@@ -10,25 +10,23 @@ output:
 
 **Notes**
 
-**Guidelines**
-
-Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data. This also gets us about halfway toward the final production data, which simplifies the final step of writing production data. 
-
-A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx). It may be worthwhile to include additional variables for certain states, if we expect extra variables to be useful in the dashboard production.
-
 
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(stringr)
 library(salic)
 library(lubridate)
+library(maps)
+library(viridis)
 knitr::opts_chunk$set(comment = NA)
 ```
+
 
 ## Load
 
 ```{r}
-db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
 src_tbls(db_raw)
 ```
 
@@ -42,11 +40,8 @@ cust <- tbl(db_raw, "cust") %>%
 glimpse(cust)
 ```
 
+
 ## Prep
-
-**Guidelines**
-
-The code below will need to be modified for state-specific data formats 
 
 ### Gender
 
@@ -60,11 +55,10 @@ cust %>%
     mutate(pct = round(n / sum(n) * 100, 1))
 ```
 
+
 ### Date of Birth
 
-**Guidelines**
-
-It's a good idea to look for odd values here, which could be stand-ins for missing values
+*Guidelines: It's a good idea to look for odd values here, which could be stand-ins for missing values*
 
 ```{r}
 # select(cust, dob) %>% sample_n(5)
@@ -80,12 +74,13 @@ cust %>%
 cust %>%
     count(year = year(dob_date)) %>%
     ggplot(aes(year, n)) +
-    geom_col() +
+    geom_area(fill = "#728B8E") +
     ggtitle("Birth Year customer distribution")
 
 # check missing
 cust %>% filter(is.na(year(dob_date))) %>% nrow()
 ```
+
 
 ### Name
 
@@ -105,45 +100,77 @@ cust %>%
     select(first_new, first, last_new, last)
 ```
 
+
 ### State
 
-```{r}
-# select(cust, state) %>% sample_n(5)
-data(state_abbreviations)
-cust <- cust %>%
-    recode_state(state_abbreviations)
+*Guidelines: Standard state recoding allows for USA (including provinces) and Canada. Probably no need to track other countries.*
 
-cust %>%
-    count(state_new, state) %>%
-    arrange(desc(n)) %>%
-    DT::datatable()
+```{r, fig.height=3.5}
+# recode using salic-defined function
+data(state_abbreviations) # identifies acceptible values
+cust <- cust %>%
+    salic::recode_state(state_abbreviations)
+
+# counts by state
+x <- cust %>%
+    left_join(rename(state_abbreviations, state_new = state), by = "state_new") %>%
+    mutate(cont_US = ifelse(state_new %in% state.abb & !(state_new %in% c("AK", "HI")), 
+                            TRUE, FALSE),
+           name = tolower(name)) %>%
+    count(country, cont_US, state_new, name) %>%
+    mutate(pct = n / sum(n) * 100) %>%
+    arrange(desc(n))
 
 # check missing
-# cust %>% filter(is.na(state_new)) %>% nrow()
-cust %>%
-    filter(is.na(state_new)) %>%
-    count(state_new, state) %>%
-    arrange(desc(n))
+cust %>% filter(is.na(state_new)) %>% nrow()
 ```
+
+```{r, fig.height=3}
+# Contiguous US
+states_map <- map_data("state")
+
+x %>%
+    filter(cont_US, state_new != "__state__") %>%
+    ggplot(aes(map_id = name)) +
+    geom_map(aes(fill = pct), map = states_map) +
+    expand_limits(x = states_map$long, y = states_map$lat) +
+    scale_fill_viridis() +
+    ggtitle("% of Customers (Contiguous US States)")
+```
+
+```{r, fig.height=2.5, fig.width=6}
+# Other locations
+x %>%
+    filter(!cont_US) %>%
+    top_n(10, n) %>% #
+    ggplot(aes(reorder(name, pct), pct, fill = country)) +
+    geom_col() +
+    coord_flip() +
+    labs(title = "% of Customers (Non-Contiguous US) - Top 10", x = element_blank())
+```
+
 
 ### Residency
 
+*Guidelines: Note that unusual (non-missing) state values are assumed to be nonresidents. You should check to make sure this assumption doesn't cause misidentification issues.*
+
 ```{r}
 cust <- cust %>% mutate(
-    cust_res = ifelse(!is.na(state_new) & state_new == "__state__", 1L, 
+    cust_res = ifelse(!is.na(state_new) & state_new == "__state__", 1L,  
                       ifelse(!is.na(state), 0L, NA))
 )
 cust %>%
-    count(cust_res, state_new) %>%
-    arrange(desc(cust_res), desc(n)) %>%
-    mutate(pct = round(n / sum(n) * 100, 1)) %>%
-    DT::datatable()
+    count(cust_res) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
 
-# check missing
+# check oddballs - ensure it is safe to assume these are nonresidents
+# we don't want to misidentify large numbers, but can triage for inconsequential amounts
 cust %>%
-    filter(is.na(cust_res)) %>%
-    count(state_new, state)
+    filter(is.na(state_new), !is.na(cust_res)) %>%
+    count(cust_res, state_new, state) %>%
+    arrange(desc(n))
 ```
+
 
 ### Zipcode
 
@@ -171,29 +198,33 @@ cust %>%
     select(zip_new, zip) %>%
     group_by(nchar(zip)) %>%
     sample_n(2)
+
+# check missing
+cust %>% filter(is.na(zip_new)) %>% nrow()
 ```
+
 
 ## Finalize
 
-- Renaming "new" columns and dropping old and unnecessary
-- Adding a "source" column in case future data is appended
-
 ```{r}
-cust <- cust %>% select(
-    cust_id, sex = sex_new, dob = dob_new, last = last_new, first = first_new,
-    state = state_new, cust_res, zip, raw_cust_id
-) %>%
-    mutate(source_cust = as.integer("__period__"))
+cust <- cust %>% 
+    # Renaming "new" columns and dropping old and unnecessary
+    select(cust_id, sex = sex_new, dob = dob_new, last = last_new, first = first_new,
+           state = state_new, cust_res, zip = zip_new, raw_cust_id) %>%
+    # Adding a "source" column in case future data is appended
+    mutate(source_cust = "__period__")
 glimpse(cust)
 ```
+
 
 ## Write to Sqlite
 
 ```{r}
 f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
-db_standard <- src_sqlite(f, create = TRUE)
+db_standard <- src_sqlite(f)
 copy_to(db_standard, cust, temporary = FALSE)
 ```
+
 
 ```{r}
 sessionInfo()

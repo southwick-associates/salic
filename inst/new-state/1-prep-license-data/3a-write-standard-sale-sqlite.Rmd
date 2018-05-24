@@ -10,10 +10,6 @@ output:
 
 **Notes**
 
-**Guidelines**
-
-A select set of variables should be included in the standardized database (see O365 > _Analyst Docs > Data Dictionary...xlsx).
-
 
 ```{r setup, message=FALSE}
 library(tidyverse)
@@ -22,10 +18,14 @@ library(lubridate)
 knitr::opts_chunk$set(comment = NA)
 ```
 
+*Guidelines: Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data (and also simplifies the final step of writing production data).*
+
+
 ## Load
 
 ```{r}
-db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
 src_tbls(db_raw)
 ```
 
@@ -40,18 +40,10 @@ sale <- tbl(db_raw, "sale") %>%
 glimpse(sale)
 ```
 
-## Prep 
 
-### License Year
+## Prep
 
-```{r, fig.height=3}
-summary(sale$year)
-sale %>%
-    count(year) %>%
-    ggplot(aes(year, n)) +
-    geom_col() +
-    ggtitle("Sales by License Year")
-```
+*Guidelines: The code below may need quite a bit of adjustment to recode state-specific data into a standard format.*
 
 ### Transaction Date
 
@@ -69,6 +61,7 @@ sale %>%
 sale %>% filter(is.na(dot_new)) %>% nrow()
 ```
 
+
 ### Start Date
 
 ```{r}
@@ -84,6 +77,7 @@ sale %>%
 # check missing
 sale %>% filter(is.na(start_date_new)) %>% nrow()
 ```
+
 
 ### End Date
 
@@ -101,54 +95,62 @@ sale %>%
 sale %>% filter(is.na(end_date_new)) %>% nrow()
 ```
 
-#### Summarize Dates
 
-```{r, fig.width=6}
-x <- list()
-x[[1]] <- count(sale, year = year(dot_date)) %>% mutate(timing = "transaction year")
-x[[2]] <- count(sale, year = year(start_date_date)) %>% mutate(timing = "start year")
-x[[3]] <- count(sale, year = year(end_date_date)) %>% mutate(timing = "end year")
+### Summarize Dates
 
-bind_rows(x) %>%
+```{r, fig.width=4}
+# reshaping to more easily compare date "events" in ggplot
+count_dates <- sale %>%
+    # sample_n(10000) %>%
+    select(dot = dot_new, start_date = start_date_new, end_date = end_date_new) %>%
+    gather(key = event, value = date, start_date, end_date, dot) %>%
+    mutate(year = year(ymd(date))) %>%
+    count(event, year)
+
+count_dates %>%
     ggplot(aes(year, n)) +
-    geom_col() +
-    facet_wrap(~ timing, ncol = 1) +
+    geom_col(fill = "#d8b365") +
+    facet_wrap(~ event, ncol = 1) +
     ggtitle("Sales by Year - Viewed with 3 different date metrics")
 ```
 
+
 ### Revenue
+
+*Guidelines: Probably no recoding will be needed here. This is a low priority variable since it isn't included in the dashboard*
 
 ```{r}
 summary(sale$revenue)
 sale %>%
     ggplot(aes(revenue)) +
-    geom_histogram() +
-    scale_x_log10() +
-    xlab("revenue (log10)") +
+    geom_histogram(fill = "#728B8E") +
+    # scale_x_log10() +
+    # xlab("revenue (log10)") +
     ggtitle("Revenue Histogram")
 ```
 
+
 ## Finalize
 
-- Renaming "new" columns and dropping old and unnecessary
-- Adding a "source" column in case future data is appended
-
 ```{r}
-sale <- sale %>% select(
-    cust_id, lic_id, year, dot = dot_new, start_date = start_date_new,
-    end_date = end_date_new, revenue, raw_sale_id
-) %>%
-    mutate(source_cust = as.integer("__period__"))
+sale <- sale %>% 
+    # Renaming "new" columns and dropping old and unnecessary
+    select(cust_id, lic_id, year, dot = dot_new, start_date = start_date_new, 
+           end_date = end_date_new, revenue, raw_sale_id) %>%
+    # Adding a "source" column in case future data is appended
+    mutate(source_cust = "__period__")
 glimpse(sale)
 ```
+
 
 ## Write to Sqlite
 
 ```{r}
 f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
-db_standard <- src_sqlite(f)
+db_standard <- src_sqlite(f, create = TRUE)
 copy_to(db_standard, sale, temporary = FALSE)
 ```
+
 
 ```{r}
 sessionInfo()

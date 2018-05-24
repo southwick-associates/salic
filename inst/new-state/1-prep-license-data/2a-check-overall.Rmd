@@ -8,32 +8,30 @@ output:
         code_folding: show
 ---
 
+**Notes**
+
+
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-**Notes**
+*Guidelines: If the data from the state has problems, it often shows up in the `summary_sale()`. The number of customers doesn't usually change more than around 10% per year. Big fluctuations might indicate data issues.*
 
-**Guidelines**
-
-If the data from the state has problems, it often shows up in the `summary_sale()`. The number of customers doesn't usually change more than around 10% per year. Big fluctuations might indicate data issues.
-
-This isn't intended to separate out hunters vs anglers (vs neither). Code for those more detailed checks are included in `2c-check-license-types.Rmd`, which likely will require some additional preparation of the license table.
 
 ## Load
 
-only two sales columns are needed (cust_id, year)
+*Guidelines: only two sales columns are needed (cust_id, year)*
 
 ```{r}
-db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
 src_tbls(db_raw)
 ```
 
-**Guidelines**
 
-Column names will vary by state. Converting to standard names here for `summary_sale()`
+*Guidelines: Column names will vary by state. Converting to standard names here for `summary_sale()`*
 
 ```{r}
 sale <- tbl(db_raw, "sale") %>% 
@@ -42,11 +40,13 @@ sale <- tbl(db_raw, "sale") %>%
 glimpse(sale)
 ```
 
+
 ### Summarize
 
 ```{r}
 salic::summary_sale(sale)
 ```
+
 
 ```{r}
 sessionInfo()

@@ -1,0 +1,150 @@
+---
+title: "Check Sales"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(salic)
+library(readxl)
+knitr::opts_chunk$set(comment = NA)
+```
+
+
+## Load
+
+### License Table
+
+*Guidelines: Note that a "duration" variable is needed in the license table for the sale trends summary. Details are included in the data dictionary*
+
+```{r}
+lic <- read_excel("../data/1-prep-license-data/license-types-prepped.xlsx")
+glimpse(lic)
+```
+
+
+### Sales
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_standard <- src_sqlite(f)
+
+sale <- tbl(db_standard, "sale") %>% 
+    collect() %>%
+    left_join(lic, by = "lic_id") %>%
+    mutate(dot = ymd(dot), start_date = ymd(start_date), end_date = ymd(end_date))
+glimpse(sale)
+```
+
+
+## Sale Trends by Type-Duration
+
+```{r}
+x <- sale %>%
+    count(type, year, duration)
+
+x %>%
+    ggplot(aes(year, n, fill = factor(duration))) +
+    geom_col() +
+    facet_wrap(~ type, nrow = 2, scales = "free_y") +
+    scale_fill_brewer(type = "div")
+```
+
+
+## Dates vs License Year
+
+```{r}
+# reshaping to more easily compare date "events" in ggplot
+sale_date <- sale %>%
+    # head() %>%
+    select(year, dot, start_date, end_date, type) %>%
+    gather(key = event, value = date, start_date, end_date, dot)
+
+# adding standard month variable to compare distributions across years
+# (..., -1 = prev. Nov, 0 = prev. Dec, 1 = Jan, ...)
+sale_date <- sale_date %>%
+    mutate(
+        event = factor(event, levels = c("dot", "start_date", "end_date")),
+        yr_diff = year(date) - year,
+        month = month(date) + yr_diff * 12
+    ) 
+```
+
+### Recent year Distribution
+
+```{r}
+sale_date %>%
+    filter(year == max(year)) %>%
+    ggplot(aes(date, ..density.., color = event)) +
+    geom_freqpoly() +
+    facet_wrap(~ type, nrow = 2)
+```
+
+
+### Across Years
+
+*Guidelines: These sometimes change over time (e.g., with changes in license type offerings). For large changes, it may be useful to understand what is causing them*
+
+```{r}
+x <- sale_date %>%
+    # sample_n(10000) %>%
+    # filter(month > -10, month < 14) %>% # it might be helpful to truncate
+    count(type, event, year, month)
+
+x %>%
+    ggplot(aes(month, n, fill =  type)) +
+    geom_col() +
+    facet_grid(event ~ year, scales = "free_y") +
+    labs(x = "standardized month", title = "Total Sales - Monthly Distributions",
+         subtitle = "Month coding = (..., -1 = prev. Nov, 0 = prev. Dec, 1 = Jan, ...)")
+```
+
+
+## Check for Duplicates
+
+```{r}
+# get distinct customers by licid-year
+cust_distinct <- sale %>%
+    count(cust_id, lic_id, year) %>%
+    mutate(is_dup = ifelse(n > 1, TRUE, FALSE)) 
+
+# percent of customers by licid-year who bought > 1 licid
+dup_pct <- cust_distinct %>%
+    group_by(lic_id, year, is_dup) %>%
+    summarize(count = n()) %>%
+    mutate(pct = count / sum(count) * 100)
+    
+# get durations - to exclude short-term types
+durations <- sale %>%
+    mutate(duration = end_date - start_date) %>%
+    group_by(lic_id, description) %>%
+    summarize(avg_duration = median(duration)) %>%
+    ungroup()
+```
+
+```{r}
+x <- durations %>%
+    left_join(dup_pct, by = "lic_id") %>%
+    # set conditions that are meaningful for investigating egregious duplicates
+    filter(is_dup, avg_duration > 150, pct > 10, count > 1000)
+
+x %>%
+    ggplot(aes(count, pct, color = description, shape = factor(avg_duration))) +
+    geom_point() +
+    labs(title = "Duplicates: customers with multiple sales of a lic_id in the same year",
+         x = "count of customers duplicated", y = "% of customers duplicated")
+```
+
+
+```{r}
+sessionInfo()
+```

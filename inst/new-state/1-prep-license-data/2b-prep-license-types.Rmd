@@ -8,24 +8,25 @@ output:
         code_folding: show
 ---
 
+**Notes**
+
+
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(salic)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-**Notes**
+*Guidelines: A license table preparation step is likely needed to distinguish licenses/permits that confer hunting vs fishing privileges (vs neither). The code below provides a direction, although typically it will involve some by-hand editing in a spreadsheet.*
 
-**Guidelines**
-
-A license table preparation step is likely needed to distinguish licenses/permits that confer hunting vs fishing privileges (vs neither). The code below provides a direction, although typically it will ultimately involve some by-hand editing in a spreadsheet.
 
 ## Load
 
-Pull in at least 2 columns: lic_id, description
+*Guidelines: Pull in at least 2 columns: lic_id, description*
 
 ```{r}
-db_raw <- src_sqlite("../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3")
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
 src_tbls(db_raw)
 ```
 
@@ -36,41 +37,31 @@ lic <- tbl(db_raw, "lic") %>%
 glimpse(lic)
 ```
 
+
 ## Prep
-
-**Guidelines**
-
-It's usually worth insuring that lic_id uniquely identifies license type (it usually does). There are typically 100s of unique lic_ids, and they don't always confer hunting or fishing privileges. This step is more about getting a rough count of hunters and anglers (in `2c-check-license-types`), so getting things exactly correct isn't necessary until later (when license history tables are built).
-
-Some states may require more preparation than others (for example Iowa provided a table with a unique row for each year, which was condensed at this step).
 
 ### Check for dups
 
-**Guidelines**
-
-The lic_id should uniquely identify rows. If it doesn't, additional work will be needed to clean things up.
+*Guidelines: The lic_id should uniquely identify rows. If it doesn't, additional work will be needed. For example Iowa provided a table with a unique row for each year, which was deduped at this step).*
 
 ```{r}
 length(unique(lic$lic_id))
 ```
 
+
 ## Export
 
-**Guidelines**
-
-One of the license table's functions is to distinguish sales (hunting vs fishing). The easiest way to do this is to usually edit the table by hand with a spreadsheet and add a 'type' variable with 4 possible values:
-
-- fish (a license/permit that bestows a fishing privilege)
-- hunt (a license/permit that bestows a hunting privilege)
-- combo (a license/permit that bestows both a fishing and hunting privilege)
-- trap (a license/permit that bestows a trapping privilege, typically counted in hunting)
-
-I recommend saving the edited csv (or xlsx) as "license-type-prepped" with at least 3 variables (lic_id, description, type). This will be imported in the next step (`2c-check-license-types`)
+*Guidelines: Writing to CSV for by-hand editing*
 
 ```{r}
 dir.create("../data/1-prep-license-data")
 write_csv(lic, "../data/1-prep-license-data/license-type.csv")
 ```
+
+*One of the license table's functions is to distinguish sales (hunting vs fishing). The easiest way to do this is to usually edit the table by hand with a spreadsheet and add a 'type' variable with 4 possible values: fish, hunt, combo (both fishing & hunting), trap (trapping privilege, typically counted in hunting)*
+
+*I recommend adding the type column in excel and then saving as "license-type-prepped.xlsx" with at least 3 variables (lic_id, description, type). This will be imported in the next step (`2c-check-license-types`)*
+
 
 ```{r}
 sessionInfo()

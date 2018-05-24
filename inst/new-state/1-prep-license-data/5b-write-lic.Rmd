@@ -1,0 +1,191 @@
+---
+title: "Write License Types to Production Database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(salic)
+library(lubridate)
+knitr::opts_chunk$set(comment = NA)
+```
+
+*Guidelines: Finalized permissions should be prepared (in Excel or similar) with the addition of priv and (if needed) subtype variables. This script produces some summaries and writes the final table to sqlite.*
+
+
+## Load
+
+### License Table
+
+```{r}
+lic <- read_excel("../data/1-prep-license-data/license-types-prepped.xlsx")
+glimpse(lic)
+```
+
+
+### Sales
+
+*Guidelines: These data are included for by-permission summaries*
+
+```{r}
+f <- "../../../../../Data-production/Data-Dashboards/__state__/lic.sqlite3"
+db_lic <- src_sqlite(f)
+
+sale <- tbl(db_lic, "sale") %>%
+    select(cust_id, lic_id, year, res) %>%
+    collect() %>%
+    salic::df_factor_res()
+glimpse(sale)
+```
+
+```{r}
+cust <- tbl(db_lic, "cust") %>% 
+    select(cust_id, sex, birth_year) %>%
+    collect() %>%
+    salic::df_factor_sex()
+glimpse(cust)
+```
+
+
+## Prep
+
+### Join all 3 tables
+
+```{r}
+sale <- sale %>%
+    left_join(cust, by = "cust_id") %>%
+    left_join(lic, by = "lic_id")
+```
+
+
+## Summarize across Years
+
+### Sale Trends by Priv-Duration
+
+*Guidelines: Get a sense for annual trends by privilege (including possible trends in multi-year & lifetime licenses).*
+
+```{r}
+sale_priv <- sale %>%
+    filter(!is.na(priv))
+```
+
+```{r, fig.height=4, fig.width=7.5}
+x <- sale_priv %>%
+    count(priv, year, duration)
+
+x %>%
+    ggplot(aes(year, n, fill = factor(duration))) +
+    geom_col() +
+    facet_wrap(~ priv, scales = "free_y") +
+    scale_fill_brewer(type = "div") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+### Customer Tends by Priv
+
+*Guidelines: How do privilege customers change over time? This should end up being close to the top-level participants number that ends up in the dashboard (although it doesn’t account for effect of multi-year and lifetime licenses).*
+
+```{r, fig.height=3.5, fig.width=7.5}
+x <- sale_priv %>%
+    distinct(cust_id, priv, year) %>%
+    count(priv, year)
+
+x %>%
+    ggplot(aes(year, n)) +
+    geom_col(fill = "#728B8E") +
+    facet_wrap(~ priv, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## Summarize Recent Year Customers
+
+```{r}
+recent_year <- max(sale_priv$year)
+
+cust_recent <- sale_priv %>%
+    filter(year == recent_year) %>%
+    select(year, cust_id, res, sex, birth_year, priv) %>%
+    distinct()
+```
+
+### By Gender
+
+```{r, fig.height=3}
+x <- cust_recent %>%
+    count(priv, sex) %>%
+    group_by(priv) %>%
+    mutate(pct = n / sum(n) * 100)
+
+x %>%
+    filter(sex == "Female") %>%
+    ggplot(aes(priv, pct, fill = sex)) +
+    geom_col(fill = "#5ab4ac") +
+    ggtitle(paste("Female: % of", recent_year, "Privilege Holders")) +
+    coord_flip()
+```
+
+
+### By Residency
+
+```{r, fig.height=3}
+x <- cust_recent %>%
+    count(priv, res) %>%
+    group_by(priv) %>%
+    mutate(pct = n / sum(n) * 100)
+
+x %>%
+    filter(res == "Nonresident", priv != "nr deer app") %>%
+    ggplot(aes(priv, pct, fill = res)) +
+    geom_col(fill = "#d8b365") +
+    ggtitle(paste("Nonresident: % of", recent_year, "Privilege Holders")) +
+    coord_flip()
+```
+
+
+### By Age
+
+```{r}
+x <- cust_recent %>%
+    salic::recode_agecat() %>%
+    count(priv, age_year) %>%
+    group_by(priv) %>%
+    mutate(pct = n / sum(n) * 100)
+
+x %>%
+    ggplot(aes(age_year, n)) +
+    geom_area(fill = "#728B8E") +
+    facet_wrap(~ priv, scales = "free_y") +
+    ggtitle(paste("Age Distribution by Privilege in ", recent_year))
+```
+
+
+## Finalize Table
+
+```{r}
+lic <- lic %>% 
+    mutate(duration = as.integer(duration), lic_res = as.integer(lic_res))
+glimpse(lic)
+```
+
+
+## Write to Sqlite
+
+```{r}
+copy_to(db_lic, lic, temporary = FALSE)
+```
+
+
+```{r}
+sessionInfo()
+```
