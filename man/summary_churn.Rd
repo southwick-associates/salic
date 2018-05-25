@@ -41,5 +41,5 @@ filter(sale, priv == "hunt") \%>\%
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{count_lines_textfile}},
-  \code{\link{summary_sale}}
+  \code{\link{summary_initial}}, \code{\link{summary_sale}}
 }

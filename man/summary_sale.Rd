@@ -40,5 +40,6 @@ summary_sale(sale, rnd = 2, include_revenue = T)
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{count_lines_textfile}},
-  \code{\link{summary_churn}}
+  \code{\link{summary_churn}},
+  \code{\link{summary_initial}}
 }

@@ -20,5 +20,6 @@ select(x, nm) \%>\% check_dups()
 }
 \seealso{
 Other functions for validating license data: \code{\link{count_lines_textfile}},
-  \code{\link{summary_churn}}, \code{\link{summary_sale}}
+  \code{\link{summary_churn}},
+  \code{\link{summary_initial}}, \code{\link{summary_sale}}
 }

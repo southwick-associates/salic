@@ -19,5 +19,6 @@ count_lines_textfile
 }
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},
-  \code{\link{summary_churn}}, \code{\link{summary_sale}}
+  \code{\link{summary_churn}},
+  \code{\link{summary_initial}}, \code{\link{summary_sale}}
 }

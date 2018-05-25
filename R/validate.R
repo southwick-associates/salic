@@ -95,6 +95,38 @@ count_lines_textfile <- function(file_path) {
     nlines
 }
 
+#' Summarize sales, customers, and churn by year
+#' 
+#' This is a wrapper function that combines \code{\link{summary_sale}} and 
+#' \code{\link{summary_churn}}
+#' @param sale data frame: Table holding sales by year with a minimum of
+#' 2 variables (cust_id, year)
+#' @import dplyr
+#' @family functions for validating license data
+#' @export
+#' @examples
+#' library(tidyverse)
+#' library(salic)
+#' data(sale, lic, package = "salic")
+#' 
+#' summary_initial(sale)
+summary_initial <- function(sale) {
+    # get years for churn summary
+    all_yrs <- sort(unique(sale$year))
+    
+    # produce output data
+    sale_out <- summary_sale(sale)
+    churn_out <- summary_churn(sale, all_yrs)
+    dat_out <- churn_out %>%
+        left_join(sale_out, by = "year")
+    
+    # print output summary
+    print_dat(dat_out, "Summarize Sales, Customers, & Churn", paste0(
+        "Typical Churn: hunting: 20-45% --- fishing: 35-60%)\n",  
+        "(USFWS: https://wsfrprograms.fws.gov/Subpages/LicenseInfo/LicenseIndex.htm"
+    ))
+}
+
 
 #' Summarize sales and customers by year
 #' @param x data frame: Table holding sales by year with a minimum of
