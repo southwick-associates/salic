@@ -5,7 +5,7 @@
 \title{Summarize churn by year}
 \usage{
 summary_churn(x, years, rnd = 1, out = NULL, title = "Churn by Year",
-  note = NULL)
+  note = NULL, suppress_notes = FALSE)
 }
 \arguments{
 \item{x}{data frame: Table holding sales by year with a minimum of

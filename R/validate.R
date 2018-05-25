@@ -115,8 +115,8 @@ summary_initial <- function(sale) {
     all_yrs <- sort(unique(sale$year))
     
     # produce output data
-    sale_out <- summary_sale(sale)
-    churn_out <- summary_churn(sale, all_yrs)
+    sale_out <- summary_sale(sale, suppress_notes = TRUE)
+    churn_out <- summary_churn(sale, all_yrs, suppress_notes = TRUE)
     dat_out <- churn_out %>%
         left_join(sale_out, by = "year")
     
@@ -135,6 +135,7 @@ summary_initial <- function(sale) {
 #' @param out character: file path to optional output csv
 #' @param title character: title for output table
 #' @param note character: note for output table
+#' @param suppress_notes: If TRUE, returns a data frame only
 #' @inheritParams pct_round
 #' @import dplyr
 #' @family functions for validating license data
@@ -151,8 +152,10 @@ summary_initial <- function(sale) {
 #' sale <- left_join(sale, lic)
 #' sale <- mutate(sale, revenue = 30)
 #' summary_sale(sale, rnd = 2, include_revenue = T)
-summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
-                         title = "Summarize Sales & Customers", note = NULL) {
+summary_sale <- function(
+    x, include_revenue = FALSE, rnd = 1, out = NULL, 
+    title = "Summarize Sales & Customers", note = NULL, suppress_notes = FALSE
+) {
     pct_round2 <- function(x) pct_round(x, rnd)
     cust <- select(x, cust_id, year) %>% distinct %>% count(year) %>%
         mutate(change_cust = (n - lag(n)) / lag(n)) %>%
@@ -181,9 +184,14 @@ summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
                                funs(pct_round2))
     }
     if (!is.null(out)) write.csv(output, file = out, row.names = FALSE)
-    note_out <- "https://wsfrprograms.fws.gov/Subpages/LicenseInfo/LicenseIndex.htm"
-    if (!is.null(note)) note_out <- paste0(note_out, ")\n(", note)
-    print_dat(out_print, title, note_out)
+    
+    if (suppress_notes) {
+        out_print
+    } else {
+        note_out <- "https://wsfrprograms.fws.gov/Subpages/LicenseInfo/LicenseIndex.htm"
+        if (!is.null(note)) note_out <- paste0(note_out, ")\n(", note)
+        print_dat(out_print, title, note_out)
+    }
 }
 
 #' Summarize churn by year
@@ -209,8 +217,10 @@ summary_sale <- function(x, include_revenue = FALSE, rnd = 1, out = NULL,
 #' sale <- left_join(sale, lic)
 #' filter(sale, priv == "hunt") %>%
 #'     summary_churn(2004:2013, title = "Hunting Churn", note = "An additional note")
-summary_churn <- function(x, years, rnd = 1, out = NULL,
-                          title = "Churn by Year", note = NULL) {
+summary_churn <- function(
+    x, years, rnd = 1, out = NULL, title = "Churn by Year", 
+    note = NULL, suppress_notes = FALSE
+) {
     # get a single row per customer-year for churn calculation
     y <- select(x, cust_id, year) %>%
         filter(year %in% years) %>%
@@ -226,6 +236,12 @@ summary_churn <- function(x, years, rnd = 1, out = NULL,
     if (!is.null(out)) write.csv(output, file = out, row.names = FALSE)
     note_out <- "typical hunting: 20-45% --- typical fishing: 35-60%"
     if (!is.null(note)) note_out <- paste0(note_out, ")\n(", note)
-    print_dat(out_print, title, note_out)
+    
+    if (suppress_notes) {
+        out_print %>%
+            mutate(year = as.integer(as.character(year)))
+    } else {
+        print_dat(out_print, title, note_out)
+    }
 }
 

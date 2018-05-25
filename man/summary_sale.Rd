@@ -5,7 +5,8 @@
 \title{Summarize sales and customers by year}
 \usage{
 summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
-  title = "Summarize Sales & Customers", note = NULL)
+  title = "Summarize Sales & Customers", note = NULL,
+  suppress_notes = FALSE)
 }
 \arguments{
 \item{x}{data frame: Table holding sales by year with a minimum of
@@ -20,6 +21,8 @@ summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
 \item{title}{character: title for output table}
 
 \item{note}{character: note for output table}
+
+\item{suppress_notes:}{If TRUE, returns a data frame only}
 }
 \description{
 Summarize sales and customers by year
