@@ -9,24 +9,17 @@ output:
 params:
     raw_db_file: "~/data/XX_Dashboard/raw.sqlite3"
     db_file: "~/data2/XX_Dashboard/lic.sqlite3"
-    csv_file: "~/data/XX_Dashboard/geocode-addresses/cust-for-geocode.csv"
+    csv_file: 
 ---
+
+START HERE - Rethinking what is needed here
+1. pull addresses
+2. write to standard (appending zipcode)
 
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(tibble)
 knitr::opts_chunk$set(comment = NA)
-```
-
-## Params
-
-```{r}
-tribble(
-    ~param, ~value,
-    "raw_db_file", params$raw_db_file,
-    "db_file", params$db_file,
-    "csv_file", params$csv_file
-) %>% DT::datatable() 
 ```
 
 ## Load
@@ -36,11 +29,11 @@ tribble(
 - Table and column names will vary by state
 
 ```{r}
-db_raw <- src_sqlite(params$raw_db_file)
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
 # src_tbls(db_raw)
-# tbl(db_raw, "customer_info")
 
-cust_raw <- tbl(db_raw, "customer_info") %>% 
+cust_raw <- tbl(db_raw, "cust") %>% 
     select(cust_id = CustomerID, street = MailStreet1, city = MailCity, 
            state = MailState, zip = MailZip) %>% 
     collect(n = Inf)
@@ -85,6 +78,7 @@ count(cust, nchar(zip))
 ## Write to CSV
 
 ```{r}
+"~/data/XX_Dashboard/geocode-addresses/cust-for-geocode.csv"
 glimpse(cust)
 dir.create(dirname(params$csv_file))
 write.csv(cust, file = params$csv_file, row.names = FALSE)

@@ -120,9 +120,6 @@ sample_n(cust, 5) %>% select(dob, birth_year)
 ### 1. License Type
 
 ```{r}
-# sale <- sale %>%
-#     mutate(res = lic_res)
-
 # check
 sale %>%
     count(lic_res) %>% 
@@ -176,18 +173,24 @@ sale %>%
 ```{r}
 sale <- sale %>%
     left_join(select(cust, cust_id, cust_res), by = "cust_id") %>%
-    mutate(res = ifelse(!is.na(lic_res), lic_res,
-                        ifelse(!is.na(recent_res), recent_res, cust_res)))
+    mutate(
+        res = ifelse(!is.na(lic_res), lic_res, 
+                     ifelse(!is.na(recent_res), recent_res, cust_res)),
+        # for summarization
+        res_id = ifelse(!is.na(lic_res), "lic_res",  
+                        ifelse(!is.na(recent_res), "recent_res", 
+                               ifelse(!is.na(cust_res), "cust_res", NA))) %>%
+            factor(levels = c("lic_res", "recent_res", "cust_res"))
+    )
 
-# check
+# check residency coding
 sale %>%
-    count(res) %>% 
-    mutate(pct = round(n / sum(n) * 100, 4))
+    count(res_id) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
 
 # check coding heirarchy (lic_res, recent_res, cust_res)
 sale %>%
-    count(res, lic_res, recent_res, cust_res) %>% 
-    mutate(pct = round(n / sum(n) * 100, 4)) %>%
+    count(res_id, lic_res, recent_res, cust_res) %>% 
     data.frame()
 ```
 

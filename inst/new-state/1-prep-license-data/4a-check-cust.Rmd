@@ -123,162 +123,86 @@ length(unique(cust$cust_id)) == length(cust$cust_id)
 ```
 
 
+## Check Demographics
 
-## Check Hunter Demographics
+### Prepare 
 
 ```{r}
-hunt_sale <- sale %>%
-    filter(type %in% c("hunt", "trap", "combo")) %>%
-    distinct(cust_id, year)
-    
-hunters <- cust %>%
-    right_join(hunt_sale, by ="cust_id")
+# angler/hunter identifier
+demo_sale <- sale %>%
+    mutate(
+        hunt = ifelse(type %in% c("hunt", "trap", "combo"), "hunting", NA),
+        fish = ifelse(type %in% c("fish", "combo"), "fishing", NA)
+    ) %>%
+    distinct(cust_id, year, hunt, fish)
 
-rm(hunt_sale)
-glimpse(hunters)
+# join to demographics
+demo_cust <- cust %>%
+    select(cust_id, sex, cust_res, birth_year) %>%
+    right_join(demo_sale, by = "cust_id") %>%
+    # transpose for easy ggplot comparison
+    gather(var, sport, hunt, fish, na.rm = TRUE)
+
+rm(demo_sale)
+glimpse(demo_cust)
 ```
 
 
 ### Gender
 
-*Guidelines: Males typically make up 80 to 95% of hunters, but the female percentage is usually increasing over time.*
+*Guidelines: Typical Percentages: Hunters: ~5-15% female, Anglers: ~15-30% female. The female percentage is usually increasing over time (particularly for hunting).*
 
-```{r, fig.height=2.5, fig.width=4.5}
-x <- hunters %>%
-    count(year, sex) %>%
-    group_by(year) %>%
+```{r, fig.height=2.5, fig.width=6.5}
+x <- demo_cust %>%
+    filter(!is.na(sex)) %>%
+    count(sport, year, sex) %>%
+    group_by(sport, year) %>%
     mutate(pct = n / sum(n))
 
 x %>%
-    filter(sex != "Male") %>%
-    ggplot(aes(year, pct, fill = sex)) +
-    geom_col() +
-    scale_fill_brewer(type = "div") +
+    filter(sex == "Female") %>%
+    ggplot(aes(year, pct)) +
+    geom_col(fill = "#5ab4ac") +
+    facet_wrap(~ sport, scales = "free") +
     scale_y_continuous(labels = percent) +
-    labs(title = "Female Hunters: % of All Hunters")
+    labs(title = "Women: % of All License Buyers")
 ```
 
 
 ### Residency
 
-*Guidelines: Typical Resident Hunting: 70-95%*
+*Guidelines: Typical Nonresident %: Hunting: 5-30%, Fishing: 15-35%*
 
-```{r, fig.height=2.5, fig.width=5}
-x <- hunters %>%
-    count(year, cust_res) %>%
-    group_by(year) %>%
+```{r, fig.height=2.5, fig.width=6.5}
+x <- demo_cust %>%
+    filter(!is.na(cust_res)) %>%
+    count(sport, year, cust_res) %>%
+    group_by(sport, year) %>%
     mutate(pct = n / sum(n))
 
 x %>%
-    filter(cust_res != "Resident") %>%
-    ggplot(aes(year, pct, fill = cust_res)) +
-    geom_col() +
-    scale_fill_brewer(type = "div") +
+    filter(cust_res == "Nonresident") %>%
+    ggplot(aes(year, pct)) +
+    geom_col(fill = "#d8b365") +
+    facet_wrap(~ sport, scales = "free") +
     scale_y_continuous(labels = percent) +
-    labs(title = "Nonresident Hunters: % of All Hunters")
+    labs(title = "Nonresidents: % of All License Buyers")
 ```
 
 
 ### Age
 
-*Guidelines: Typical Hunting Age Group Peak: 40s*
-
-```{r, fig.height=4}
-# identify age by year (and age category)
-hunters <- salic::recode_agecat(hunters)
-
-hunters %>%
-    ggplot(aes(age_year, group = year, color = year)) +
-    geom_freqpoly()
-```
-
-*Guidelines: Breaking out by residency & gender can be interesting*
-
-Looking closer at age distributions by gender-residency. Apparent big trend in decreasing hunters. Only young resident women appear to be on the rise.
+*Guidelines: Typical Fishing/Hunting Age Group Peak: 40s*
 
 ```{r}
-hunters %>%
-    filter(!is.na(age_year), !is.na(cust_res)) %>%
+# identify age by year (and age category)
+demo_cust <- salic::recode_agecat(demo_cust)
+
+demo_cust %>%
+    filter(!is.na(age_year), !is.na(sex)) %>%
     ggplot(aes(age_year, group = year, color = year)) +
     geom_freqpoly() +
-    facet_wrap(sex ~ cust_res, scales = "free_y")
-```
-
-
-## Check Angler Demographics
-
-```{r}
-fish_sale <- sale %>%
-    filter(type %in% c("fish", "combo")) %>%
-    distinct(cust_id, year)
-    
-fishers <- cust %>%
-    right_join(fish_sale, by ="cust_id")
-
-rm(fish_sale)
-glimpse(fishers)
-```
-
-
-### Gender
-
-*Guidelines: Males typically make up 70 to 85% of anglers, but the female proportion is usually increasing.*
-
-```{r, fig.height=2.5, fig.width=4.5}
-x <- fishers %>%
-    count(year, sex) %>%
-    group_by(year) %>%
-    mutate(pct = n / sum(n))
-
-x %>%
-    filter(sex != "Male") %>%
-    ggplot(aes(year, pct, fill = sex)) +
-    geom_col() +
-    scale_fill_brewer(type = "qual") +
-    scale_y_continuous(labels = percent) +
-    labs(title = "Female Anglers: % of All Anglers")
-```
-
-
-### Residency
-
-*Guidelines: Typical Resident fishing: 65-85%*
-
-```{r, fig.height=2.5, fig.width=5}
-x <- fishers %>%
-    count(year, cust_res) %>%
-    group_by(year) %>%
-    mutate(pct = n / sum(n))
-
-x %>%
-    filter(cust_res != "Resident") %>%
-    ggplot(aes(year, pct, fill = cust_res)) +
-    geom_col() +
-    scale_fill_brewer(type = "qual") +
-    scale_y_continuous(labels = percent) +
-    labs(title = "Nonresident Anglers: % of All Anglers")
-```
-
-
-### Age
-
-*Guidelines: Typical fishing Age Group Peak: 40s*
-
-```{r, fig.height=4}
-# identify age by year (and age category)
-fishers <- salic::recode_agecat(fishers)
-
-fishers %>%
-    ggplot(aes(age_year, group = year, color = year)) +
-    geom_freqpoly()
-```
-
-```{r}
-fishers %>%
-    filter(!is.na(sex), !is.na(cust_res)) %>%
-    ggplot(aes(age_year, group = year, color = year)) +
-    geom_freqpoly() +
-    facet_wrap(sex ~ cust_res, scales = "free_y")
+    facet_wrap(sex ~ sport, scales = "free_y")
 ```
 
 

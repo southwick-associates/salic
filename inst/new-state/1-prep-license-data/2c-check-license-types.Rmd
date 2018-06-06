@@ -95,25 +95,20 @@ x %>%
 
 ## Check Hunters
 
-### Sales & Customers by Year
+### Counts & Churn by Year
 
 *Guidelines: Compare to USFWS historical license sales. Note that USFWS tracks paid license holders, so excluding free transactions from these counts can sometimes be helpful*
 
 *Also, as of 2018, the 2016/2017 USFWS numbers appear less reliable than older ranges (perhaps there are revision processes that include more careful data validation)*
 
+*Note that churn calculations with `salic::summary_churn()` don't take multi-year & lifetime license sales into account (so churn may be overestimated)*
+
 ```{r}
 hunt_lic <- filter(lic, type %in% c("combo", "hunt", "trap"))
 hunt_sale <- semi_join(sale, hunt_lic, by = "lic_id")
-salic::summary_sale(hunt_sale)
-```
-
-
-### Churn
-
-*Guidelines: Note that churn calculations with `salic::summary_churn()` don't take multi-year & lifetime license sales into account (so churn may be overestimated)*
-
-```{r}
-salic::summary_churn(hunt_sale, 2007:2016) # year range will vary by state
+hunt_sale %>%
+    filter(year %in% 2006:2016) %>%
+    salic::summary_initial()
 ```
 
 
@@ -134,19 +129,14 @@ d3heatmap(hunt_count, scale = "none", colors = "Blues", Rowv = F, Colv = F,
 
 ## Check Anglers
 
-### Sales & Customers by Year
+### Counts & Churn by Year
 
 ```{r}
 fish_lic <- filter(lic, type %in% c("combo", "fish"))
 fish_sale <- semi_join(sale, fish_lic, by = "lic_id")
-salic::summary_sale(fish_sale)
-```
-
-
-### Churn
-
-```{r}
-salic::summary_churn(fish_sale, 2007:2016) # year range will vary by state
+fish_sale %>%
+    filter(year %in% 2006:2016) %>%
+    salic::summary_initial()
 ```
 
 

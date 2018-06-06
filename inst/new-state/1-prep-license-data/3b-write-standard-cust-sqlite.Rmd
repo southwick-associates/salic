@@ -126,7 +126,7 @@ cust %>% filter(is.na(state_new)) %>% nrow()
 ```
 
 ```{r, fig.height=3}
-# Contiguous US
+# check contiguous US
 states_map <- map_data("state")
 
 x %>%
@@ -136,17 +136,6 @@ x %>%
     expand_limits(x = states_map$long, y = states_map$lat) +
     scale_fill_viridis() +
     ggtitle("% of Customers (Contiguous US States)")
-```
-
-```{r, fig.height=2.5, fig.width=6}
-# Other locations
-x %>%
-    filter(!cont_US) %>%
-    top_n(10, n) %>% #
-    ggplot(aes(reorder(name, pct), pct, fill = country)) +
-    geom_col() +
-    coord_flip() +
-    labs(title = "% of Customers (Non-Contiguous US) - Top 10", x = element_blank())
 ```
 
 
