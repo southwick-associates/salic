@@ -7,14 +7,8 @@ output:
         toc_float: true
         code_folding: show
 params:
-    raw_db_file: "~/data/XX_Dashboard/raw.sqlite3"
-    db_file: "~/data2/XX_Dashboard/lic.sqlite3"
-    csv_file: 
+    final_year: 2018
 ---
-
-START HERE - Rethinking what is needed here
-1. pull addresses
-2. write to standard (appending zipcode)
 
 ```{r setup, message=FALSE}
 library(tidyverse)
@@ -22,66 +16,107 @@ library(tibble)
 knitr::opts_chunk$set(comment = NA)
 ```
 
-## Load
 
-### Raw address data
+## Get Personal Info (names, addresses)
 
-- Table and column names will vary by state
+### Load Raw
+
+*Guidelines: Address and City needs to be pulled from raw data, since it isn't included in standardized data*
 
 ```{r}
-f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-2018.sqlite3"
 db_raw <- src_sqlite(f)
-# src_tbls(db_raw)
 
 cust_raw <- tbl(db_raw, "cust") %>% 
-    select(cust_id = CustomerID, street = MailStreet1, city = MailCity, 
-           state = MailState, zip = MailZip) %>% 
-    collect(n = Inf)
+    select(raw_cust_id, street = Address1, city = City) %>% 
+    collect()
+
+length(unique(cust_raw$raw_cust_id))
 glimpse(cust_raw)
 ```
 
-### Cleaned data
 
-- Only customers with state resident addresses are pulled, since the aim here is to identify county of residence
+### Load & Join Standardized
+
+*Guidelines: Name and Zip. Also filtering to exclude out-of-state addresses*
 
 ```{r}
-db <- src_sqlite(params$db_file)
-cust <- tbl(db, "cust") %>%
-    filter(res == 1) %>%
-    select(cust_id) %>%
-    collect(n = Inf)
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_standard <- src_sqlite(f)
+
+cust_standard <- tbl(db_standard, "cust") %>% 
+    filter(cust_res == 1) %>%
+    select(raw_cust_id, first, last, state, zip) %>% 
+    collect()
+length(unique(cust_standard$raw_cust_id))
+```
+
+```{r}
+cust_standard <- cust_standard %>%
+    left_join(cust_raw, by = "raw_cust_id")
+rm(cust_raw)
+glimpse(cust_standard)
+```
+
+
+### Load & Join Production
+
+*Guidelines: This is also used to filter (if necessary). Only customers in the final production data are needed*
+
+```{r}
+f <- "../../../../../Data-production/Data-Dashboards/__state__/license.sqlite3"
+db_license <- src_sqlite(f)
+cust <- tbl(db_license, "cust") %>%
+    filter(cust_res == 1) %>%
+    select(cust_id, raw_cust_id) %>%
+    collect()
+length(unique(cust$cust_id))
 glimpse(cust)
 ```
 
-## Prep
-
-### Join address data
-
 ```{r}
-cust_in <- cust
-cust <- left_join(cust, cust_raw, by = "cust_id")
-count(cust, state)
+cust <- cust %>%
+    inner_join(cust_standard, by = "raw_cust_id") %>%
+    select(cust_id, first, last, street, city, state, zip)
+rm(cust_standard)
+glimpse(cust)
 ```
 
-### Truncate Zips
 
-- insure 5 digit length
+### (Optional) Filter to Last 2 Years
+
+*Guidelines: Only need the last 2 years of county-specific data for the current dashboard presentation. This is useful if time is a concern (processing 1 milion rows will likely take 1 or 2 hours)*
 
 ```{r}
-# count(cust_raw, nchar(zip))
-count(cust, nchar(zip))
+years_to_include <- c(params$final_year - 2, params$final_year - 1, params$final_year)
 
-cust <- mutate(cust, zip = ifelse(nchar(zip) == 5, zip, NA))
-count(cust, nchar(zip))
+f <- "../../../../../Data-production/Data-Dashboards/__state__/history.sqlite3"
+db_history <- src_sqlite(f)
+all_sports <- tbl(db_history, "all_sports") %>%
+    filter(year %in% years_to_include) %>%
+    select(cust_id, year) %>%
+    collect() %>%
+    distinct()
+count(all_sports, year)
+length(unique(all_sports$cust_id))
 ```
+
+```{r}
+cust <- cust %>%
+    semi_join(all_sports, by = "cust_id")
+rm(all_sports)
+glimpse(cust)
+```
+
 
 ## Write to CSV
 
+*Guidelines: This will be loaded into software (e.g., Bulk Mailer) to append county. Example Mailing Name: Dashboard_VA2017 > then run Address Correction*
+
 ```{r}
-"~/data/XX_Dashboard/geocode-addresses/cust-for-geocode.csv"
-glimpse(cust)
-dir.create(dirname(params$csv_file))
-write.csv(cust, file = params$csv_file, row.names = FALSE)
+dir <- "../../../../../Data-sensitive/Data-Dashboards/__state__/geocode-addresses"
+dir.create(dir)
+write_csv(cust, file.path(dir, "cust-in.csv"))
 ```
 
 ```{r}

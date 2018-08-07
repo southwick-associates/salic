@@ -1,0 +1,151 @@
+---
+title: "Append county info to sqlite database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(RSQLite)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load 
+
+### State county fips
+
+*Guidelines: Out-of-state fips will be excluded from the customer-counties*
+
+```{r}
+f <- "../../../../../Data-production/Data-Dashboards/_Shared/census.sqlite3"
+db_census <- src_sqlite(f)
+county_fips <- tbl(db_census, "county_fips") %>% 
+    filter(state_abbrev == "__state__") %>%
+    collect()
+glimpse(county_fips)
+```
+
+
+### Customer-county
+
+```{r}
+cust_county <- list()
+coltyp <- cols(
+  cust_id = col_character(),
+  `County FIPS` = col_integer(),
+  `County Name` = col_character()
+)
+
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/geocode-addresses/cust-out.csv"
+cust_county <- read_csv(f, col_types = coltyp) %>%
+    rename(county_fips = `County FIPS`, county_name_geocode = `County Name`)
+glimpse(cust_county)
+```
+
+
+### ACS Population Data
+
+*Guidelines: Want to check county naming and also do a bit of summarizing*
+
+```{r}
+pop_acs <- tbl(db_census, "pop_acs") %>%
+    filter(state_abbrev == "__state__", year == 2017) %>%
+    select(county_fips, county, pop) %>%
+    collect() %>%
+    # also aggregate to total population by county
+    group_by(county_fips, county) %>%
+    summarize(pop = sum(pop))
+glimpse(pop_acs)
+```
+
+
+## Prep
+
+*Dropping out-of-state fips*
+
+```{r}
+state_counties <- county_fips$county_fips
+
+# show excluded counties
+cust_county %>%
+    filter(!(county_fips %in% state_counties)) %>%
+    count(county_fips, county_name_geocode) %>%
+    arrange(desc(n)) %>%
+    DT::datatable()
+
+# filter excluded counties
+cust_county <- cust_county %>%
+    filter(county_fips %in% state_counties)
+glimpse(cust_county)
+```
+
+
+## Check
+
+### County-to-Fips Naming
+
+*Guidelines: Anything look odd in the name comparisons between the two data sources?*
+
+```{r}
+cust_counties <- cust_county %>%
+    count(county_fips, county_name_geocode)
+
+cust_counties %>%
+    full_join(county_fips, by = "county_fips") %>%
+    filter(is.na(county_name) | is.na(county_name_geocode) | (county_name != county_name_geocode))
+```
+
+### County naming in ACS Data
+
+*Just a quick check for correspondence. Maybe not necessary*
+
+```{r}
+pop_acs %>%
+    left_join(county_fips, by = "county_fips") %>%
+    DT::datatable()
+```
+
+### Finalize
+
+```{r}
+cust_county <- cust_county %>%
+    left_join(county_fips, by = "county_fips") %>%
+    select(cust_id, county_fips)
+
+# update customer table
+f <- "../../../../../Data-production/Data-Dashboards/__state__/license.sqlite3"
+db_license <- src_sqlite(f)
+cust <- tbl(db_license, "cust") %>% 
+    collect() %>%
+    left_join(cust_county, by = "cust_id")
+
+# check
+count(cust, county_fips)
+glimpse(cust)
+```
+
+
+## Update Sqlite
+
+```{r}
+# create a new customer table to insure data isn't lost by mistake
+# it would probably be more efficient to add a new column, but this works
+cust1 <- cust
+copy_to(db_license, cust1, temporary = FALSE)
+```
+
+```{r}
+# remove original customer table and rename the copied table
+con <- dbConnect(SQLite(), dbname = f)
+dbRemoveTable(con, "cust")
+dbGetQuery(con, "ALTER TABLE cust1 RENAME TO cust")
+dbDisconnect(con)
+```
+
+```{r}
+sessionInfo()
+```

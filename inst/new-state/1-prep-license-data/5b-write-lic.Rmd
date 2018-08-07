@@ -37,7 +37,7 @@ glimpse(lic)
 *Guidelines: These data are included for by-permission summaries*
 
 ```{r}
-f <- "../../../../../Data-production/Data-Dashboards/__state__/lic.sqlite3"
+f <- "../../../../../Data-production/Data-Dashboards/__state__/license.sqlite3"
 db_lic <- src_sqlite(f)
 
 sale <- tbl(db_lic, "sale") %>%

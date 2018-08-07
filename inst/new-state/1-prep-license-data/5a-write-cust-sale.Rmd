@@ -216,7 +216,7 @@ glimpse(sale)
 ## Write to Sqlite
 
 ```{r}
-f <- "../../../../../Data-production/Data-Dashboards/__state__/lic.sqlite3"
+f <- "../../../../../Data-production/Data-Dashboards/__state__/license.sqlite3"
 db_lic <- src_sqlite(f, create = TRUE)
 
 copy_to(db_lic, cust, temporary = FALSE)
