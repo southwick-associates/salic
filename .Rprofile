@@ -6,7 +6,7 @@
 local({
     
 # Project-specific Parameters
-r_version <- '3.4.3'
+r_version <- '3.5.1'
 proj_libname <- 'southwick-packages'
 
 
