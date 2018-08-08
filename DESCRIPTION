@@ -13,6 +13,7 @@ Description: A set of functions for getting license data into a standard format
     the initial effort to develop graphical "scorecards", which evolved into
     interactive data dashboards.
 License: GPL-3
+Encoding: UTF-8
 LazyData: FALSE
 Depends:
     R (>= 3.3.3)
@@ -21,5 +22,5 @@ Imports:
     tidyr (>= 0.6.3),
     ggplot2 (>= 2.2.1),
     lubridate (>= 1.7.1)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: saproj (>= 2.0)

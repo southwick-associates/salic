@@ -30,3 +30,4 @@ dplyr::count(x, state_new, state)
 Other functions for recoding license data: \code{\link{recode_agecat}},
   \code{\link{recode_month}}
 }
+\concept{functions for recoding license data}

@@ -17,4 +17,5 @@ A data frame with 72 abbreviations, used in the \code{\link{recode_state}} funct
 Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
   \code{\link{sale}}
 }
+\concept{Sample Data}
 \keyword{datasets}

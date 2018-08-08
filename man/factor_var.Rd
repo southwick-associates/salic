@@ -10,12 +10,13 @@
 \usage{
 factor_var(x, levels, labels, ...)
 
-factor_age(x, levels = 1:7, labels = c("0-17", "18-24", "25-34", "35-44",
-  "45-54", "55-64", "65+"), ...)
+factor_age(x, levels = 1:7, labels = c("0-17", "18-24", "25-34",
+  "35-44", "45-54", "55-64", "65+"), ...)
 
 factor_sex(x, levels = 1:2, labels = c("Male", "Female"), ...)
 
-factor_res(x, levels = c(1, 0), labels = c("Resident", "Nonresident"), ...)
+factor_res(x, levels = c(1, 0), labels = c("Resident", "Nonresident"),
+  ...)
 
 factor_R3(x, levels = 1:4, labels = c("Carry", "Retain", "Reactivate",
   "Recruit"), ...)
@@ -47,3 +48,4 @@ sale2 \%>\%
 \seealso{
 Other functions for labelling numeric variables: \code{\link{df_factor_var}}
 }
+\concept{functions for labelling numeric variables}

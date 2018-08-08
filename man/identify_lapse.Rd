@@ -42,3 +42,4 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{identify_R3}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
+\concept{license history functions}

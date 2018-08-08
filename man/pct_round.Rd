@@ -25,4 +25,5 @@ x$pct <- pct_round(x$pop / sum(x$pop))
 Other internal helper functions: \code{\link{calc_churn}},
   \code{\link{format_num}}, \code{\link{print_dat}}
 }
+\concept{internal helper functions}
 \keyword{internal}

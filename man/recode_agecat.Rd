@@ -4,9 +4,9 @@
 \alias{recode_agecat}
 \title{Create a standardized age category variable}
 \usage{
-recode_agecat(dat, age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54",
-  "55-64", "65+"), age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf),
-  max_age = 110)
+recode_agecat(dat, age_labs = c("0-17", "18-24", "25-34", "35-44",
+  "45-54", "55-64", "65+"), age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64,
+  Inf), max_age = 110)
 }
 \arguments{
 \item{dat}{data frame: Input table}
@@ -34,3 +34,4 @@ sale2 <- left_join(sale, cust) \%>\%
 Other functions for recoding license data: \code{\link{recode_month}},
   \code{\link{recode_state}}
 }
+\concept{functions for recoding license data}

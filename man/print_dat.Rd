@@ -4,7 +4,8 @@
 \alias{print_dat}
 \title{Print a data frame with caption/note (internal salic only - not exported)}
 \usage{
-print_dat(x, caption = NULL, note = NULL, digits = 1, big.mark = ",")
+print_dat(x, caption = NULL, note = NULL, digits = 1,
+  big.mark = ",")
 }
 \arguments{
 \item{x}{data frame: data frame contents to print}
@@ -34,4 +35,5 @@ print_dat(x, "Customer Sales by Year", digits = 0)
 Other internal helper functions: \code{\link{calc_churn}},
   \code{\link{format_num}}, \code{\link{pct_round}}
 }
+\concept{internal helper functions}
 \keyword{internal}

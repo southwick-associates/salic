@@ -18,4 +18,5 @@ A data frame with a random sample of 1000 GA hunting customers
 Other Sample Data: \code{\link{lic}}, \code{\link{sale}},
   \code{\link{state_abbreviations}}
 }
+\concept{Sample Data}
 \keyword{datasets}

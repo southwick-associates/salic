@@ -4,8 +4,8 @@
 \alias{new_dashboard}
 \title{Setup a new state dashboard with default directories and template scripts}
 \usage{
-new_dashboard(state, time_period, sa_path = "E:/SA", R_version = "3.4.3",
-  project_library = "data-dashboards")
+new_dashboard(state, time_period, sa_path = "E:/SA",
+  R_version = "3.4.3", project_library = "data-dashboards")
 }
 \arguments{
 \item{state}{character: Two letter state designation}
@@ -26,3 +26,4 @@ This is intended to be run before data processing for a new state begins
 \examples{
 salic::new_dashboard("XX", "2017")
 }
+\concept{functions for making directories and files}

@@ -10,17 +10,17 @@
 \usage{
 df_factor_var(df, var, levels, labels, ...)
 
-df_factor_sex(df, var = "sex", levels = 1:2, labels = c("Male", "Female"),
-  ...)
+df_factor_sex(df, var = "sex", levels = 1:2, labels = c("Male",
+  "Female"), ...)
 
-df_factor_res(df, var = "res", levels = c(1, 0), labels = c("Resident",
-  "Nonresident"), ...)
+df_factor_res(df, var = "res", levels = c(1, 0),
+  labels = c("Resident", "Nonresident"), ...)
 
-df_factor_R3(df, var = "R3", levels = 1:4, labels = c("Carry", "Retain",
-  "Reactivate", "Recruit"), ...)
+df_factor_R3(df, var = "R3", levels = 1:4, labels = c("Carry",
+  "Retain", "Reactivate", "Recruit"), ...)
 
-df_factor_age(df, var = "age", levels = 1:7, labels = c("0-17", "18-24",
-  "25-34", "35-44", "45-54", "55-64", "65+"), ...)
+df_factor_age(df, var = "age", levels = 1:7, labels = c("0-17",
+  "18-24", "25-34", "35-44", "45-54", "55-64", "65+"), ...)
 }
 \arguments{
 \item{df}{data frame: Input data frame}
@@ -51,3 +51,4 @@ sale2 <- sale2 \%>\%
 \seealso{
 Other functions for labelling numeric variables: \code{\link{factor_var}}
 }
+\concept{functions for labelling numeric variables}

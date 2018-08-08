@@ -28,4 +28,5 @@ format_num(c("6.2\%", "13.9\%", "8.2\%", NA))
 Other internal helper functions: \code{\link{calc_churn}},
   \code{\link{pct_round}}, \code{\link{print_dat}}
 }
+\concept{internal helper functions}
 \keyword{internal}

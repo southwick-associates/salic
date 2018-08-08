@@ -37,3 +37,4 @@ sale <- recode_month(sale)
 Other functions for recoding license data: \code{\link{recode_agecat}},
   \code{\link{recode_state}}
 }
+\concept{functions for recoding license data}

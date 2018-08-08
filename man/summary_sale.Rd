@@ -46,3 +46,4 @@ Other functions for validating license data: \code{\link{check_dups}},
   \code{\link{summary_churn}},
   \code{\link{summary_initial}}
 }
+\concept{functions for validating license data}

@@ -33,4 +33,5 @@ calc_churn(y, 2013)
 Other internal helper functions: \code{\link{format_num}},
   \code{\link{pct_round}}, \code{\link{print_dat}}
 }
+\concept{internal helper functions}
 \keyword{internal}
