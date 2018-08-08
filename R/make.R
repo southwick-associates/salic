@@ -95,7 +95,7 @@ update_dashboard <- function() {}
 #' @examples
 #' salic::replace_strings()
 replace_strings <- function(
-    path = ".", find_string, replacement_string, pattern = ".Rmd", showmessage = TRUE
+    path = ".", find_string, replacement_string, pattern = ".R", showmessage = TRUE
 ) {
     
     # get file names in which to apply replacement

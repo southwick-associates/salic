@@ -5,7 +5,7 @@
 \title{Search and replace string across files with R}
 \usage{
 replace_strings(path = ".", find_string, replacement_string,
-  pattern = ".Rmd", showmessage = TRUE)
+  pattern = ".R", showmessage = TRUE)
 }
 \arguments{
 \item{path}{a character vector of full path names; the default
