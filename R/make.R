@@ -19,7 +19,7 @@
 #' salic::new_dashboard("XX", "2017")
 new_dashboard <- function(
     state, time_period, sa_path = "E:/SA", 
-    R_version = "3.4.3", project_library = "data-dashboards"
+    R_version = "3.5.1", project_library = "data-dashboards"
 ) {
     
     # initial variable prep
