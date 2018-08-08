@@ -1,0 +1,290 @@
+---
+title: "Create permission tables by priv (hunt, fish, etc.)"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: hide
+params:
+    priv_nm: hunt  # (fish, hunt, all_sports) or (deer, trout, etc.)
+    priv_hist: NONE  # (NONE, fish, hunt, etc.) > for subtype permissions (otherwise "NONE")
+    lic_filter: type %in% c("hunt", "trap", "combo")
+    yrs: 2008:2018   # (first_year:last_year)
+    life_yr1: 2008   # first year of lifetime license data (might preceed other license data)
+    test: FALSE  # (TRUE, FALSE) > if TRUE, runs a sample & doesn't write output to sqlite
+    db_license: "E:/SA/Data-production/Data-Dashboards/__state__/license.sqlite3"
+    db_history: "E:/SA/Data-production/Data-Dashboards/__state__/history.sqlite3"
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(RSQLite)
+library(salic)
+library(DT)
+library(stringr)
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Params
+
+```{r}
+# R3 license years (for argument to identify_R3, don't want to include lifetime-only years)
+yrs_separated <- str_split_fixed(params$yrs, ":", 2)
+yrs_r3 <- `:`(yrs_separated[1], yrs_separated[2])
+
+if (params$life_yr1 != "NONE") {
+    # need to get the larger years range
+    yrs <- `:`(params$life_yr1, yrs_separated[2])
+} else {
+    # same if no additional lifetime-only license years
+    yrs <- yrs_r3
+}
+```
+
+```{r}
+tibble::tribble(
+    ~param, ~value,
+    "priv_nm", params$priv_nm,
+    "lic_filter", params$lic_filter,
+    "priv_hist", params$priv_hist,
+    "yrs", params$yrs,
+    "life_yr1", params$life_yr1,
+    "test", params$test,
+    "db_license", params$db_license,
+    "db_history", params$db_history
+) %>% DT::datatable()
+```
+
+## Load
+
+### License Types
+
+```{r}
+db_license <- src_sqlite(params$db_license)
+lic_all <- tbl(db_license, "lic") %>% collect()
+lic <- filter_(lic_all, .dots = params$lic_filter)
+DT::datatable(lic)
+```
+
+### Sales
+
+```{r}
+# get sales for relevant license types
+# the if condition just insures the logic works on the sqlite backend (== vs %in%)
+if (nrow(lic) == 1) {
+   sale <- tbl(db_license, "sale") %>% filter(lic_id == lic$lic_id) 
+} else {
+    sale <- tbl(db_license, "sale") %>% filter(lic_id %in% lic$lic_id)
+}
+sale <- select(sale, cust_id, lic_id, year, res) %>% 
+    filter(year %in% yrs) %>%
+    collect()
+glimpse(sale)
+```
+
+### Sample
+
+*Guidelines: For testing, take a sample of about 10,000 license holders*
+
+```{r}
+if (params$test) {
+    cust <- distinct(sale, cust_id)
+    sample_size <- min(10000, nrow(cust))
+    cust <- sample_n(cust, sample_size)
+    sale <- semi_join(sale, cust, by = "cust_id")
+    rm(cust)
+    glimpse(sale)
+}
+```
+
+## Prepare Sales Data
+
+### Check Duration
+
+*Guidelines: State-specific coding may be required if duration is not completely accounted for in the license table*
+
+```{r}
+count(lic, duration)
+```
+
+### Rank Sales
+
+*Guidelines: Creates one row per customer-year (grouping by cust_id, year)*
+
+- *picks highest duration (e.g., a 5-year license would be chosen over a 1-year license)*
+- *picks Resident (res == 1) over Nonresident (res == 0). A customer generally shouldn't have 2 different residencies in the same year, but it happens occasionally*
+    
+```{r}
+sale <- sale %>%
+    left_join(lic, by = "lic_id")
+    
+sale_ranked <- sale %>%
+    rank_sale(rank_var = c("duration", "res"), grp_var = c("cust_id", "year"))
+
+# visual comparison
+ranked_sale_count <- count(sale_ranked, res, year, duration) %>% mutate(grp = "ranked-sales")
+sale_count <- count(sale, res, year, duration) %>% mutate(grp = "sales")
+bind_rows(sale_count, ranked_sale_count) %>%
+    ggplot(aes(factor(year), n, fill = factor(duration))) +
+    geom_bar(stat = "identity") +
+    facet_grid(factor_res(res) ~ grp, scales = "free_y")
+```
+
+## Prepare Permission Data
+
+### Make License History
+
+*Guidelines: Note that each of the 3 steps produces an output for checking*
+
+- *it might be helpful to run these one at a time during testing*
+- *the data format is described in _Analyst Docs > Data Dictionary > license history*
+    
+```{r, eval = params$priv_hist == "NONE", message = FALSE}
+# if not in test mode then this can take a while to run
+
+# 1. make license history
+lic_history <- sale_ranked %>%
+    select(cust_id, duration, year, res) %>%
+    make_lic_history(yrs, carry_vars = "res")
+
+# Visual Compare privs and sales
+sale_count <- count(sale_ranked, res, year, duration) %>% 
+    mutate(duration_run = duration, grp = "sales")
+priv_count <- count(lic_history, res, year, duration_run) %>% 
+    mutate(grp = "privs")
+bind_rows(sale_count, priv_count) %>%
+    ggplot(aes(factor(year), n, fill = factor(duration_run))) +
+    geom_bar(stat = "identity") +
+    facet_grid(factor_res(res) ~ grp, scales = "free_y")
+
+
+# 2. Identify R3
+# this condition means R3 won't be calcualated unless there is a sufficient license history
+if (length(yrs) > 5) {
+    lic_history <- identify_R3(lic_history, yrs_r3)
+    
+    # visual check
+    count(lic_history, res, year, R3) %>%
+        ggplot(aes(factor(year), n, fill = factor_R3(R3))) +
+        geom_bar(stat = "identity") +
+        facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
+
+} else {
+    lic_history$R3 <- NA 
+}
+check_identify_R3(lic_history, yrs) %>% DT::datatable()
+
+
+# 3. Identify lapse
+lic_history <- identify_lapse(lic_history, yrs)
+
+# check
+count(lic_history, res, year, lapse) %>%
+    ggplot(aes(factor(year), n, fill = factor(lapse))) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~ factor_res(res), scales = "free_y", nrow = 2)
+
+check_identify_lapse(lic_history) %>% DT::datatable()
+
+
+# 4. Overall Check
+# This samples a few customers, showing relevant calculation variables
+lic_history %>%
+    select(cust_id, year, res, bought, duration, duration_run, lag_duration_run, R3, lapse) %>%
+    check_history_samp() %>% DT::datatable()
+
+
+# 5. Make priv table
+# this drops the temporary cacluation variables (duration_run, etc.)
+priv <- lic_history %>%
+    select(cust_id, year, res, duration, duration_run, lag_duration_run, bought, lapse, R3, res) %>%
+    mutate_at(vars(duration_run, lag_duration_run), "as.integer")
+```
+
+```{r, eval = params$priv_hist != "NONE", message = FALSE}
+# get history for a specified reference permission
+db_history <- src_sqlite(params$db_history)
+
+priv_hist <- tbl(db_history, params$priv_hist) %>% 
+    select(cust_id, year, lapse, R3) %>%
+    collect()
+
+# identify R3/lapse (by year) depending on that permission
+priv <- sale_ranked %>%
+    select(cust_id, year, res) %>%
+    inner_join(priv_hist, by = c("cust_id", "year"))
+# todo: maybe add a warning here if nrow(priv) < nrow(priv_sale)
+```
+
+### Check Final Priv
+
+*Guidelines: This should show TRUE (i.e., all relevant sales are included)*
+
+```{r}
+nrow(sale_ranked) == semi_join(priv, sale_ranked, by = c("cust_id", "year")) %>% nrow()
+```
+
+## Write to SQLite
+
+### License Permission Table
+
+*Guidelines: The idea here is to have a separate table that explicitly identifies all the license types that go into a specific permission. This allows a simple join to associate license types with permissions*
+
+```{r}
+if (!(params$test)) {
+    # match priv name with output table name
+    # remove spaces in type name to insure compatibility with sqlite table names
+    out_nm <- stringr::str_replace_all(params$priv_nm, " ", "_")
+    
+    permission <- select(lic, lic_id, description)
+    permission$permission <- out_nm
+    permission <- select(permission, permission, lic_id, description)
+    glimpse(permission)
+}
+```
+
+
+### Write Output Data
+
+```{r}
+if (!(params$test)) {
+    ### Permission History Data
+    if (!file.exists(params$db_history)) src_sqlite(params$db_history, create = TRUE)
+    
+    con <- dbConnect(SQLite(), dbname = params$db_history)
+    
+    priv <- priv %>% mutate(
+        year = as.integer(year), 
+        lapse = as.integer(lapse), 
+        R3 = as.integer(R3) 
+    )
+    glimpse(priv)
+    
+    # write table (overwrite if this permission table already exists)
+    if (out_nm %in% dbListTables(con)) dbRemoveTable(con, out_nm)
+    dbWriteTable(con, out_nm, data.frame(priv))
+    dbDisconnect(con)
+    
+    ### Permission Relation Table
+    con <- dbConnect(SQLite(), dbname = params$db_license)
+    
+    # create table if it doesn't yet exist
+    if (!("permission" %in% dbListTables(con))) {
+        dbWriteTable(con, "permission", data.frame(permission))
+    } else {
+        # overwrite selected priv records to insure only the newest is kept
+        permission_old <- tbl(db_license, "permission") %>% collect()
+        permission_old <- filter(permission_old, permission != out_nm)
+        permission <- bind_rows(permission, permission_old)
+        dbRemoveTable(con, "permission")
+        dbWriteTable(con, "permission", data.frame(permission))
+    }
+    dbDisconnect(con)
+}
+```
+
+```{r}
+sessionInfo()
+```
+

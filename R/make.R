@@ -72,6 +72,8 @@ new_dashboard <- function(
     # doing this saves the analyst some time and helps enforce naming conventions
     replace_strings(analysis_path, "__state__", state, showmessage = FALSE)
     replace_strings(analysis_path, "__period__", time_period, showmessage = FALSE)
+    replace_strings(analysis_path, "__state__", state, ".Rmd", FALSE)
+    replace_strings(analysis_path, "__period__", time_period, ".Rmd", FALSE)
     
     # print message
     message("A new dashboard project has been initialized:\n  ", analysis_path)
