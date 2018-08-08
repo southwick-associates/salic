@@ -5,7 +5,7 @@
 \title{Setup a new state dashboard with default directories and template scripts}
 \usage{
 new_dashboard(state, time_period, sa_path = "E:/SA",
-  R_version = "3.4.3", project_library = "data-dashboards")
+  R_version = "3.5.1", project_library = "data-dashboards")
 }
 \arguments{
 \item{state}{character: Two letter state designation}

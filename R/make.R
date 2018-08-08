@@ -1,8 +1,5 @@
 # functions for making files, folders, etc.
 
-# TODO: look this over. Anything more needed?
-# update section 1 templates based on Iowa processing
-
 #' Setup a new state dashboard with default directories and template scripts
 #' 
 #' This is intended to be run before data processing for a new state begins
@@ -53,7 +50,7 @@ new_dashboard <- function(
                showWarnings = FALSE)
     
     # copy project template files to analysis_path
-    template_paths <- list.files(system.file("new-state", package = "salic"),
+    template_paths <- list.files(system.file("state-template", package = "salic"),
                                  full.names = TRUE)
     for (i in template_paths) {
         file.copy(i, analysis_path, recursive = TRUE, overwrite = FALSE)
@@ -80,6 +77,10 @@ new_dashboard <- function(
     message("A new dashboard project has been initialized:\n  ", analysis_path)
     
 }
+
+# TODO - for future dashboards
+# copy existing code with replacements (__period__, first = FALSE)
+update_dashboard <- function() {}
 
 #' Search and replace string across files with R
 #' 
@@ -126,5 +127,5 @@ replace_strings <- function(
     }
 }
 
-update_project <- function() {}
+
 
