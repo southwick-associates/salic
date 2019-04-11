@@ -23,8 +23,8 @@ replace_strings(path = ".", find_string, replacement_string,
 \item{showmessage}{logical: If TRUE, prints a message about replacement}
 }
 \description{
-This is a helper function for preparing templates in salic. It uses 
-\code{\link[base]{gsub}} (https://gist.github.com/mages/1544009)
+This is a helper function for preparing templates in salic. It uses gsub, see 
+\code{\link[base]{grep}} (https://gist.github.com/mages/1544009)
 }
 \examples{
 salic::replace_strings()

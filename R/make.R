@@ -86,8 +86,8 @@ update_dashboard <- function() {}
 
 #' Search and replace string across files with R
 #' 
-#' This is a helper function for preparing templates in salic. It uses 
-#' \code{\link[base]{gsub}} (https://gist.github.com/mages/1544009)
+#' This is a helper function for preparing templates in salic. It uses gsub, see 
+#' \code{\link[base]{grep}} (https://gist.github.com/mages/1544009)
 #' @inheritParams base::list.files
 #' @param find_string character: String (to find) that will be replaced
 #' @param replacement_string character: New string to use

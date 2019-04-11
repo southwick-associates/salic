@@ -13,7 +13,6 @@
 #' @param grp_var character: name of variable(s) used for grouping
 #' @import dplyr
 #' @family license history functions
-#' @seealso \code{\link{check_rank_sale}}
 #' @export
 #' @examples
 #' ### Run ranking with sample data

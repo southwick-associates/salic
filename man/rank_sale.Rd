@@ -32,8 +32,6 @@ sale_unranked <- select(lic, lic_id, duration) \%>\%
 sale_ranked <- rank_sale(sale_unranked)
 }
 \seealso{
-\code{\link{check_rank_sale}}
-
 Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
