@@ -152,8 +152,8 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' Identify R3 group each year
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} and 
-#' codes R3: 1 = carried, 2 = retained, 3 = reactivated, 4 = recruited, 
-#' where 1 (retained) consists of carried + renewed.
+#' codes R3: 1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited, 
+#' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
 #' @import dplyr

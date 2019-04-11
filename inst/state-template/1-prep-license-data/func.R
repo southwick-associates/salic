@@ -3,6 +3,7 @@
 
 # read_cust("path_to_file", n_max = 1000)
 read_cust <- function(f, ...) {
+    # state-specific read statement
     coltyp <- cols( )
     read_csv(f, col_types = coltyp, progress = FALSE, ...) %>%
         mutate(raw_lic_id = row_number())
@@ -11,16 +12,17 @@ read_lic <- function(f, ...) {}
 read_sale <- function(f, ...) {}
 
 write_raw <- function(df) {
-    f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+    f <- "E:/SA/Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
     # connect, write, disconnect
     con <- dbConnect(RSQLite::SQLite(), f)
-    dbWriteTable(con, deparse(substitute(df)), df) # probably use sql statement instead
+    dbWriteTable(con, deparse(substitute(df)), df)
     dbDisconnect(con)
 }
 
 test_overall <- function(sale, threshold = 0.1) {
     # Throw error if the percentage change in customer counts is outside of threshold
-    # (need to either pull in existing sales data or existing summary)
+    # - need to either pull in existing sales data or existing summary
+    # - probably also output for latex (table, plot, whatever)
 }
 
 test_lic <- function(sale, lic) {

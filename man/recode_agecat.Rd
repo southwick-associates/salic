@@ -6,7 +6,7 @@
 \usage{
 recode_agecat(dat, age_labs = c("0-17", "18-24", "25-34", "35-44",
   "45-54", "55-64", "65+"), age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64,
-  Inf), max_age = 110)
+  Inf), max_age = 110, suppress_check = TRUE)
 }
 \arguments{
 \item{dat}{data frame: Input table}
@@ -17,6 +17,8 @@ recode_agecat(dat, age_labs = c("0-17", "18-24", "25-34", "35-44",
 \code{\link[base]{cut}}}
 
 \item{max_age}{numeric: maximum allowed age. Anything above will be set to missing.}
+
+\item{suppress_check}{logical: If TRUE, does not print a coding summary}
 }
 \description{
 Uses 'birth_year' (from cust) and 'year' (from sale) to identify

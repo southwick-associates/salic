@@ -1,7 +1,7 @@
 # would be only part of the first round (not updates)
 
 build_standard_cust <- function() {
-    f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+    f <- "E:/SA/Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
     con <- dbConnect(RSQLite::SQLite(), f)
     dbSendQuery(con,
         "CREATE TABLE cust(

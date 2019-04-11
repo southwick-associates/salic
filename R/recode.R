@@ -88,6 +88,7 @@ recode_month <- function(sale, month_range = 0:12) {
 #' @param age_breaks numeric: breaks for age category passed to 
 #' \code{\link[base]{cut}}
 #' @param max_age numeric: maximum allowed age. Anything above will be set to missing.
+#' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @import dplyr
 #' @family functions for recoding license data
 #' @export
@@ -102,7 +103,8 @@ recode_agecat <- function(
     dat, 
     age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"),  
     age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf), 
-    max_age = 110
+    max_age = 110,
+    suppress_check = TRUE
 ) {
     # make variables
     dat <- dat %>% mutate(
@@ -113,11 +115,11 @@ recode_agecat <- function(
     )
     
     # check output
-    cat("\nCategory Coding Summary:\n")
-    count(dat, age_year, age, agecat) %>% 
-        data.frame() %>% 
-        print(row.names = FALSE)
-    
-    # return
+    if (!suppress_check) {
+        cat("\nCategory Coding Summary:\n")
+        count(dat, age_year, age, agecat) %>% 
+            data.frame() %>% 
+            print(row.names = FALSE)
+    }
     dat
 }

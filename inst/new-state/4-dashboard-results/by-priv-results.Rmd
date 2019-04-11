@@ -58,7 +58,7 @@ f <- "../../../../../Data-production/Data-Dashboards/_Shared/census.sqlite3"
 db_census <- src_sqlite(f)
 
 pop_county <- tbl(db_census, "pop_acs") %>% 
-    filter(state_abbrev == "VA") %>%
+    filter(state_abbrev == "__state__") %>%
     collect() %>%
     # collapse to 7 age categories
     group_by(county_fips, year, sex, age) %>%
