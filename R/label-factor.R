@@ -65,6 +65,7 @@ factor_R3 <- function(x, levels = 1:4,
 #' but operate on data frames (useful for piping) and produce a check summary.
 #' @param df data frame: Input data frame
 #' @param var numeric: Numeric variable for input
+#' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @inheritParams factor_var
 #' @export
 #' @family functions for labelling numeric variables
@@ -78,10 +79,13 @@ factor_R3 <- function(x, levels = 1:4,
 #' sale2 <- sale2 %>%
 #'     select(-agecat) %>%
 #'     df_factor_age()
-df_factor_var <- function(df, var, levels, labels, ...) {
+df_factor_var <- function(df, var, levels, labels, suppress_check = TRUE, ...) {
     df$var_old <- df[[var]]
     df[[var]] <- factor(df[[var]], levels = levels, labels = labels, ...)
-    count(df, .data[[var]], var_old) %>% data.frame() %>% print(row.names = FALSE)
+    if (!suppress_check) {
+        count(df, .data[[var]], var_old) %>% 
+            data.frame() %>% print(row.names = FALSE)
+    }
     select(df, -var_old)
 }
 

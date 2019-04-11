@@ -8,7 +8,7 @@
 \alias{df_factor_age}
 \title{Convert numeric to factor in data frame and check}
 \usage{
-df_factor_var(df, var, levels, labels, ...)
+df_factor_var(df, var, levels, labels, suppress_check = TRUE, ...)
 
 df_factor_sex(df, var = "sex", levels = 1:2, labels = c("Male",
   "Female"), ...)
@@ -30,6 +30,8 @@ df_factor_age(df, var = "age", levels = 1:7, labels = c("0-17",
 \item{levels}{numeric: Levels for input numeric vector}
 
 \item{labels}{labels: Labels to use for output factor vector}
+
+\item{suppress_check}{logical: If TRUE, does not print a coding summary}
 
 \item{...}{Other arguments passed to \code{\link[base]{factor}}}
 }
