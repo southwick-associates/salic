@@ -68,7 +68,7 @@ new_dashboard <- function(
     file.copy(system.file("new-state-Rfiles", "XX.Rproj", package = "salic"), 
               file.path(analysis_path, paste0(state, "-", time_period, ".Rproj")))
     
-    # replace placeholder strings in Rmd templates
+    # replace placeholder strings in template code
     # doing this saves the analyst some time and helps enforce naming conventions
     replace_strings(analysis_path, "__state__", state, showmessage = FALSE)
     replace_strings(analysis_path, "__period__", time_period, showmessage = FALSE)

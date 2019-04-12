@@ -1,0 +1,185 @@
+---
+title: "Initial Data Check"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(salic)
+library(tibble)
+library(d3heatmap)
+options(scipen = 999)
+knitr::opts_chunk$set(comment = NA)
+```
+
+
+## Load
+
+### Prepped License Table
+
+```{r}
+lic <- read_excel("../data/1-prep-license-data/license-types-prepped.xlsx")
+glimpse(lic)
+```
+
+
+### Raw Sales
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
+src_tbls(db_raw)
+```
+
+```{r}
+# tbl(db_raw, "sale") %>% glimpse()
+sale_in <- tbl(db_raw, "sale") %>%
+    select(cust_id = TXNL_CUST_ID, year = TXNL_YEAR, lic_id = TXNL_LICN_TYPE) %>%
+    collect()
+glimpse(sale_in)
+```
+
+
+### Raw Customers
+
+*Guidelines: Only customer ID is pulled, because we will just use this table to check customer coverage in the sale vs cust table (to insure we don't have obviously missing data)*
+
+```{r}
+# tbl(db_raw, "cust") %>% glimpse()
+cust <- tbl(db_raw, "cust") %>% 
+    select(cust_id = CUST_ID) %>% 
+    collect()
+glimpse(cust)
+```
+
+
+## Filter Non-Hunting/Angling
+
+*Guidelines: States sometimes include other types of data (boat registrations, etc.) that we won't use in the dashboard. These can be removed up-front to focus on relevant sales.*
+
+```{r}
+all_lic <- filter(lic, type %in% c("combo", "hunt", "trap", "fish"))
+sale <- semi_join(sale_in, all_lic, by = "lic_id")
+
+# summary of dropped
+drop_lic <- filter(lic, !(type %in% c("combo", "hunt", "trap", "fish")))
+right_join(sale_in, drop_lic, by = "lic_id") %>%
+    count(lic_id, description) %>%
+    DT::datatable()
+```
+
+
+## Customers by Type-Year
+
+```{r, fig.height=3.5}
+x <- sale %>%
+    left_join(select(lic, lic_id, type), by = "lic_id") %>%
+    distinct(cust_id, type, year) %>%
+    count(type, year)
+
+x %>%
+    ggplot(aes(year, n)) +
+    geom_col(fill = "#d8b365") +
+    facet_wrap(~ type, nrow = 2, scales = "free_y")
+```
+
+
+## Check Hunters
+
+### Counts & Churn by Year
+
+*Guidelines: Compare to USFWS historical license sales. Note that USFWS tracks paid license holders, so excluding free transactions from these counts can sometimes be helpful*
+
+*Also, as of 2018, the 2016/2017 USFWS numbers appear less reliable than older ranges (perhaps there are revision processes that include more careful data validation)*
+
+*Note that churn calculations with `salic::summary_churn()` don't take multi-year & lifetime license sales into account (so churn may be overestimated)*
+
+```{r}
+hunt_lic <- filter(lic, type %in% c("combo", "hunt", "trap"))
+hunt_sale <- semi_join(sale, hunt_lic, by = "lic_id")
+hunt_sale %>%
+    filter(year %in% 2006:2016) %>%
+    salic::summary_initial()
+```
+
+
+### Sales by License Type
+
+*Guidelines: I find the heatmap useful if I suspect missing data (and opening in a new window can be helpful to increase the size for easier viewing)*
+
+```{r, fig.height=10}
+hunt_sale <- select(lic, lic_id, description) %>% right_join(hunt_sale)
+hunt_count <- count(hunt_sale, description, year) %>% 
+    spread(year, n, fill = 0) %>% data.frame()
+row.names(hunt_count) <- hunt_count$description # heatmap uses row names for the y-axis
+hunt_count$description <- NULL
+d3heatmap(hunt_count, scale = "none", colors = "Blues", Rowv = F, Colv = F,
+          dendrogram="none")
+```
+
+
+## Check Anglers
+
+### Counts & Churn by Year
+
+```{r}
+fish_lic <- filter(lic, type %in% c("combo", "fish"))
+fish_sale <- semi_join(sale, fish_lic, by = "lic_id")
+fish_sale %>%
+    filter(year %in% 2006:2016) %>%
+    salic::summary_initial()
+```
+
+
+### Sales by License Type
+
+```{r, fig.height=10}
+fish_sale <- select(lic, lic_id, description) %>% right_join(fish_sale)
+fish_count <- count(fish_sale, description, year) %>% 
+    spread(year, n, fill = 0) %>% data.frame()
+row.names(fish_count) <- fish_count$description # heatmap uses row names for the y-axis
+fish_count$description <- NULL
+d3heatmap(fish_count, scale = "none", colors = "Blues", Rowv = F, Colv = F,
+          dendrogram="none")
+```
+
+
+## Table Coverage
+
+### Customer Coverage
+
+*Guidelines: It's important that all customers in the sales table are included in the customer and license type tables.*
+
+```{r}
+cust_sale <- semi_join(cust, sale, by = "cust_id")
+tribble(
+    ~group, ~count,
+    "Customers in sales table", distinct(sale, cust_id) %>% nrow(),
+    "Customers in customer table", distinct(cust_sale, cust_id) %>% nrow()
+)
+```
+
+### License Type Coverage
+
+```{r}
+lic_sale <- semi_join(lic, sale, by = "lic_id")
+tribble(
+    ~group, ~count,
+    "License Types in sales table", distinct(sale, lic_id) %>% nrow(),
+    "License Types in license table", distinct(lic_sale, lic_id) %>% nrow()
+)
+```
+
+
+```{r}
+sessionInfo()
+```

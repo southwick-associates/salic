@@ -1,0 +1,220 @@
+---
+title: "Write Standardized Intermediate Customer Data to Sqlite"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(stringr)
+library(salic)
+library(lubridate)
+library(maps)
+library(viridis)
+knitr::opts_chunk$set(comment = NA)
+```
+
+
+## Load
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
+src_tbls(db_raw)
+```
+
+```{r}
+# tbl(db_raw, "cust") %>% glimpse()
+cust <- tbl(db_raw, "cust") %>% 
+    select(cust_id = CUST_ID, raw_cust_id, sex = CUST_GENDER, dob = CUST_BIRTH_DATE,
+           last = CUST_LAST_NAME, first = CUST_FIRST_NAME, state = CUST_STATE,
+           zip = CUST_POSTAL_CODE) %>%
+    collect()
+glimpse(cust)
+```
+
+
+## Prep
+
+### Gender
+
+```{r}
+# count(cust, sex)
+cust <- cust %>% mutate(
+    sex_new = ifelse(sex == "M", 1L, ifelse(sex == "F", 2L, NA))
+)
+cust %>%
+    count(sex_new, sex) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
+```
+
+
+### Date of Birth
+
+*Guidelines: It's a good idea to look for odd values here, which could be stand-ins for missing values*
+
+```{r}
+# select(cust, dob) %>% sample_n(5)
+cust <- cust %>%
+    mutate(
+        dob_date = ymd(dob),
+        dob_new = as.character(dob_date)
+    )
+cust %>%
+    sample_n(5) %>%
+    select(dob_new, dob_date, dob)
+
+cust %>%
+    count(year = year(dob_date)) %>%
+    ggplot(aes(year, n)) +
+    geom_area(fill = "#728B8E") +
+    ggtitle("Birth Year customer distribution")
+
+# check missing
+cust %>% filter(is.na(year(dob_date))) %>% nrow()
+```
+
+
+### Name
+
+```{r}
+# select(cust, first, last) %>% sample_n(5)
+cust <- cust %>% mutate(
+    last_new = str_trim(last) %>% str_to_lower(),
+    first_new = str_trim(first) %>% str_to_lower()
+)
+cust %>%
+    sample_n(5) %>%
+    select(first_new, first, last_new, last)
+
+# check missing
+cust %>%
+    filter(is.na(first_new) | is.na(last_new)) %>%
+    select(first_new, first, last_new, last)
+```
+
+
+### State
+
+*Guidelines: Standard state recoding allows for USA (including provinces) and Canada. Probably no need to track other countries.*
+
+```{r, fig.height=3.5}
+# recode using salic-defined function
+data(state_abbreviations) # identifies acceptible values
+cust <- cust %>%
+    salic::recode_state(state_abbreviations)
+
+# counts by state
+x <- cust %>%
+    left_join(rename(state_abbreviations, state_new = state), by = "state_new") %>%
+    mutate(cont_US = ifelse(state_new %in% state.abb & !(state_new %in% c("AK", "HI")), 
+                            TRUE, FALSE),
+           name = tolower(name)) %>%
+    count(country, cont_US, state_new, name) %>%
+    mutate(pct = n / sum(n) * 100) %>%
+    arrange(desc(n))
+
+# check missing
+cust %>% filter(is.na(state_new)) %>% nrow()
+```
+
+```{r, fig.height=3}
+# check contiguous US
+states_map <- map_data("state")
+
+x %>%
+    filter(cont_US, state_new != "__state__") %>%
+    ggplot(aes(map_id = name)) +
+    geom_map(aes(fill = pct), map = states_map) +
+    expand_limits(x = states_map$long, y = states_map$lat) +
+    scale_fill_viridis() +
+    ggtitle("% of Customers (Contiguous US States)")
+```
+
+
+### Residency
+
+*Guidelines: Note that unusual (non-missing) state values are assumed to be nonresidents. You should check to make sure this assumption doesn't cause misidentification issues.*
+
+```{r}
+cust <- cust %>% mutate(
+    cust_res = ifelse(!is.na(state_new) & state_new == "__state__", 1L,  
+                      ifelse(!is.na(state), 0L, NA))
+)
+cust %>%
+    count(cust_res) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
+
+# check oddballs - ensure it is safe to assume these are nonresidents
+# we don't want to misidentify large numbers, but can triage for inconsequential amounts
+cust %>%
+    filter(is.na(state_new), !is.na(cust_res)) %>%
+    count(cust_res, state_new, state) %>%
+    arrange(desc(n))
+```
+
+
+### Zipcode
+
+```{r}
+# count(cust, nchar(zip))
+cust <- cust %>% mutate(
+    # drop non-numeric characters
+    zip_clean = str_replace_all(zip, "[^0-9.]", "") %>% str_trim(),  
+    zip_new = ifelse(nchar(zip_clean) == 5, zip_clean,
+                     # some zips are often zip+4 coded (truncating simplifies things)
+                     ifelse(nchar(zip_clean) >= 9, str_sub(zip_clean, end = 5), NA))
+)
+cust %>%
+    sample_n(5) %>%
+    select(zip_new, zip)
+
+cust %>%
+    count(nchar(zip_new), nchar(zip)) %>%
+    mutate(pct = round(n / sum(n) * 100, 1)) %>%
+    arrange(desc(n))
+
+# check 9-digit+ truncation
+cust %>%
+    filter(nchar(zip) >= 9) %>%
+    select(zip_new, zip) %>%
+    group_by(nchar(zip)) %>%
+    sample_n(2)
+
+# check missing
+cust %>% filter(is.na(zip_new)) %>% nrow()
+```
+
+
+## Finalize
+
+```{r}
+cust <- cust %>% 
+    # Renaming "new" columns and dropping old and unnecessary
+    select(cust_id, sex = sex_new, dob = dob_new, last = last_new, first = first_new,
+           state = state_new, cust_res, zip = zip_new, raw_cust_id) %>%
+    # Adding a "source" column in case future data is appended
+    mutate(source_cust = "__period__")
+glimpse(cust)
+```
+
+
+## Write to Sqlite
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_standard <- src_sqlite(f)
+copy_to(db_standard, cust, temporary = FALSE)
+```
+
+
+```{r}
+sessionInfo()
+```

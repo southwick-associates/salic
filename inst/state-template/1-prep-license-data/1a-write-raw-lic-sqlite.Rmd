@@ -1,0 +1,88 @@
+---
+title: "Load Raw License Type Data into sqlite database"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+In case you want to include some top-level notes
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(salic)
+knitr::opts_chunk$set(comment = NA)
+```
+
+*Guidelines*
+
+- *Any cleaning should be minimal (e.g., adding row IDs, dropping empty rows)*
+
+- *Regarding file paths: Using relative paths to data by going backward (with ../../etc) is a bit awkward, but it will make the code easier to re-run if the path to the SA folder ever changes*
+
+
+## Load
+
+*Guidelines: I recommend using the package readr functions (read_csv, etc.) because they are fast (for loading large data files) and provide useful ways to work around problems that often arise when loading data (parsing errors, etc.)*
+
+```{r}
+# path to raw data file
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__/"
+
+# test import method
+read_lines(f, n_max = 3)
+read_csv(f, n_max = 5) %>% glimpse() # see readr documentation for non-csv formats
+
+# check line count to ensure correct number of rows after data import
+# if this doesn't work, an alternative is to open the file with JujuEdit
+salic::count_lines_textfile(f)
+```
+
+
+*Guidelines: Running `spec()` is useful to see the decisions readr is making about choosing variable type. Incorrectly specifying type can often lead to problems. Using `col_character()` tends to lead to the least problems, but this is less space-efficient for storing integers or numbers.*
+
+```{r}
+# check readr column type specification
+read_csv(f, n_max = 5) %>% spec() 
+
+# column type specification to use for import (varies by state)
+# note: start with output from read_csv() %>% spec()
+coltyp <- cols( )
+
+# load full dataset
+lic <- read_csv(f, col_types = coltyp, progress = FALSE)
+
+# check for problems
+problems(lic)
+
+# get an overview of imported data
+glimpse(lic)
+```
+
+
+## Add Row IDs
+
+*Guidelines: Adding a unique row ID ensures that we always have some means of joining production data back to raw data in the future (if needed for investigation or pulling address data). It may prove redundant (e.g., if rows are uniquely identified with a state-supplied ID). Since it isn't always obvious whether that is the case at the import stage, a good rule of thumb is just to add a row ID to each raw data table stored in sqlite.*
+
+```{r}
+lic <- mutate(lic, raw_lic_id = row_number())
+tail(lic$raw_lic_id)
+```
+
+
+## Write to sqlite
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f, create = TRUE)
+copy_to(db_raw, lic, temporary = FALSE)
+```
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,157 @@
+---
+title: "Write Standardized Intermediate Sales Data to Sqlite"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+    html_document:
+        toc: true
+        toc_float: true
+        code_folding: show
+---
+
+**Notes**
+
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(stringr)
+library(lubridate)
+knitr::opts_chunk$set(comment = NA)
+```
+
+*Guidelines: Saving an intermediate (standardized) database is useful for expediting downstream validation of customer and sales data (and also simplifies the final step of writing production data).*
+
+
+## Load
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/raw-__period__.sqlite3"
+db_raw <- src_sqlite(f)
+src_tbls(db_raw)
+```
+
+```{r}
+# tbl(db_raw, "sale") %>% glimpse()
+sale <- tbl(db_raw, "sale") %>%
+    select(raw_sale_id, cust_id = TXNL_CUST_ID, lic_id = TXNL_LICN_TYPE,
+           year = TXNL_YEAR, source_year, dot = TXNL_TIMESTAMP, 
+           start_date = TXNL_EFFECT_DATE, end_date = TXNL_EXPIRE_DATE,
+           revenue = TXNL_STATE_COST) %>%
+    collect()
+glimpse(sale)
+```
+
+
+## Prep
+
+*Guidelines: The code below may need quite a bit of adjustment to recode state-specific data into a standard format.*
+
+### Transaction Date
+
+```{r}
+# select(sale, dot) %>% sample_n(5)
+sale <- sale %>% mutate(
+    dot_date = str_sub(dot, end = 10) %>% ymd(),
+    dot_new = as.character(dot_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(dot_new, dot)
+
+# check missing
+sale %>% filter(is.na(dot_new)) %>% nrow()
+```
+
+
+### Start Date
+
+```{r}
+# select(sale, start_date) %>% sample_n(5)
+sale <- sale %>% mutate(
+    start_date_date = mdy(start_date),
+    start_date_new = as.character(start_date_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(start_date_new, start_date)
+
+# check missing
+sale %>% filter(is.na(start_date_new)) %>% nrow()
+```
+
+
+### End Date
+
+```{r}
+# select(sale, end_date) %>% sample_n(5)
+sale <- sale %>% mutate(
+    end_date_date = mdy(end_date),
+    end_date_new = as.character(end_date_date)
+) 
+sale %>%
+    sample_n(5) %>%
+    select(end_date_new, end_date)
+
+# check missing
+sale %>% filter(is.na(end_date_new)) %>% nrow()
+```
+
+
+### Summarize Dates
+
+```{r, fig.width=4}
+# reshaping to more easily compare date "events" in ggplot
+count_dates <- sale %>%
+    # sample_n(10000) %>%
+    select(dot = dot_new, start_date = start_date_new, end_date = end_date_new) %>%
+    gather(key = event, value = date, start_date, end_date, dot) %>%
+    mutate(year = year(ymd(date))) %>%
+    count(event, year)
+
+count_dates %>%
+    ggplot(aes(year, n)) +
+    geom_col(fill = "#d8b365") +
+    facet_wrap(~ event, ncol = 1) +
+    ggtitle("Sales by Year - Viewed with 3 different date metrics")
+```
+
+
+### Revenue
+
+*Guidelines: Probably no recoding will be needed here. This is a low priority variable since it isn't included in the dashboard*
+
+```{r}
+summary(sale$revenue)
+sale %>%
+    ggplot(aes(revenue)) +
+    geom_histogram(fill = "#728B8E") +
+    # scale_x_log10() +
+    # xlab("revenue (log10)") +
+    ggtitle("Revenue Histogram")
+```
+
+
+## Finalize
+
+```{r}
+sale <- sale %>% 
+    # Renaming "new" columns and dropping old and unnecessary
+    select(cust_id, lic_id, year, dot = dot_new, start_date = start_date_new, 
+           end_date = end_date_new, revenue, raw_sale_id) %>%
+    # Adding a "source" column in case future data is appended
+    mutate(source_cust = "__period__")
+glimpse(sale)
+```
+
+
+## Write to Sqlite
+
+```{r}
+f <- "../../../../../Data-sensitive/Data-Dashboards/__state__/standard.sqlite3"
+db_standard <- src_sqlite(f, create = TRUE)
+copy_to(db_standard, sale, temporary = FALSE)
+```
+
+
+```{r}
+sessionInfo()
+```
