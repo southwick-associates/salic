@@ -15,6 +15,7 @@ run_lichist <- function(
     priv_nm, lic_filter, yrs = firstyr:lastyr, 
     priv_hist = "NONE", test = FALSE, script_name = "by-permission.R"
 ) {
+    params_passed <- TRUE # to disable default script parameters
     file_end <- ifelse(test, "-test.html", ".html")
     rmarkdown::render(
         input = file.path(script_dir, script_name),
@@ -51,6 +52,7 @@ run_lichist("waterfowl", 'str_detect(priv, "waterfowl")', 2013:lastyr) # incompl
 # for running parameterized summary.R
 # this script shouldn't require state-specific tweaking
 run_summary <- function(data_src = "db_license", script_name = "summary.R" ) {
+    params_passed <- TRUE
     rmarkdown::render(
         input = file.path(script_dir, script_name),
         output_file = file.path("summary", paste0(data_src, ".html")),

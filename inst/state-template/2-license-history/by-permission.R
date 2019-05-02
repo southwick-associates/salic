@@ -9,16 +9,20 @@ library(tidyverse)
 library(DBI)
 library(salic)
 
-# Params ------------------------------------------------------------------
-# Intended to be commented out for production runs
 
-# priv_nm <- "hunt" # (fish, hunt, all_sports) or (deer, trout, etc.)
-# lic_filter <- 'type %in% c("hunt", "combo")'
-# yrs <- 2009:2018
-# priv_hist <- "NONE" # (NONE, fish, hunt, etc.) > for subtype permissions (otherwise "NONE")
-# test <- FALSE # (TRUE, FALSE) > if TRUE, runs a sample & doesn't write output to sqlite
-# db_license <- "E:/SA/Data-production/Data-Dashboards/__state__/license.sqlite3"
-# db_history <- "E:/SA/Data-production/Data-Dashboards/__state__/history.sqlite3"
+# Params (for Testing) -------------------------------------------------------
+
+# These will be suppressed in production runs: via run_lichist()
+# (i.e., params_passed variable should only exist if script is sourced from a function call)
+if (!exists("params_passed")) {
+    priv_nm <- "hunt" # (fish, hunt, all_sports) or (deer, trout, etc.)
+    lic_filter <- 'type %in% c("hunt", "combo")'
+    yrs <- 2009:2018
+    priv_hist <- "NONE" # (NONE, fish, hunt, etc.) > for subtype permissions (otherwise "NONE")
+    test <- FALSE # (TRUE, FALSE) > if TRUE, runs a sample & doesn't write output to sqlite
+    db_license <- "E:/SA/Data-production/Data-Dashboards/__state__/license.sqlite3"
+    db_history <- "E:/SA/Data-production/Data-Dashboards/__state__/history.sqlite3"
+}
 
 
 # Load Data ---------------------------------------------------------------
@@ -56,6 +60,7 @@ if (test) {
 # Ranking creates one row per customer-year
 # - picks highest duration (e.g., a 5-year license would be chosen over a 1-year license)
 # - picks Resident (res == 1) over Nonresident (res == 0).
+lic <- select(lic, lic_id, duration)
 sale <- sale %>%
     left_join(lic, by = "lic_id") %>%
     rank_sale(rank_var = c("duration", "res"), grp_var = c("cust_id", "year"))
@@ -105,6 +110,15 @@ lic_history <- lic_history %>%
 check_history_samp(lic_history) %>% 
     knitr::kable(caption = "Sample of a few customers from license history") %>% print()
 
+# Visual summary
+x <- count(lic_history, year, duration) %>% mutate(cnt = "permission holders")
+y <- count(sale, year, duration) %>% mutate(cnt = "ranked sales")
+bind_rows(x, y) %>%
+    ggplot(aes(year, n, fill = factor(duration))) +
+    geom_col() +
+    facet_wrap(~ cnt) +
+    ggtitle("Permission Holders vs. Purchasers per Year")
+
 # This should show TRUE (i.e., all relevant sales are included)
 nrow(sale) == semi_join(lic_history, sale, by = c("cust_id", "year")) %>% nrow()
 
@@ -115,6 +129,9 @@ if (!test) {
     out_nm <- stringr::str_replace_all(priv_nm, " ", "_") # ensure sqlite compatibility
     
     ## 1. Permission History Data
+    lic_history <- lic_history %>%
+        mutate_at(vars(year, lapse, R3, res, duration, cust_id), as.integer)
+    
     if (!file.exists(db_history)) src_sqlite(db_history, create = TRUE)
     con <- dbConnect(RSQLite::SQLite(), db_history)
     if (out_nm %in% dbListTables(con)) dbRemoveTable(con, out_nm)

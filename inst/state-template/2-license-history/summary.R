@@ -10,14 +10,17 @@ library(DBI)
 library(salic)
 
 
-# Params ------------------------------------------------------------------
-# Intended to be commented out for production runs
+# Params (for Testing) -------------------------------------------------------
 
-# data_src <- "db_history"
-# firstyr <- 2009
-# lastyr <- 2018
-# db_license <- "E:/SA/Data-production/Data-Dashboards/__state__/license.sqlite3"
-# db_history <- "E:/SA/Data-production/Data-Dashboards/__state__/history.sqlite3"
+# These will be suppressed in production runs: via run_summary()
+# (i.e., params_passed variable should only exist if script is sourced from a function call)
+if (!exists("params_passed")) {
+    data_src <- "db_history"
+    firstyr <- 2009
+    lastyr <- 2018
+    db_license <- "E:/SA/Data-production/Data-Dashboards/__state__/license.sqlite3"
+    db_history <- "E:/SA/Data-production/Data-Dashboards/__state__/history.sqlite3"
+}
 
 
 # Get Permission Counts ---------------------------------------------------
