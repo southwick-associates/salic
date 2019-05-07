@@ -65,6 +65,7 @@ if (data_src == "db_history") {
     count_perm <- function(priv_name) {
         hist <- tbl(con, priv_name) %>%
             select(cust_id, year, duration = duration_run, res, R3, lapse) %>%
+            filter(year %in% firstyr:lastyr) %>%
             collect()
         hist %>%
             left_join(cust, by = "cust_id") %>%
@@ -129,29 +130,31 @@ counts %>%
     pct_calc("sex") %>%
     filter(is.na(sex) | sex == "Female") %>%
     pct_plot("sex") +
-    ggtitle("Non-Male Percentages")
+    ggtitle("Non-Male Percentages of Total")
 
 counts %>%
     df_factor_res() %>%
     pct_calc("res") %>%
     filter(is.na(res) | res == "Nonresident") %>%
     pct_plot("res") +
-    ggtitle("Non-Resident Percentages")
+    ggtitle("Non-Resident Percentages of Total")
 
 # R3
 if (data_src == "db_history") {
     counts %>%
         df_factor_R3() %>%
         pct_calc("R3") %>%
+        filter(!is.na(R3), R3 %in% c("Reactivate", "Recruit")) %>%
         pct_plot("R3") +
-        ggtitle("R3 Percentages")
+        ggtitle("Recruit/Reactivate Percentages of Total")
 }
 
 # Churn
 if (data_src == "db_history") {
     counts %>%
+        filter(year != lastyr) %>%
         group_by(permission, year) %>%
-        summarise(churn = mean(lapse)) %>%
+        summarise(churn = weighted.mean(lapse, n)) %>%
         ggplot(aes(year, churn)) +
         geom_line() +
         facet_wrap(~ permission) +
