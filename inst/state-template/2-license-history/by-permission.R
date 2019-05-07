@@ -60,9 +60,8 @@ if (test) {
 # Ranking creates one row per customer-year
 # - picks highest duration (e.g., a 5-year license would be chosen over a 1-year license)
 # - picks Resident (res == 1) over Nonresident (res == 0).
-lic <- select(lic, lic_id, duration)
 sale <- sale %>%
-    left_join(lic, by = "lic_id") %>%
+    left_join(select(lic, lic_id, duration), by = "lic_id") %>%
     rank_sale(rank_var = c("duration", "res"), grp_var = c("cust_id", "year"))
 
 
@@ -93,19 +92,17 @@ if (priv_hist == "NONE") { # for most permissions (overall & privilege types)
     # first get history for specified reference permission, since subtypes use this other
     #   permission for defining R3 and lapse
     con <- dbConnect(RSQLite::SQLite(), db_history)
-    priv_hist <- tbl(con, priv_hist) %>% select(cust_id, year, lapse, R3) %>% collect()
+    ref_history <- tbl(con, priv_hist) %>% select(cust_id, year, lapse, R3) %>% collect()
     dbDisconnect(con)
     
     # identify R3/lapse (by year) depending on the reference permission
     lic_history <- lic_history %>%
-        select(cust_id, year, res) %>%
-        inner_join(priv_hist, by = c("cust_id", "year"))
+        inner_join(ref_history, by = c("cust_id", "year"))
 }
 
 ## 3. Finalize Format & Check
-lic_history <- lic_history %>%
-    select(cust_id, year, res, duration, duration_run, lag_duration_run, bought, lapse, R3, res) %>%
-    mutate_at(vars(duration_run, lag_duration_run, year, lapse, R3), "as.integer")
+# assumes cust_id is integer (which it usually should be)
+lic_history <- mutate_all(lic_history, as.integer)
 
 check_history_samp(lic_history) %>% 
     knitr::kable(caption = "Sample of a few customers from license history") %>% print()
@@ -129,9 +126,6 @@ if (!test) {
     out_nm <- stringr::str_replace_all(priv_nm, " ", "_") # ensure sqlite compatibility
     
     ## 1. Permission History Data
-    lic_history <- lic_history %>%
-        mutate_at(vars(year, lapse, R3, res, duration, cust_id), as.integer)
-    
     if (!file.exists(db_history)) src_sqlite(db_history, create = TRUE)
     con <- dbConnect(RSQLite::SQLite(), db_history)
     if (out_nm %in% dbListTables(con)) dbRemoveTable(con, out_nm)
