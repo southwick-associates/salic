@@ -96,8 +96,7 @@ if (priv_hist == "NONE") { # for most permissions (overall & privilege types)
     dbDisconnect(con)
     
     # identify R3/lapse (by year) depending on the reference permission
-    lic_history <- lic_history %>%
-        inner_join(ref_history, by = c("cust_id", "year"))
+    lic_history <- inner_join(lic_history, ref_history, by = c("cust_id", "year"))
 }
 
 ## 3. Finalize Format & Check
