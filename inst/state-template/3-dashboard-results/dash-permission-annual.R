@@ -31,7 +31,7 @@ if (!exists("params_passed")) {
     
     # pull customer data
     con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "license.sqlite3"))
-    cust <- dbGetQuery(con, "SELECT cust_id, sex, birth_year, county_fips FROM cust")
+    cust <- tbl(con, "cust") %>% select(cust_id, sex, birth_year, county_fips) %>% collect()
     dbDisconnect(con)
 }
 
@@ -64,11 +64,15 @@ group_by(pop_county, year) %>%
 
 
 # Get Production Data ----------------------------------------------------
+# Note: If subtypes are present, will need additional code (see VA 2018 Q4)
 
 ## 1. Permission license history Data
 con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "history.sqlite3"))
-priv <- dbGetQuery(con, paste("SELECT cust_id, year, res, lapse, R3 FROM", priv_nm)) %>%
+priv <- tbl(con, priv_nm) %>%
+    select(cust_id, year, res, lapse, R3) %>%
     filter(year %in% yrs) %>%
+    collect()
+priv <- priv %>%
     left_join(cust, by = "cust_id") %>%
     label_categories() %>%
     recode_agecat() %>%
@@ -77,21 +81,14 @@ dbDisconnect(con)
 
 ## 2. Sales: for showing purchases by month
 con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "license.sqlite3"))
-lic <- tbl(con, "permission") %>% filter(permission == priv_nm) %>% collect()
-
-if (nrow(lic) == 1) { # this logic is needed for the sqlite backend
-    sale <- tbl(con, "sale") %>% filter(lic_id == lic$lic_id)
-} else {
-    sale <- tbl(con, "sale") %>% filter(lic_id %in% lic$lic_id)
-}
-sale <- sale %>%
+lic <- tbl(con, "permission") %>% 
+    filter(permission == priv_nm) %>% 
+    collect()
+sale <- tbl(con, "sale") %>%
     select(cust_id, year, month) %>% 
-    filter(year %in% yrs) %>%
+    filter(year %in% yrs, lic_id %in% lic$lic_id) %>%
     collect()
 dbDisconnect(con)
-
-## 3. Residency-specific filtering & recoding for subtypes (see VA 2018 code)
-# not desirable for new states
 
 
 # Estimate ----------------------------------------------------------------

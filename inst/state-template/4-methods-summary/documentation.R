@@ -1,10 +1,13 @@
 # Get documenation needed for dashboard
 
 # Documentation (docx) to be updated for each dashboard. 
-# (Stored in the O365 group: MO > Deliverables)
+# - To be stored in the O365 group: __state__ > Deliverables
+# - Template in the O365 group: Analyst Docs > Docs to Share with States > XX Method...docx
 
 # - Duplication Summary (included in Chelsea's documentation.pdf, stored in the 1-prep-license-data folder)
 # - License Types: A stripped-down table to include in the summary
+# - Other state-specific info as needed (e.g., lifetime licenses, etc.)
+
 
 library(tidyverse)
 

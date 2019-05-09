@@ -21,7 +21,7 @@ script_dir <- "3-dashboard-results"
 # Pull Customer Data --------------------------------------------------------
 
 con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "license.sqlite3"))
-cust <- dbGetQuery(con, "SELECT cust_id, sex, birth_year, county_fips FROM cust")
+cust <- tbl(con, "cust") %>% select(cust_id, sex, birth_year, county_fips) %>% collect()
 dbDisconnect(con)
 
 
