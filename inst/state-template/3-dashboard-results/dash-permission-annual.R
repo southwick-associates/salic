@@ -85,8 +85,8 @@ lic <- tbl(con, "permission") %>%
     filter(permission == priv_nm) %>% 
     collect()
 sale <- tbl(con, "sale") %>%
-    select(cust_id, year, month) %>% 
     filter(year %in% yrs, lic_id %in% lic$lic_id) %>%
+    select(cust_id, year, month) %>% 
     collect()
 dbDisconnect(con)
 

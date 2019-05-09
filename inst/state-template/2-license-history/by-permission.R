@@ -29,19 +29,14 @@ if (!exists("params_passed")) {
 
 ## 1. license types
 con <- dbConnect(RSQLite::SQLite(), db_license)
-lic_all <- tbl(con, "lic") %>% collect()
+lic_all <- dbReadTable(con, "lic")
 lic <- filter_(lic_all, .dots = lic_filter)
 DT::datatable(lic)
 
 ## 2. sales
-# The if condition just ensures the logic works on the sqlite backend (== vs %in%)
-if (nrow(lic) == 1) {
-    sale <- tbl(con, "sale") %>% filter(lic_id == lic$lic_id) 
-} else {
-    sale <- tbl(con, "sale") %>% filter(lic_id %in% lic$lic_id)
-}
-sale <- select(sale, cust_id, lic_id, year, res) %>% 
-    filter(year %in% yrs) %>%
+sale <- tbl(con, "sale") %>%
+    filter(year %in% yrs, lic_id %in% lic$lic_id) %>%
+    select(cust_id, lic_id, year, res) %>% 
     collect()
 dbDisconnect(con)
 
