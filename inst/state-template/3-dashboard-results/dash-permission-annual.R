@@ -20,14 +20,12 @@ if (!exists("params_passed")) {
     state <- "__state__"
     yrs <- 2009:2018
     dashboard_yrs <- max(yrs) # focus years to be available in dashboard dropdown menu
-    quarter <- 4 # quarter to be estimated
-    current_quarter <- 4 # quarter of most recent data
     data_dir <- "E:/SA/Data-production/Data-Dashboards"
     out_dir <- "data/3-dashboard-results"
     
     priv_nm <- "hunt" # (fish, hunt, all_sports) or (deer, trout, etc.)
     priv_ref <- "NONE" # (NONE, fish, hunt, etc.) > subtype/priv permissions (otherwise "NONE")
-    out_nm <- c(priv_nm, max(yrs), current_quarter) %>% paste(collapse = "-")
+    out_nm <- c(priv_nm, max(yrs)) %>% paste(collapse = "-")
     
     # pull customer data
     con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "license.sqlite3"))
@@ -160,7 +158,7 @@ out_tbl <- bind_rows(
     lapply(churn, tableau, metric = "churn"),
     if (has_recruit) lapply(part_new, tableau, metric = "participants - recruited")
 ) %>%
-    mutate(quarter = quarter, group = priv_nm) %>%
+    mutate(quarter = 4, group = priv_nm) %>%
     select(quarter, group, metric, segment, year, category, value)
 glimpse(out_tbl)
 

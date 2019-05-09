@@ -11,8 +11,6 @@ source("3-dashboard-results/func.R")
 state <- "__state__"
 yrs <- 2009:2018
 dashboard_yrs <- max(yrs) # focus years to be available in dashboard dropdown menu
-quarter <- 4 # quarter to be estimated
-current_quarter <- 4 # quarter of most recent data
 data_dir <- "E:/SA/Data-production/Data-Dashboards"
 out_dir <- "data/3-dashboard-results"
 script_dir <- "3-dashboard-results"
@@ -31,7 +29,7 @@ dbDisconnect(con)
 run_dash <- function(priv_nm, priv_ref = "NONE") {
 
     params_passed <- TRUE # to disable default script parameters
-    out_nm <- c(priv_nm, max(yrs), current_quarter) %>% paste(collapse = "-")
+    out_nm <- c(priv_nm, max(yrs)) %>% paste(collapse = "-")
     dir.create(file.path(script_dir, "log"), showWarnings = FALSE)
     
     rmarkdown::render(
