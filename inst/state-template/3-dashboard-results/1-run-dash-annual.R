@@ -1,4 +1,5 @@
 # Run dashboard results for each Permission
+# the "annual" code is the specific case (doesn't allow for sub-year results)
 
 library(tidyverse)
 library(salic)
@@ -10,8 +11,6 @@ source("3-dashboard-results/func.R")
 
 state <- "__state__"
 yrs <- 2009:2018
-current_quarter <- 1
-quarters <- c(2,4)
 dashboard_yrs <- max(yrs) # focus years to be available in dashboard dropdown menu
 data_dir <- "E:/SA/Data-production/Data-Dashboards"
 out_dir <- "data/3-dashboard-results"
@@ -32,7 +31,7 @@ run_dash <- function(priv_nm, priv_ref = "NONE") {
     params_passed <- TRUE # to disable default script parameters
     dir.create(file.path(script_dir, "log"), showWarnings = FALSE)
     rmarkdown::render(
-        input = file.path(script_dir, "dash-permission.R"),
+        input = file.path(script_dir, "dash-permission-annual.R"),
         output_file = file.path("log", paste0(priv_nm, ".html")),
         knit_root_dir = getwd(), quiet = FALSE
     )
@@ -63,7 +62,7 @@ filter(dat, segment != "month") %>%
 
 # provide to Ben for summary
 # counts by year for each group (permission)
-filter(dat, segment == "All", metric == "participants", quarter == current_quarter) %>% 
+filter(dat, segment == "All", metric == "participants") %>% 
     select(group, year, value) %>% 
     spread(year, value) %>%
     write.csv(file = "out/priv-counts.csv")

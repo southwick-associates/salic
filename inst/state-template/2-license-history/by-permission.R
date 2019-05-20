@@ -96,7 +96,7 @@ if (priv_hist == "NONE") { # for most permissions (overall & privilege types)
 
 ## 3. Finalize Format & Check
 # assumes cust_id is integer (which it usually should be)
-lic_history <- mutate_all(lic_history, as.integer)
+lic_history <- mutate_at(lic_history, vars(-bought), as.integer)
 
 check_history_samp(lic_history) %>% 
     knitr::kable(caption = "Sample of a few customers from license history") %>% print()

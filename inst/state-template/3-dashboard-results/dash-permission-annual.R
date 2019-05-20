@@ -25,7 +25,6 @@ if (!exists("params_passed")) {
     
     priv_nm <- "hunt" # (fish, hunt, all_sports) or (deer, trout, etc.)
     priv_ref <- "NONE" # (NONE, fish, hunt, etc.) > subtype/priv permissions (otherwise "NONE")
-    out_nm <- c(priv_nm, max(yrs)) %>% paste(collapse = "-")
     
     # pull customer data
     con <- dbConnect(RSQLite::SQLite(), file.path(data_dir, state, "license.sqlite3"))
@@ -45,7 +44,7 @@ county_fips <- tbl(con, "county_fips") %>%
 cust <- left_join(cust, county_fips, by = "county_fips") %>% select(-county_fips)
 
 pop_county <- tbl(con, "pop_acs") %>%
-    select(-state) %>% 
+    select(-state) %>% # needed for the next line (abbrev filter) to run correctly
     filter(state_abbrev == state, year %in% yrs) %>%
     collect()
 dbDisconnect(con)
@@ -54,8 +53,9 @@ pop_county <- pop_county %>%
     aggregate_pop() %>% # collapse to 7 age categories
     label_categories() %>% # convert numeric categories to factor
     left_join(county_fips, by = "county_fips") %>%
-    extrapolate_pop(yrs) # extrapolate (if needed) with statewide avg % change
+    extrapolate_pop(yrs) # filling in missing population data (if needed)
 
+# population summary as a validation step (easily checked using google)
 group_by(pop_county, year) %>% 
     summarise(sum(pop)) %>% 
     knitr::kable(caption = "State Population", format.args = list(big.mark = ","))
@@ -97,8 +97,7 @@ segs <- c("tot", "res", "sex", "age", "county")
 part <- sapply(segs[1:4], function(i) est_part(priv, i), simplify = F)
 part <- lapply(part, function(x) scaleup_part(x, part$tot))
 
-# Resident Participants 
-# (intermediate results for rate estimation, other than for county)
+# Participants by residency (for rates & county estimation)
 priv_res <- filter(priv, res == "Resident")
 tot_res <- filter(part[["res"]], res == "Resident") # for scaling
 
@@ -118,8 +117,7 @@ if (priv_ref == "NONE") {
     
 } else { 
     # estimate a privilege rate instead (based on reference permission participants)
-    out_ref <- str_replace(out_nm, priv_nm, priv_ref)
-    pop <- readRDS(file.path(out_dir, "part", paste0(out_ref, ".rds"))) %>%
+    pop <- readRDS(file.path(out_dir, "part", paste0(priv_ref, ".rds"))) %>%
         lapply(function(x) rename(x, pop = part))
     rate <- mapply(est_rate, part, pop, SIMPLIFY = F, MoreArgs = list(flag_rate = 100))
 }
@@ -167,13 +165,13 @@ glimpse(out_tbl)
 
 ## save out_tbl results of selected permission
 dir.create(out_dir, showWarnings = FALSE)
-saveRDS(out_tbl, file.path(out_dir, paste0(out_nm, ".rds")))
+saveRDS(out_tbl, file.path(out_dir, paste0(priv_nm, ".rds")))
 
 ## save total participant results for reference permissions (e.g., hunt, fish)
 # privileges such as trout will use these for estimating privilege rate
 if (priv_ref == "NONE") {
     dir.create(file.path(out_dir, "part"), showWarnings = FALSE)
-    saveRDS(part, file.path(out_dir, "part", paste0(out_nm, ".rds")))
+    saveRDS(part, file.path(out_dir, "part", paste0(priv_nm, ".rds")))
 }
 
 ## check
