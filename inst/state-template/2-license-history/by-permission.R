@@ -104,11 +104,12 @@ check_history_samp(lic_history) %>%
 # Visual summary
 x <- count(lic_history, year, duration) %>% mutate(cnt = "permission holders")
 y <- count(sale, year, duration) %>% mutate(cnt = "ranked sales")
+note <- "Note: NA durations in 'permission holders' refer to carried-over multi-year or lifetimes"
 bind_rows(x, y) %>%
     ggplot(aes(year, n, fill = factor(duration))) +
     geom_col() +
     facet_wrap(~ cnt) +
-    ggtitle("Permission Holders vs. Purchasers per Year")
+    ggtitle("Permission Holders vs. Purchasers per Year", note)
 
 # This should show TRUE (i.e., all relevant sales are included)
 nrow(sale) == semi_join(lic_history, sale, by = c("cust_id", "year")) %>% nrow()

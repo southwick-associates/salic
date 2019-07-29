@@ -23,9 +23,19 @@
 #' sale_unranked <- select(lic, lic_id, duration) %>%
 #'     right_join(sale) %>%
 #'     select(cust_id, year, duration)
-#'
-#' # Perform ranking and check the result
+#'     
+#' # Randomly generate a duration variable for this example
+#' sale_unranked$duration <- base::sample(1:5, nrow(sale_unranked), replace = T)
+#' 
+#' # Perform ranking
 #' sale_ranked <- rank_sale(sale_unranked)
+#' 
+#' # check sale ranking
+#' left_join(
+#'     count(sale_ranked, duration), 
+#'     distinct(sale_unranked, cust_id, year, duration) %>% count(duration), 
+#'     by = "duration"
+#' )
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
     sale %>%
         # to insure highest value is picked - sort ascending, pick last
@@ -33,6 +43,52 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
         group_by_(.dots = grp_var) %>%
         slice(n()) %>%
         ungroup()
+}
+
+#' Join earliest sale month by customer-year to ranked sale table.
+#'
+#' This function is only intended to be run following \code{\link{rank_sale}}
+#' @param sale_ranked data frame: Input ranked sales data
+#' @param sale_unranked data frame: Input unranked sales data
+#' @import dplyr
+#' @family license history functions
+#' @export
+#' @examples
+#' ### Run ranking with sample data
+#' library(tidyverse)
+#' data(lic, sale, package = "salic")
+#'
+#' # Join duration variable to sale data
+#' sale_unranked <- select(lic, lic_id, duration) %>%
+#'     right_join(sale) %>%
+#'     select(cust_id, year, duration)
+#'     
+#' # Randomly generate a month variable for this example
+#' sale_unranked$month <- base::sample(1:12, nrow(sale_unranked), replace = T)
+#'
+#' # Perform ranking
+#' sale_ranked <- sale_unranked %>%
+#'     rank_sale() %>%
+#'     rank_month(sale_unranked)
+#' 
+#' # check month ranking
+#' left_join(
+#'     count(sale_ranked, month), 
+#'     distinct(sale_unranked, cust_id, year, month) %>% count(month), 
+#'     by = "month"
+#' )
+rank_month <- function(sale_ranked, sale_unranked) {
+    if (is.null(sale_unranked$month)) {
+        stop("'month' must be included in 'sale_unranked' data frame")
+    }
+    earliest_month <- sale_unranked %>%
+        arrange(month) %>%
+        group_by(cust_id, year) %>%
+        slice(1L) %>%
+        ungroup() %>%
+        select(cust_id, year, month)
+    sale_ranked$month <- NULL
+    left_join(sale_ranked, earliest_month, by = c("cust_id", "year"))
 }
 
 #' Make a License History Table
