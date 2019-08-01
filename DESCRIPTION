@@ -1,7 +1,7 @@
 Package: salic
 Type: Package
 Title: Prepare License Data from Wildlife Agencies
-Version: 1.4
+Version: 1.4.1
 Date: 2019-08-01
 Author: Dan Kary
 Maintainer: Dan Kary <Rsoftware@SouthwickAssociates.com>
@@ -16,10 +16,10 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: FALSE
 Depends:
-    R (>= 3.3.3)
+    R (>= 3.5.1)
 Imports:
-    dplyr (>= 0.7.0),
-    lubridate (>= 1.7.1)
+    dplyr (>= 0.7.6),
+    lubridate (>= 1.7.4)
 RoxygenNote: 6.1.0
 Suggests:
-    tidyr (>= 0.6.3)
+    tidyr (>= 0.8.1)
