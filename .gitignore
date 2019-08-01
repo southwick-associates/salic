@@ -5,5 +5,6 @@
 .Rprofile
 snapshot-library.csv
 salic.Rproj
-TODO
+TODO.md
 /tmp/*
+README.html

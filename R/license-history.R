@@ -347,6 +347,12 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 check_identify_R3 <- function(lic_history, yrs) {
     # this function only produces an output if R3 has been identified
     # (which it might not have been if there aren't at least 5 years of data)
+    
+    # error - don't run if tidyr isn't installed
+    if (!requireNamespace("tidyr", quietly = TRUE)) {
+        stop("tidyr needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     if ("yrs_since" %in% names(lic_history)) {
         lic_history %>%
             filter(year > yrs[5]) %>%
@@ -369,6 +375,11 @@ check_identify_R3 <- function(lic_history, yrs) {
 #' @examples
 #' # See ?salic::identify_lapse
 check_identify_lapse <- function(lic_history) {
+    # error - don't run if tidyr isn't installed
+    if (!requireNamespace("tidyr", quietly = TRUE)) {
+        stop("tidyr needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     lic_history %>%
         mutate(
             yrs_till_next = ifelse(is.na(lead_year), "Never",  

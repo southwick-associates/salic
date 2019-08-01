@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^tmp/
-TODO
+TODO.md
 .Rprofile
 snapshot-library.csv
+README.html
