@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^tmp/
 TODO
+.Rprofile
+snapshot-library.csv
