@@ -3,17 +3,16 @@
 \docType{data}
 \name{lic}
 \alias{lic}
-\title{Sample Data: GA Hunting Licenses}
-\format{A data frame with 32 rows and 4 variables
+\title{Sample Data: Hunting/Fishing License Types}
+\format{A data frame with 97 rows and 4 variables
 \describe{
-\item{lic_id}{License ID}
-\item{description}{License Description}
-\item{priv}{Privilege Type}
-\item{duration}{Duration (years, minimum of 1) for License
-(where duration == 99 corresponds to a lifetime license)}
+\item{lic_id}{License ID (integer) (primary key)}
+\item{type}{License Type (character) (hunt, fish, combo)}
+\item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
+\item{lic_res}{License Residency (integer) (1=Res, 0=Nonres, NA=Unspecified)}
 }}
 \description{
-A data frame describing hunting licenses
+Sample Data: Hunting/Fishing License Types
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{sale}},

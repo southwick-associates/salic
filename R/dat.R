@@ -1,6 +1,5 @@
 # Documentation for Sample Data
 
-
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'
 #' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
@@ -17,58 +16,50 @@
 #' @family Sample Data
 NULL
 
+# License Data Tables ---------------------------------------------------
 
-# 3 License Data Tables ---------------------------------------------------
-
-
-#' Sample Data: GA Hunting Customers
-#'
-#' A data frame with a random sample of 1000 GA hunting customers
+#' Sample Data: 1,000 Hunting/Fishing Customers
 #'
 #' @docType data
 #' @keywords datasets
 #' @name cust
-#' @format A data frame with 1000 rows and 4 variables
+#' @format A data frame with 1,000 rows and 4 variables
 #' \describe{
-#' \item{cust_id}{Customer ID}
-#' \item{dob}{Date of Birth}
-#' \item{state}{State of Residence}
-#' \item{sex}{Gender}
+#' \item{cust_id}{Customer ID (integer) (primary key)}
+#' \item{sex}{Gender (integer) (1=Male, 2=Female)}
+#' \item{birth_year}{Year of Birth (integer) (yyyy)}
+#' \item{cust_res}{State of Residence based on Address (integer) (1=Res, 0=Nonres)}
 #' }
 #' @family Sample Data
 NULL
 
-#' Sample Data: GA Hunting Licenses
-#'
-#' A data frame describing hunting licenses
+#' Sample Data: Hunting/Fishing License Types
 #'
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 32 rows and 4 variables
+#' @format A data frame with 97 rows and 4 variables
 #' \describe{
-#' \item{lic_id}{License ID}
-#' \item{description}{License Description}
-#' \item{priv}{Privilege Type}
-#' \item{duration}{Duration (years, minimum of 1) for License
-#' (where duration == 99 corresponds to a lifetime license)}
+#' \item{lic_id}{License ID (integer) (primary key)}
+#' \item{type}{License Type (character) (hunt, fish, combo)}
+#' \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
+#' \item{lic_res}{License Residency (integer) (1=Res, 0=Nonres, NA=Unspecified)}
 #' }
 #' @family Sample Data
 NULL
 
-#' Sample Data: GA Hunting Sales
-#'
-#' A data frame with GA Hunting sales corresponding to the 1000 customer sample
+#' Sample Data: Hunting/Fishing Sales for 1,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 2802 rows and 4 variables
+#' @format A data frame with 4,651 rows and 5 variables
 #' \describe{
-#' \item{cust_id}{Customer ID}
-#' \item{lic_id}{License ID}
-#' \item{dot}{Date of Transaction}
-#' \item{year}{License Year}
+#' \item{cust_id}{Customer ID (integer) (foreign key)}
+#' \item{lic_id}{License ID (integer) (foreign key)}
+#' \item{year}{License Year (integer) (yyyy)}
+#' \item{dot}{Transaction Purchase Date (character) (yyyy-mm-dd)}
+#' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 #' }
 #' @family Sample Data
 NULL

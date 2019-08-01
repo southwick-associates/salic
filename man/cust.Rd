@@ -3,16 +3,16 @@
 \docType{data}
 \name{cust}
 \alias{cust}
-\title{Sample Data: GA Hunting Customers}
-\format{A data frame with 1000 rows and 4 variables
+\title{Sample Data: 1,000 Hunting/Fishing Customers}
+\format{A data frame with 1,000 rows and 4 variables
 \describe{
-\item{cust_id}{Customer ID}
-\item{dob}{Date of Birth}
-\item{state}{State of Residence}
-\item{sex}{Gender}
+\item{cust_id}{Customer ID (integer) (primary key)}
+\item{sex}{Gender (integer) (1=Male, 2=Female)}
+\item{birth_year}{Year of Birth (integer) (yyyy)}
+\item{cust_res}{State of Residence based on Address (integer) (1=Res, 0=Nonres)}
 }}
 \description{
-A data frame with a random sample of 1000 GA hunting customers
+Sample Data: 1,000 Hunting/Fishing Customers
 }
 \seealso{
 Other Sample Data: \code{\link{lic}}, \code{\link{sale}},

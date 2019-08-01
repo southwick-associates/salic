@@ -4,7 +4,7 @@ Title: Prepare License Data from Wildlife Agencies
 Version: 1.4
 Date: 2019-08-01
 Author: Dan Kary
-Maintainer: Dan Kary <Dan@SouthwickAssociates.com>
+Maintainer: Dan Kary <Rsoftware@SouthwickAssociates.com>
 Description: A set of functions for getting license data into a standard format
     that facilitates further analysis (churn, R3, etc.). Much of this functionality
     was built for producing state data dashboards, originally developed under the

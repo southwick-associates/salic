@@ -1,6 +1,7 @@
 
 # Prepare License Data from Wildlife Agencies
 Write an Overview Here
+- make sure to include disclaimer about the scope of this software package (specifically designed to work with agency license data)
 
 ## Usage
 Might make sense to link to the vignette here (to be written)

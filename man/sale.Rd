@@ -3,16 +3,17 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: GA Hunting Sales}
-\format{A data frame with 2802 rows and 4 variables
+\title{Sample Data: Hunting/Fishing Sales for 1,000 Customers}
+\format{A data frame with 4,651 rows and 5 variables
 \describe{
-\item{cust_id}{Customer ID}
-\item{lic_id}{License ID}
-\item{dot}{Date of Transaction}
-\item{year}{License Year}
+\item{cust_id}{Customer ID (integer) (foreign key)}
+\item{lic_id}{License ID (integer) (foreign key)}
+\item{year}{License Year (integer) (yyyy)}
+\item{dot}{Transaction Purchase Date (character) (yyyy-mm-dd)}
+\item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{
-A data frame with GA Hunting sales corresponding to the 1000 customer sample
+Sample Data: Hunting/Fishing Sales for 1,000 Customers
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
