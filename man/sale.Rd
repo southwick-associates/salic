@@ -3,8 +3,8 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: Hunting/Fishing Sales for 1,000 Customers}
-\format{A data frame with 4,651 rows and 5 variables
+\title{Sample Data: Sales (2008 through 2019)}
+\format{A data frame with 14,790 rows and 5 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}
@@ -13,7 +13,7 @@
 \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{
-Sample Data: Hunting/Fishing Sales for 1,000 Customers
+Sample Data: Sales (2008 through 2019)
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{lic}},

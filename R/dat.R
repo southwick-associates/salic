@@ -18,12 +18,12 @@ NULL
 
 # License Data Tables ---------------------------------------------------
 
-#' Sample Data: 1,000 Hunting/Fishing Customers
+#' Sample Data: 3,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
 #' @name cust
-#' @format A data frame with 1,000 rows and 4 variables
+#' @format A data frame with 3,000 rows and 4 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (primary key)}
 #' \item{sex}{Gender (integer) (1=Male, 2=Female)}
@@ -33,12 +33,12 @@ NULL
 #' @family Sample Data
 NULL
 
-#' Sample Data: Hunting/Fishing License Types
+#' Sample Data: License Types
 #'
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 97 rows and 4 variables
+#' @format A data frame with 105 rows and 4 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
@@ -48,12 +48,12 @@ NULL
 #' @family Sample Data
 NULL
 
-#' Sample Data: Hunting/Fishing Sales for 1,000 Customers
+#' Sample Data: Sales (2008 through 2019)
 #'
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 4,651 rows and 5 variables
+#' @format A data frame with 14,790 rows and 5 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}

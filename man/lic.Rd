@@ -3,8 +3,8 @@
 \docType{data}
 \name{lic}
 \alias{lic}
-\title{Sample Data: Hunting/Fishing License Types}
-\format{A data frame with 97 rows and 4 variables
+\title{Sample Data: License Types}
+\format{A data frame with 105 rows and 4 variables
 \describe{
 \item{lic_id}{License ID (integer) (primary key)}
 \item{type}{License Type (character) (hunt, fish, combo)}
@@ -12,7 +12,7 @@
 \item{lic_res}{License Residency (integer) (1=Res, 0=Nonres, NA=Unspecified)}
 }}
 \description{
-Sample Data: Hunting/Fishing License Types
+Sample Data: License Types
 }
 \seealso{
 Other Sample Data: \code{\link{cust}}, \code{\link{sale}},
