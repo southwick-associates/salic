@@ -4,12 +4,12 @@
 \name{sale}
 \alias{sale}
 \title{Sample Data: Sales (2008 through 2019)}
-\format{A data frame with 14,790 rows and 5 variables
+\format{A data frame with 16,352 rows and 5 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}
 \item{year}{License Year (integer) (yyyy)}
-\item{dot}{Transaction Purchase Date (character) (yyyy-mm-dd)}
+\item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
 \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{

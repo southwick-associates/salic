@@ -4,12 +4,11 @@
 \name{cust}
 \alias{cust}
 \title{Sample Data: 3,000 Customers}
-\format{A data frame with 3,000 rows and 4 variables
+\format{A data frame with 3,000 rows and 3 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (primary key)}
 \item{sex}{Gender (integer) (1=Male, 2=Female)}
 \item{birth_year}{Year of Birth (integer) (yyyy)}
-\item{cust_res}{State of Residence based on Address (integer) (1=Res, 0=Nonres)}
 }}
 \description{
 Sample Data: 3,000 Customers

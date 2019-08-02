@@ -4,12 +4,11 @@
 \name{lic}
 \alias{lic}
 \title{Sample Data: License Types}
-\format{A data frame with 105 rows and 4 variables
+\format{A data frame with 112 rows and 3 variables
 \describe{
 \item{lic_id}{License ID (integer) (primary key)}
 \item{type}{License Type (character) (hunt, fish, combo)}
 \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
-\item{lic_res}{License Residency (integer) (1=Res, 0=Nonres, NA=Unspecified)}
 }}
 \description{
 Sample Data: License Types

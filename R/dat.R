@@ -23,12 +23,11 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name cust
-#' @format A data frame with 3,000 rows and 4 variables
+#' @format A data frame with 3,000 rows and 3 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (primary key)}
 #' \item{sex}{Gender (integer) (1=Male, 2=Female)}
 #' \item{birth_year}{Year of Birth (integer) (yyyy)}
-#' \item{cust_res}{State of Residence based on Address (integer) (1=Res, 0=Nonres)}
 #' }
 #' @family Sample Data
 NULL
@@ -38,12 +37,11 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 105 rows and 4 variables
+#' @format A data frame with 112 rows and 3 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
 #' \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
-#' \item{lic_res}{License Residency (integer) (1=Res, 0=Nonres, NA=Unspecified)}
 #' }
 #' @family Sample Data
 NULL
@@ -53,12 +51,12 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 14,790 rows and 5 variables
+#' @format A data frame with 16,352 rows and 5 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}
 #' \item{year}{License Year (integer) (yyyy)}
-#' \item{dot}{Transaction Purchase Date (character) (yyyy-mm-dd)}
+#' \item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
 #' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 #' }
 #' @family Sample Data

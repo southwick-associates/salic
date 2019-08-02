@@ -23,7 +23,7 @@ data(lic, sale, package = "salic")
 # Join duration variable to sale data
 sale_unranked <- select(lic, lic_id, duration) \%>\%
     right_join(sale) \%>\%
-    select(cust_id, year, duration, dot)
+    select(cust_id, year, duration, month)
 
 # Perform sale ranking
 sale_ranked <- rank_sale(sale_unranked)
