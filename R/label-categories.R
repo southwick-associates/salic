@@ -15,7 +15,7 @@
 #' @family functions for labelling numeric variables
 #' @examples
 #' library(dplyr)
-#' data(cust, sale, package = "salic")
+#' data(cust, sale)
 #' sale2 <- left_join(sale, cust) %>% 
 #'     recode_agecat()
 #' sale2 %>%
@@ -69,7 +69,7 @@ factor_R3 <- function(x, levels = 1:4,
 #' @family functions for labelling numeric variables
 #' @examples
 #' library(dplyr)
-#' data(cust, sale, package = "salic")
+#' data(cust, sale)
 #' sale2 <- left_join(sale, cust) %>% 
 #'     recode_agecat()
 #' sale2 %>%

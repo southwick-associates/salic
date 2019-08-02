@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{rank_sale}
 \alias{rank_sale}
-\title{Aggregate a Sale Table to insure 1 row per customer per year.}
+\title{Aggregate a Sale Table to ensure 1 row per customer per year.}
 \usage{
 rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 }
@@ -20,7 +20,7 @@ license duration.
 }
 \examples{
 library(dplyr)
-data(lic, sale, package = "salic")
+data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)

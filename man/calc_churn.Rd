@@ -21,12 +21,12 @@ licenses, so it should only be used for initial data validation
 }
 \examples{
 library(dplyr)
-load(sale, lic, package = "salic")
+data(sale)
 
-y <- select(sale, cust_id, year) \%>\%
-    filter(year \%in\% 2012:2013) \%>\% distinct()
-
-calc_churn(y, 2013)
+select(sale, cust_id, year) \%>\%
+    filter(year \%in\% 2012:2013) \%>\% 
+    distinct() \%>\%
+    calc_churn(2013)
 }
 \seealso{
 Other internal helper functions: \code{\link{format_num}},

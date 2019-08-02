@@ -15,9 +15,7 @@ This is a wrapper function that combines \code{\link{summary_sale}} and
 \code{\link{summary_churn}}
 }
 \examples{
-library(dplyr)
-data(sale, lic, package = "salic")
-
+data(sale)
 summary_initial(sale)
 }
 \seealso{

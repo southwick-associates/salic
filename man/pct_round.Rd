@@ -20,6 +20,7 @@ in other summary functions in salic.
 \examples{
 x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
 x$pct <- pct_round(x$pop / sum(x$pop))
+x
 }
 \seealso{
 Other internal helper functions: \code{\link{calc_churn}},

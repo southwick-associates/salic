@@ -28,16 +28,12 @@ summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
 Summarize sales and customers by year
 }
 \examples{
-library(dplyr)
-data(sale, lic, package = "salic")
-
+data(sale)
 summary_sale(sale)
-summary_sale(sale, out = "summary_sale.csv")
 
 # example with made-up license revenue
-sale <- left_join(sale, lic)
-sale <- mutate(sale, revenue = 30)
-summary_sale(sale, rnd = 2, include_revenue = T)
+sale2 <- mutate(sale, revenue = 30)
+summary_sale(sale2, rnd = 2, include_revenue = T)
 }
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},

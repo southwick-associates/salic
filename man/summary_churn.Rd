@@ -27,15 +27,12 @@ licenses, so it should only be used for initial data validation
 }
 \examples{
 library(dplyr)
-data(sale, lic, package = "salic")
+data(sale, lic)
+summary_churn(sale, 2012:2018)
 
-summary_churn(sale, 2004:2013)
-summary_churn(sale, 2004:2013, out = "summary_churn.csv")
-
-library(dplyr)
 sale <- left_join(sale, lic)
-filter(sale, priv == "hunt") \%>\%
-    summary_churn(2004:2013, title = "Hunting Churn", note = "An additional note")
+filter(sale, type \%in\% c("hunt", "combo")) \%>\%
+    summary_churn(2012:2018, title = "Hunting Churn", note = "A note")
 }
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},

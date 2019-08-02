@@ -19,7 +19,7 @@ where "retained" consists of carried + renewed (hence R3: retain, reactivate, re
 }
 \examples{
 library(dplyr)
-data(lic, sale, package = "salic")
+data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)

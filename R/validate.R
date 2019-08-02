@@ -7,6 +7,7 @@
 #'
 #' This is a helper function for conveniently displaying percentages. It is used
 #' in other summary functions in salic.
+#' 
 #' @param x numeric: Vector of values to display as rounded percentages
 #' @param rnd numeric: number of decimals to round pct change results
 #' @param scale numeric: scaling paramter - defaults to 100 for showing percentages
@@ -15,6 +16,7 @@
 #' @examples
 #' x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
 #' x$pct <- pct_round(x$pop / sum(x$pop))
+#' x
 pct_round <- function(x, rnd = 1, scale = 100) {
     # sprintf is used to insure trailing zeroes are included
     sprintf_param <- paste0("%.", rnd, "f")
@@ -26,6 +28,7 @@ pct_round <- function(x, rnd = 1, scale = 100) {
 #'
 #' This is a simple calculation that doesn't take into account multi-year
 #' licenses, so it should only be used for initial data validation
+#' 
 #' @param x data frame: Table holding sales by year
 #' @param year numeric: year to calculate churn (e.g., churn for 2014 uses sales
 #' for 2 years: 2013 and 2014)
@@ -35,12 +38,12 @@ pct_round <- function(x, rnd = 1, scale = 100) {
 #' @keywords internal
 #' @examples
 #' library(dplyr)
-#' load(sale, lic, package = "salic")
+#' data(sale)
 #' 
-#' y <- select(sale, cust_id, year) %>%
-#'     filter(year %in% 2012:2013) %>% distinct()
-#'
-#' calc_churn(y, 2013)
+#' select(sale, cust_id, year) %>%
+#'     filter(year %in% 2012:2013) %>% 
+#'     distinct() %>%
+#'     calc_churn(2013)
 calc_churn <- function(x, yr) {
     y1 <- filter(x, year == yr-1)
     y2 <- filter(x, year == yr)
@@ -55,6 +58,7 @@ calc_churn <- function(x, yr) {
 # Validation Functions ----------------------------------------------------
 
 #' Check for duplicates in a table
+#' 
 #' @param x data frame: Table holding records
 #' @import dplyr
 #' @family functions for validating license data
@@ -76,14 +80,20 @@ check_dups <- function(x) {
 
 #' Count rows in a text file
 #' 
-#' This is a quick way of counting lines in a text file, to insure the final # of rows in 
+#' This is a quick way of counting lines in a text file, to ensure the final # of rows in 
 #' the loaded dataset is correct: 
 #'  https://stackoverflow.com/questions/23456170/get-the-number-of-lines-in-a-text-file-using-r
+#'  
 #' @param file_path character: Path to file
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' count_lines_textfile
+#' x <- matrix(1:10, ncol = 5)
+#' f <- tempfile("test-matrix")
+#' write(x, f)
+#' readLines(f)
+#' count_lines_textfile(f)
+#' unlink(f)
 count_lines_textfile <- function(file_path) {
     f_bin <- file(file_path, open="rb")
     nlines <- 0L
@@ -98,15 +108,14 @@ count_lines_textfile <- function(file_path) {
 #' 
 #' This is a wrapper function that combines \code{\link{summary_sale}} and 
 #' \code{\link{summary_churn}}
+#' 
 #' @param sale data frame: Table holding sales by year with a minimum of
 #' 2 variables (cust_id, year)
 #' @import dplyr
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(dplyr)
-#' data(sale, lic, package = "salic")
-#' 
+#' data(sale)
 #' summary_initial(sale)
 summary_initial <- function(sale) {
     # get years for churn summary
@@ -127,6 +136,7 @@ summary_initial <- function(sale) {
 
 
 #' Summarize sales and customers by year
+#' 
 #' @param x data frame: Table holding sales by year with a minimum of
 #' 2 variables (cust_id, year)
 #' @param include_revenue logical: If TRUE, revenue by year will also be shown
@@ -139,16 +149,12 @@ summary_initial <- function(sale) {
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(dplyr)
-#' data(sale, lic, package = "salic")
-#' 
+#' data(sale)
 #' summary_sale(sale)
-#' summary_sale(sale, out = "summary_sale.csv")
 #'
 #' # example with made-up license revenue
-#' sale <- left_join(sale, lic)
-#' sale <- mutate(sale, revenue = 30)
-#' summary_sale(sale, rnd = 2, include_revenue = T)
+#' sale2 <- mutate(sale, revenue = 30)
+#' summary_sale(sale2, rnd = 2, include_revenue = T)
 summary_sale <- function(
     x, include_revenue = FALSE, rnd = 1, out = NULL, 
     title = "Summarize Sales & Customers", note = NULL, suppress_notes = FALSE
@@ -195,6 +201,7 @@ summary_sale <- function(
 #'
 #' This is a simple calculation that doesn't take into account multi-year
 #' licenses, so it should only be used for initial data validation
+#' 
 #' @param x data frame: Table holding sales by year with a minimum of
 #' 2 variables (cust_id, year)
 #' @param years numeric: range of years needed to calculate churn
@@ -204,15 +211,12 @@ summary_sale <- function(
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(sale, lic, package = "salic")
-#' 
-#' summary_churn(sale, 2004:2013)
-#' summary_churn(sale, 2004:2013, out = "summary_churn.csv")
+#' data(sale, lic)
+#' summary_churn(sale, 2012:2018)
 #'
-#' library(dplyr)
 #' sale <- left_join(sale, lic)
-#' filter(sale, priv == "hunt") %>%
-#'     summary_churn(2004:2013, title = "Hunting Churn", note = "An additional note")
+#' filter(sale, type %in% c("hunt", "combo")) %>%
+#'     summary_churn(2012:2018, title = "Hunting Churn", note = "A note")
 summary_churn <- function(
     x, years, rnd = 1, out = NULL, title = "Churn by Year", 
     note = NULL, suppress_notes = FALSE

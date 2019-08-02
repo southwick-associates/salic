@@ -40,7 +40,7 @@ indicates a license carried over from a previous year
 }
 \examples{
 library(dplyr)
-data(lic, sale, package = "salic")
+data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)

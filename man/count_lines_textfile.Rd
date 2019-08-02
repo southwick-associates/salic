@@ -10,12 +10,17 @@ count_lines_textfile(file_path)
 \item{file_path}{character: Path to file}
 }
 \description{
-This is a quick way of counting lines in a text file, to insure the final # of rows in 
+This is a quick way of counting lines in a text file, to ensure the final # of rows in 
 the loaded dataset is correct: 
  https://stackoverflow.com/questions/23456170/get-the-number-of-lines-in-a-text-file-using-r
 }
 \examples{
-count_lines_textfile
+x <- matrix(1:10, ncol = 5)
+f <- tempfile("test-matrix")
+write(x, f)
+readLines(f)
+count_lines_textfile(f)
+unlink(f)
 }
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},

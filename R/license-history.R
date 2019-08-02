@@ -3,11 +3,12 @@
 
 # Making Tables -----------------------------------------------------------
 
-#' Aggregate a Sale Table to insure 1 row per customer per year.
+#' Aggregate a Sale Table to ensure 1 row per customer per year.
 #'
 #' This function takes an input sale table and returns the max duration
 #' value present in each year (per customer) - essentially a ranking by
 #' license duration.
+#' 
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
 #' @param grp_var character: name of variable(s) used for grouping
@@ -16,7 +17,7 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale, package = "salic")
+#' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
@@ -43,6 +44,7 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' necessary since the sale ranking only keeps one row per cust_id-year,
 #' which is determined by duration, not month. This step ensures the earliest 
 #' month value gets recorded in the license history table.
+#' 
 #' @param sale_ranked data frame: Input ranked sales data
 #' @param sale_unranked data frame: Input unranked sales data
 #' @import dplyr
@@ -50,7 +52,7 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale, package = "salic")
+#' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
@@ -108,7 +110,7 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale, package = "salic")
+#' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
@@ -194,7 +196,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale, package = "salic")
+#' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
 #' sale <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
@@ -248,7 +250,7 @@ identify_R3 <- function(lic_history, yrs) {
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale, package = "salic")
+#' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
 #' sale <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
