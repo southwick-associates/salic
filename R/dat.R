@@ -37,7 +37,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 112 rows and 3 variables
+#' @format A data frame with 104 rows and 3 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
@@ -51,7 +51,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 16,352 rows and 5 variables
+#' @format A data frame with 14,935 rows and 5 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}

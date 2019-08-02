@@ -44,7 +44,7 @@ library(dplyr)
 data(cust, sale, package = "salic")
 sale2 <- left_join(sale, cust) \%>\% 
     recode_agecat()
-sale2 <- sale2 \%>\%
+sale2 \%>\%
     select(-agecat) \%>\%
     df_factor_age()
 }

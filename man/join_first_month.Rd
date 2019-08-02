@@ -15,7 +15,6 @@ join_first_month(sale_ranked, sale_unranked)
 This function is only intended to be run following \code{\link{rank_sale}}
 }
 \examples{
-### Run ranking with sample data
 library(dplyr)
 data(lic, sale, package = "salic")
 

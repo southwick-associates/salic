@@ -72,7 +72,7 @@ factor_R3 <- function(x, levels = 1:4,
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 
 #'     recode_agecat()
-#' sale2 <- sale2 %>%
+#' sale2 %>%
 #'     select(-agecat) %>%
 #'     df_factor_age()
 df_factor_var <- function(df, var, levels, labels, suppress_check = TRUE, ...) {

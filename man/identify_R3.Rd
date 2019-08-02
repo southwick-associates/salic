@@ -18,7 +18,6 @@ codes R3: 1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited,
 where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 }
 \examples{
-### Run ranking with sample data
 library(dplyr)
 data(lic, sale, package = "salic")
 

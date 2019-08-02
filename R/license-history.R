@@ -15,7 +15,6 @@
 #' @family license history functions
 #' @export
 #' @examples
-#' ### Run ranking with sample data
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
@@ -24,9 +23,6 @@
 #'     right_join(sale) %>%
 #'     select(cust_id, year, duration)
 #'     
-#' # Randomly generate a duration variable for this example
-#' sale_unranked$duration <- base::sample(1:5, nrow(sale_unranked), replace = T)
-#' 
 #' # Perform ranking
 #' sale_ranked <- rank_sale(sale_unranked)
 #' 
@@ -34,8 +30,10 @@
 #' left_join(
 #'     count(sale_ranked, duration), 
 #'     distinct(sale_unranked, cust_id, year, duration) %>% count(duration), 
-#'     by = "duration"
-#' )
+#'     by = "duration",
+#'     suffix = c(".ranked", ".unranked")
+#' ) %>% 
+#'     arrange(desc(duration))
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
     sale %>%
         # to insure highest value is picked - sort ascending, pick last
@@ -54,7 +52,6 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' @family license history functions
 #' @export
 #' @examples
-#' ### Run ranking with sample data
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
@@ -121,20 +118,22 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' @family license history functions
 #' @export
 #' @examples
-#' ### Run ranking with sample data
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
+#' # Join & rank
 #' sale_unranked <- select(lic, lic_id, duration) %>%
 #'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
-#' sale_ranked <- rank_sale(sale_unranked)
+#'     select(cust_id, year, duration, month)
+#'     
+#' sale_ranked <- rank_sale(sale_unranked) %>%
+#'     join_first_month(sale_unranked)
 #' 
-#' ### Make license history
-#' yrs <- 2004:2013
-#' lic_history <- make_lic_history(sale_ranked, yrs)
+#' # Make license history
+#' lic_history <- make_lic_history(sale_ranked, 2007:2018, "month")
+#' glimpse(lic_history)
 #' 
-#' # check
+#' # check a sample of several customers
 #' check_history_samp(lic_history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
@@ -209,11 +208,11 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
+#' 
 #' @import dplyr
 #' @family license history functions
 #' @export
 #' @examples
-#' ### Run ranking with sample data
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'

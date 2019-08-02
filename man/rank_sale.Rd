@@ -19,7 +19,6 @@ value present in each year (per customer) - essentially a ranking by
 license duration.
 }
 \examples{
-### Run ranking with sample data
 library(dplyr)
 data(lic, sale, package = "salic")
 
@@ -28,9 +27,6 @@ sale_unranked <- select(lic, lic_id, duration) \%>\%
     right_join(sale) \%>\%
     select(cust_id, year, duration)
     
-# Randomly generate a duration variable for this example
-sale_unranked$duration <- base::sample(1:5, nrow(sale_unranked), replace = T)
-
 # Perform ranking
 sale_ranked <- rank_sale(sale_unranked)
 
@@ -38,8 +34,10 @@ sale_ranked <- rank_sale(sale_unranked)
 left_join(
     count(sale_ranked, duration), 
     distinct(sale_unranked, cust_id, year, duration) \%>\% count(duration), 
-    by = "duration"
-)
+    by = "duration",
+    suffix = c(".ranked", ".unranked")
+) \%>\% 
+    arrange(desc(duration))
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

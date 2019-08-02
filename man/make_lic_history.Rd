@@ -39,20 +39,22 @@ indicates a license carried over from a previous year
 }
 }
 \examples{
-### Run ranking with sample data
 library(dplyr)
 data(lic, sale, package = "salic")
 
+# Join & rank
 sale_unranked <- select(lic, lic_id, duration) \%>\%
     right_join(sale) \%>\%
-    select(cust_id, year, duration)
-sale_ranked <- rank_sale(sale_unranked)
+    select(cust_id, year, duration, month)
+    
+sale_ranked <- rank_sale(sale_unranked) \%>\%
+    join_first_month(sale_unranked)
 
-### Make license history
-yrs <- 2004:2013
-lic_history <- make_lic_history(sale_ranked, yrs)
+# Make license history
+lic_history <- make_lic_history(sale_ranked, 2007:2018, "month")
+glimpse(lic_history)
 
-# check
+# check a sample of several customers
 check_history_samp(lic_history)
 }
 \seealso{

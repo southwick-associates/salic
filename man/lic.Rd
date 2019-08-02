@@ -4,7 +4,7 @@
 \name{lic}
 \alias{lic}
 \title{Sample Data: License Types}
-\format{A data frame with 112 rows and 3 variables
+\format{A data frame with 104 rows and 3 variables
 \describe{
 \item{lic_id}{License ID (integer) (primary key)}
 \item{type}{License Type (character) (hunt, fish, combo)}
