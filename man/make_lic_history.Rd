@@ -41,18 +41,10 @@ indicates a license carried over from a previous year
 \examples{
 library(dplyr)
 data(lic, sale, package = "salic")
-
-# Join & rank
-sale_unranked <- select(lic, lic_id, duration) \%>\%
-    right_join(sale) \%>\%
-    select(cust_id, year, duration, month)
-    
+sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
-
-# Make license history
-lic_history <- make_lic_history(sale_ranked, 2007:2018, "month")
-glimpse(lic_history)
+lic_history <- make_lic_history(sale_ranked, 2007:2018)
 
 # check a sample of several customers
 check_history_samp(lic_history)

@@ -7,6 +7,8 @@
 identify_lapse(lic_history, yrs)
 }
 \arguments{
+\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
 }
@@ -15,23 +17,16 @@ This is intended to be called following \code{\link{make_lic_history}}
 and codes lapse: 0 = renew next year, 1 = lapse next year.
 }
 \examples{
-### Run ranking with sample data
 library(dplyr)
 data(lic, sale, package = "salic")
-
-sale_unranked <- select(lic, lic_id, duration) \%>\%
-    right_join(sale) \%>\%
-    select(cust_id, year, duration)
-sale_ranked <- rank_sale(sale_unranked)
-
-### Make license history
-yrs <- 2004:2013
-lic_history <- make_lic_history(sale_ranked, yrs)
-
-### Identify lapse
-lic_history <- identify_lapse(lic_history, yrs)
-
-# check
+sale_unranked <- left_join(sale, lic)
+sale <- rank_sale(sale_unranked) \%>\%
+    join_first_month(sale_unranked)
+    
+yrs <- 2008:2019
+lic_history <- sale \%>\%
+    make_lic_history(yrs) \%>\%
+    identify_lapse(yrs)
 check_identify_lapse(lic_history)
 }
 \seealso{

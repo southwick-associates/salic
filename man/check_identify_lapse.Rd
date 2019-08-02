@@ -13,7 +13,8 @@ check_identify_lapse(lic_history)
 A test to insure lapse was correctly coded
 }
 \examples{
-# See ?salic::identify_lapse
+# See analysis function example:
+?identify_lapse
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

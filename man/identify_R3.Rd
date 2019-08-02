@@ -20,20 +20,14 @@ where "retained" consists of carried + renewed (hence R3: retain, reactivate, re
 \examples{
 library(dplyr)
 data(lic, sale, package = "salic")
-
-sale_unranked <- select(lic, lic_id, duration) \%>\%
-    right_join(sale) \%>\%
-    select(cust_id, year, duration)
-sale_ranked <- rank_sale(sale_unranked)
-
-### Make license history
-yrs <- 2004:2013
-lic_history <- make_lic_history(sale_ranked, yrs)
-
-### Identify R3
-lic_history <- identify_R3(lic_history, yrs)
-
-# check
+sale_unranked <- left_join(sale, lic)
+sale <- rank_sale(sale_unranked) \%>\%
+    join_first_month(sale_unranked)
+    
+yrs <- 2008:2019
+lic_history <- sale \%>\%
+    make_lic_history(yrs) \%>\%
+    identify_R3(yrs)
 check_identify_R3(lic_history, yrs)
 }
 \seealso{

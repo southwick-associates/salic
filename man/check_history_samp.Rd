@@ -8,13 +8,20 @@ check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 }
 \arguments{
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+
+\item{n_samp}{numeric: number of customers to view}
+
+\item{buy_min}{numeric: minimum number of license purchases for customers to include}
+
+\item{buy_max:}{numeric: maximum number of license purchases for customers to include}
 }
 \description{
 Look at a sample of customers from license history table to check the 
 year over year dynamics
 }
 \examples{
-# See ?salic::make_lic_history
+# See analysis function example:
+?make_lic_history
 }
 \seealso{
 Other license history functions: \code{\link{check_identify_R3}},

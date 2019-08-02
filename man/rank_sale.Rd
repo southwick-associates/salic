@@ -21,23 +21,17 @@ license duration.
 \examples{
 library(dplyr)
 data(lic, sale, package = "salic")
-
-# Join duration variable to sale data
-sale_unranked <- select(lic, lic_id, duration) \%>\%
-    right_join(sale) \%>\%
-    select(cust_id, year, duration)
+sale_unranked <- left_join(sale, lic)
+sale_ranked <- rank_sale(sale_unranked) \%>\%
+    join_first_month(sale_unranked)
     
-# Perform ranking
-sale_ranked <- rank_sale(sale_unranked)
-
 # check sale ranking
 left_join(
     count(sale_ranked, duration), 
     distinct(sale_unranked, cust_id, year, duration) \%>\% count(duration), 
     by = "duration",
     suffix = c(".ranked", ".unranked")
-) \%>\% 
-    arrange(desc(duration))
+)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

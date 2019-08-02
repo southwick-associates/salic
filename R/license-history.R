@@ -17,23 +17,17 @@
 #' @examples
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
-#'
-#' # Join duration variable to sale data
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
+#' sale_unranked <- left_join(sale, lic)
+#' sale_ranked <- rank_sale(sale_unranked) %>%
+#'     join_first_month(sale_unranked)
 #'     
-#' # Perform ranking
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
 #' # check sale ranking
 #' left_join(
 #'     count(sale_ranked, duration), 
 #'     distinct(sale_unranked, cust_id, year, duration) %>% count(duration), 
 #'     by = "duration",
 #'     suffix = c(".ranked", ".unranked")
-#' ) %>% 
-#'     arrange(desc(duration))
+#' )
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
     sale %>%
         # to insure highest value is picked - sort ascending, pick last
@@ -45,7 +39,10 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 
 #' Join earliest sale month by customer-year to ranked sale table.
 #'
-#' This function is only intended to be run following \code{\link{rank_sale}}
+#' This function is only intended to be run following \code{\link{rank_sale}};
+#' necessary since the sale ranking only keeps one row per cust_id-year,
+#' which is determined by duration, not month. This step ensures the earliest 
+#' month value gets recorded in the license history table.
 #' @param sale_ranked data frame: Input ranked sales data
 #' @param sale_unranked data frame: Input unranked sales data
 #' @import dplyr
@@ -54,17 +51,9 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' @examples
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
-#'
-#' # Join duration variable to sale data
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration, month)
-#' 
-#' # Perform sale ranking
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' # Join first month
-#' sale_ranked <- join_first_month(sale_ranked, sale_unranked)
+#' sale_unranked <- left_join(sale, lic)
+#' sale_ranked <- rank_sale(sale_unranked) %>%
+#'     join_first_month(sale_unranked)
 #' 
 #' # check month ranking
 #' left_join(
@@ -120,18 +109,10 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' @examples
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
-#'
-#' # Join & rank
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration, month)
-#'     
+#' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
-#' 
-#' # Make license history
-#' lic_history <- make_lic_history(sale_ranked, 2007:2018, "month")
-#' glimpse(lic_history)
+#' lic_history <- make_lic_history(sale_ranked, 2007:2018)
 #' 
 #' # check a sample of several customers
 #' check_history_samp(lic_history)
@@ -208,27 +189,20 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
-#' 
 #' @import dplyr
 #' @family license history functions
 #' @export
 #' @examples
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
-#'
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' ### Make license history
-#' yrs <- 2004:2013
-#' lic_history <- make_lic_history(sale_ranked, yrs)
-#' 
-#' ### Identify R3
-#' lic_history <- identify_R3(lic_history, yrs)
-#' 
-#' # check
+#' sale_unranked <- left_join(sale, lic)
+#' sale <- rank_sale(sale_unranked) %>%
+#'     join_first_month(sale_unranked)
+#'     
+#' yrs <- 2008:2019
+#' lic_history <- sale %>%
+#'     make_lic_history(yrs) %>%
+#'     identify_R3(yrs)
 #' check_identify_R3(lic_history, yrs)
 identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
@@ -268,28 +242,21 @@ identify_R3 <- function(lic_history, yrs) {
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} 
 #' and codes lapse: 0 = renew next year, 1 = lapse next year.
-#' @inheritParams make_lic_history
+#' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
 #' @export
 #' @examples
-#' ### Run ranking with sample data
 #' library(dplyr)
 #' data(lic, sale, package = "salic")
-#'
-#' sale_unranked <- select(lic, lic_id, duration) %>%
-#'     right_join(sale) %>%
-#'     select(cust_id, year, duration)
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' ### Make license history
-#' yrs <- 2004:2013
-#' lic_history <- make_lic_history(sale_ranked, yrs)
-#' 
-#' ### Identify lapse
-#' lic_history <- identify_lapse(lic_history, yrs)
-#' 
-#' # check
+#' sale_unranked <- left_join(sale, lic)
+#' sale <- rank_sale(sale_unranked) %>%
+#'     join_first_month(sale_unranked)
+#'     
+#' yrs <- 2008:2019
+#' lic_history <- sale %>%
+#'     make_lic_history(yrs) %>%
+#'     identify_lapse(yrs)
 #' check_identify_lapse(lic_history)
 identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
@@ -315,12 +282,16 @@ identify_lapse <- function(lic_history, yrs) {
 #'
 #' Look at a sample of customers from license history table to check the 
 #' year over year dynamics
+#' @param n_samp numeric: number of customers to view
+#' @param buy_min numeric: minimum number of license purchases for customers to include
+#' @param buy_max: numeric: maximum number of license purchases for customers to include
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
 #' @export
 #' @examples
-#' # See ?salic::make_lic_history
+#' # See analysis function example:
+#' ?make_lic_history
 check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
     lic_history %>%
         count(cust_id) %>%
@@ -338,7 +309,8 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' @family license history functions
 #' @export
 #' @examples
-#' # See ?salic::identify_R3
+#' # See analysis function example:
+#' ?identify_R3
 check_identify_R3 <- function(lic_history, yrs) {
     # this function only produces an output if R3 has been identified
     # (which it might not have been if there aren't at least 5 years of data)
@@ -368,7 +340,8 @@ check_identify_R3 <- function(lic_history, yrs) {
 #' @family license history functions
 #' @export
 #' @examples
-#' # See ?salic::identify_lapse
+#' # See analysis function example:
+#' ?identify_lapse
 check_identify_lapse <- function(lic_history) {
     # error - don't run if tidyr isn't installed
     if (!requireNamespace("tidyr", quietly = TRUE)) {

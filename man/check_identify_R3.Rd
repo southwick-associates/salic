@@ -16,7 +16,8 @@ to create license history}
 A test to insure R3 was correctly coded
 }
 \examples{
-# See ?salic::identify_R3
+# See analysis function example:
+?identify_R3
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

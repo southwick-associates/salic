@@ -12,22 +12,17 @@ join_first_month(sale_ranked, sale_unranked)
 \item{sale_unranked}{data frame: Input unranked sales data}
 }
 \description{
-This function is only intended to be run following \code{\link{rank_sale}}
+This function is only intended to be run following \code{\link{rank_sale}};
+necessary since the sale ranking only keeps one row per cust_id-year,
+which is determined by duration, not month. This step ensures the earliest 
+month value gets recorded in the license history table.
 }
 \examples{
 library(dplyr)
 data(lic, sale, package = "salic")
-
-# Join duration variable to sale data
-sale_unranked <- select(lic, lic_id, duration) \%>\%
-    right_join(sale) \%>\%
-    select(cust_id, year, duration, month)
-
-# Perform sale ranking
-sale_ranked <- rank_sale(sale_unranked)
-
-# Join first month
-sale_ranked <- join_first_month(sale_ranked, sale_unranked)
+sale_unranked <- left_join(sale, lic)
+sale_ranked <- rank_sale(sale_unranked) \%>\%
+    join_first_month(sale_unranked)
 
 # check month ranking
 left_join(
