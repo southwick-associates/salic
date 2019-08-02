@@ -28,11 +28,6 @@ current/future years and 0 = Dec, -1 = Nov, ..., for previous years.
 Assumes two variables are present in the sales table:
 dot (transaction date in 'yyyy-mm-dd'), year (numeric license year)
 }
-\examples{
-library(salic)
-data(sale, package = "salic")
-sale <- recode_month(sale)
-}
 \seealso{
 Other functions for recoding license data: \code{\link{recode_agecat}},
   \code{\link{recode_state}}

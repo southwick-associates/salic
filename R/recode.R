@@ -45,9 +45,6 @@ recode_state <- function(dat, state_table, oldvar = "state", newvar = "state_new
 #' @family functions for recoding license data
 #' @export
 #' @examples
-#' library(salic)
-#' data(sale, package = "salic")
-#' sale <- recode_month(sale)
 recode_month <- function(sale, month_range = 0:12) {
     
     # calculate standardized month
@@ -97,7 +94,6 @@ recode_month <- function(sale, month_range = 0:12) {
 #' library(dplyr)
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 
-#'     mutate(birth_year = lubridate::year(dob)) %>% 
 #'     recode_agecat()
 recode_agecat <- function(
     dat, 

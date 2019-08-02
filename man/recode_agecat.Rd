@@ -29,7 +29,6 @@ library(salic)
 library(dplyr)
 data(cust, sale, package = "salic")
 sale2 <- left_join(sale, cust) \%>\% 
-    mutate(birth_year = lubridate::year(dob)) \%>\% 
     recode_agecat()
 }
 \seealso{

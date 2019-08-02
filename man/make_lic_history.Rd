@@ -61,6 +61,6 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
   \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{rank_month}}, \code{\link{rank_sale}}
+  \code{\link{join_first_month}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}
