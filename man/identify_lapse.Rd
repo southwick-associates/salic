@@ -16,8 +16,7 @@ and codes lapse: 0 = renew next year, 1 = lapse next year.
 }
 \examples{
 ### Run ranking with sample data
-library(tidyverse)
-library(salic)
+library(dplyr)
 data(lic, sale, package = "salic")
 
 sale_unranked <- select(lic, lic_id, duration) \%>\%

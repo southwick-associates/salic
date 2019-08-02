@@ -40,8 +40,7 @@ indicates a license carried over from a previous year
 }
 \examples{
 ### Run ranking with sample data
-library(tidyverse)
-library(salic)
+library(dplyr)
 data(lic, sale, package = "salic")
 
 sale_unranked <- select(lic, lic_id, duration) \%>\%

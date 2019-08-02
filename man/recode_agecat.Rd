@@ -25,7 +25,6 @@ Uses 'birth_year' (from cust) and 'year' (from sale) to identify
 age for each license year
 }
 \examples{
-library(salic)
 library(dplyr)
 data(cust, sale, package = "salic")
 sale2 <- left_join(sale, cust) \%>\% 

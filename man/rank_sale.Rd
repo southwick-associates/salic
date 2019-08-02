@@ -20,7 +20,7 @@ license duration.
 }
 \examples{
 ### Run ranking with sample data
-library(tidyverse)
+library(dplyr)
 data(lic, sale, package = "salic")
 
 # Join duration variable to sale data

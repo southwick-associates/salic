@@ -19,8 +19,7 @@ where "retained" consists of carried + renewed (hence R3: retain, reactivate, re
 }
 \examples{
 ### Run ranking with sample data
-library(tidyverse)
-library(salic)
+library(dplyr)
 data(lic, sale, package = "salic")
 
 sale_unranked <- select(lic, lic_id, duration) \%>\%

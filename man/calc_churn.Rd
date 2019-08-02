@@ -20,8 +20,7 @@ This is a simple calculation that doesn't take into account multi-year
 licenses, so it should only be used for initial data validation
 }
 \examples{
-library(tidyverse)
-library(salic)
+library(dplyr)
 load(sale, lic, package = "salic")
 
 y <- select(sale, cust_id, year) \%>\%

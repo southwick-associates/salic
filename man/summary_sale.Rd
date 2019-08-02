@@ -28,8 +28,7 @@ summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
 Summarize sales and customers by year
 }
 \examples{
-library(tidyverse)
-library(salic)
+library(dplyr)
 data(sale, lic, package = "salic")
 
 summary_sale(sale)

@@ -17,7 +17,6 @@ This function is only intended to be run following \code{\link{rank_sale}}
 \examples{
 ### Run ranking with sample data
 library(dplyr)
-library(salic)
 data(lic, sale, package = "salic")
 
 # Join duration variable to sale data
