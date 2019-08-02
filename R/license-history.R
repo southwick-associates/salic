@@ -16,7 +16,7 @@
 #' @export
 #' @examples
 #' ### Run ranking with sample data
-#' library(tidyverse)
+#' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
 #' # Join duration variable to sale data
@@ -56,7 +56,6 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' @examples
 #' ### Run ranking with sample data
 #' library(dplyr)
-#' library(salic)
 #' data(lic, sale, package = "salic")
 #'
 #' # Join duration variable to sale data
@@ -123,8 +122,7 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' @export
 #' @examples
 #' ### Run ranking with sample data
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
 #' sale_unranked <- select(lic, lic_id, duration) %>%
@@ -216,8 +214,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @export
 #' @examples
 #' ### Run ranking with sample data
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
 #' sale_unranked <- select(lic, lic_id, duration) %>%
@@ -278,8 +275,7 @@ identify_R3 <- function(lic_history, yrs) {
 #' @export
 #' @examples
 #' ### Run ranking with sample data
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(lic, sale, package = "salic")
 #'
 #' sale_unranked <- select(lic, lic_id, duration) %>%

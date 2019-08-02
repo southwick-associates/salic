@@ -91,7 +91,6 @@ recode_month <- function(sale, month_range = 0:12) {
 #' @family functions for recoding license data
 #' @export
 #' @examples 
-#' library(salic)
 #' library(dplyr)
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 

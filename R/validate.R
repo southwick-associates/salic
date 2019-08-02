@@ -34,8 +34,7 @@ pct_round <- function(x, rnd = 1, scale = 100) {
 #' @family internal helper functions
 #' @keywords internal
 #' @examples
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' load(sale, lic, package = "salic")
 #' 
 #' y <- select(sale, cust_id, year) %>%
@@ -105,8 +104,7 @@ count_lines_textfile <- function(file_path) {
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(sale, lic, package = "salic")
 #' 
 #' summary_initial(sale)
@@ -141,8 +139,7 @@ summary_initial <- function(sale) {
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(sale, lic, package = "salic")
 #' 
 #' summary_sale(sale)
@@ -206,8 +203,7 @@ summary_sale <- function(
 #' @family functions for validating license data
 #' @export
 #' @examples
-#' library(tidyverse)
-#' library(salic)
+#' library(dplyr)
 #' data(sale, lic, package = "salic")
 #' 
 #' summary_churn(sale, 2004:2013)
