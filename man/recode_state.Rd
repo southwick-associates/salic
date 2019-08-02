@@ -19,13 +19,6 @@ recode_state(dat, state_table, oldvar = "state", newvar = "state_new")
 The idea is to set any odd values to missing. It's a simple function that does
 some minimal recoding
 }
-\examples{
-library(salic)
-data(state_abbreviations)
-data(cust)
-x <- recode_state(cust, state_abbreviations)
-dplyr::count(x, state_new, state)
-}
 \seealso{
 Other functions for recoding license data: \code{\link{recode_agecat}},
   \code{\link{recode_month}}

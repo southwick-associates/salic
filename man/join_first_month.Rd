@@ -25,10 +25,11 @@ sale_unranked <- select(lic, lic_id, duration) \%>\%
     right_join(sale) \%>\%
     select(cust_id, year, duration, dot)
 
-# Perform ranking
-sale_ranked <- sale_unranked \%>\%
-    rank_sale() \%>\%
-    join_first_month(sale_unranked)
+# Perform sale ranking
+sale_ranked <- rank_sale(sale_unranked)
+
+# Join first month
+sale_ranked <- join_first_month(sale_ranked, sale_unranked)
 
 # check month ranking
 left_join(

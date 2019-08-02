@@ -35,11 +35,9 @@ These are convenience functions for use with license data. They are
 wrappers for \code{\link[base]{factor}} with specified values.
 }
 \examples{
-library(salic)
 library(dplyr)
 data(cust, sale, package = "salic")
 sale2 <- left_join(sale, cust) \%>\% 
-    mutate(birth_year = lubridate::year(dob)) \%>\% 
     recode_agecat()
 sale2 \%>\%
     select(-agecat) \%>\%

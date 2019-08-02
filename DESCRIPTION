@@ -18,8 +18,8 @@ LazyData: FALSE
 Depends:
     R (>= 3.5.1)
 Imports:
-    dplyr (>= 0.7.6),
-    lubridate (>= 1.7.4)
+    dplyr (>= 0.7.6)
 RoxygenNote: 6.1.0
 Suggests:
+    lubridate (>= 1.7.4),
     tidyr (>= 0.8.1)

@@ -14,11 +14,9 @@
 #' @export
 #' @family functions for labelling numeric variables
 #' @examples
-#' library(salic)
 #' library(dplyr)
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 
-#'     mutate(birth_year = lubridate::year(dob)) %>% 
 #'     recode_agecat()
 #' sale2 %>%
 #'     select(-agecat) %>%
@@ -70,11 +68,9 @@ factor_R3 <- function(x, levels = 1:4,
 #' @export
 #' @family functions for labelling numeric variables
 #' @examples
-#' library(salic)
 #' library(dplyr)
 #' data(cust, sale, package = "salic")
 #' sale2 <- left_join(sale, cust) %>% 
-#'     mutate(birth_year = lubridate::year(dob)) %>% 
 #'     recode_agecat()
 #' sale2 <- sale2 %>%
 #'     select(-agecat) %>%

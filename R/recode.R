@@ -1,5 +1,7 @@
 # functions for recoding license data
 
+# TODO: Need to make sure examples work (excluding them at least for now)
+# - if I want example code, I'll need to include additional sample data
 
 #' Recode a state variable to deal with unusual values
 #' 
@@ -12,12 +14,6 @@
 #' @import dplyr
 #' @family functions for recoding license data
 #' @export
-#' @examples
-#' library(salic)
-#' data(state_abbreviations)
-#' data(cust)
-#' x <- recode_state(cust, state_abbreviations)
-#' dplyr::count(x, state_new, state)
 recode_state <- function(dat, state_table, oldvar = "state", newvar = "state_new") {
     dat[[newvar]] <- gsub("0", "o", dat[[oldvar]]) %>% toupper()
     dat[[newvar]] <- ifelse(dat[[newvar]] %in% state_table$state, dat[[newvar]], NA)
@@ -27,12 +23,13 @@ recode_state <- function(dat, state_table, oldvar = "state", newvar = "state_new
 
 #' Create a standardized month variable for sales table
 #' 
-#' The output month variable capture transaction year and month in one metric.
+#' The output month variable captures transaction year and month in one metric.
 #' The month number is relative to the license year: 1 = Jan, 2 = Feb, etc, for
 #' current/future years and 0 = Dec, -1 = Nov, ..., for previous years.
 #' 
 #' Assumes two variables are present in the sales table:
 #' dot (transaction date in 'yyyy-mm-dd'), year (numeric license year)
+#' 
 #' @param sale data frame: Input sales table
 #' @param month_range numeric: A vector of months allowed in the output. Defaults
 #' to 0:12 since this is a common range of sales. Any months outside the range will be
@@ -44,8 +41,12 @@ recode_state <- function(dat, state_table, oldvar = "state", newvar = "state_new
 #' prints a validation output.
 #' @family functions for recoding license data
 #' @export
-#' @examples
 recode_month <- function(sale, month_range = 0:12) {
+    # error - don't run if lubridate isn't installed
+    if (!requireNamespace("lubridate", quietly = TRUE)) {
+        stop("lubridate needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     
     # calculate standardized month
     sale <- sale %>% mutate(

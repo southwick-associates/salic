@@ -40,11 +40,9 @@ These are convenience functions for license data, similar to \code{\link{factor_
 but operate on data frames (useful for piping) and produce a check summary.
 }
 \examples{
-library(salic)
 library(dplyr)
 data(cust, sale, package = "salic")
 sale2 <- left_join(sale, cust) \%>\% 
-    mutate(birth_year = lubridate::year(dob)) \%>\% 
     recode_agecat()
 sale2 <- sale2 \%>\%
     select(-agecat) \%>\%

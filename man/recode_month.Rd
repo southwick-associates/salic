@@ -20,7 +20,7 @@ Returns a sales table with a standardized 'month' variable and
 prints a validation output.
 }
 \description{
-The output month variable capture transaction year and month in one metric.
+The output month variable captures transaction year and month in one metric.
 The month number is relative to the license year: 1 = Jan, 2 = Feb, etc, for
 current/future years and 0 = Dec, -1 = Nov, ..., for previous years.
 }
