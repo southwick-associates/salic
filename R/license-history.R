@@ -284,9 +284,10 @@ identify_lapse <- function(lic_history, yrs) {
 #'
 #' Look at a sample of customers from license history table to check the 
 #' year over year dynamics
+#' 
 #' @param n_samp numeric: number of customers to view
 #' @param buy_min numeric: minimum number of license purchases for customers to include
-#' @param buy_max: numeric: maximum number of license purchases for customers to include
+#' @param buy_max numeric: maximum number of license purchases for customers to include
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
@@ -297,7 +298,7 @@ identify_lapse <- function(lic_history, yrs) {
 check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
     lic_history %>%
         count(cust_id) %>%
-        filter(n >= 3, n <= 8) %>%
+        filter(n >= buy_min, n <= buy_max) %>%
         sample_n(n_samp) %>%
         left_join(lic_history, by = "cust_id") %>%
         select(-n, -lag_duration_run)

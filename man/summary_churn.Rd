@@ -20,6 +20,8 @@ summary_churn(x, years, rnd = 1, out = NULL, title = "Churn by Year",
 \item{title}{character: title for output table}
 
 \item{note}{character: note for output table}
+
+\item{suppress_notes}{logical: If TRUE, returns a data frame only}
 }
 \description{
 This is a simple calculation that doesn't take into account multi-year

@@ -167,18 +167,20 @@ summary_initial <- function(sale) {
 #' @param out character: file path to optional output csv
 #' @param title character: title for output table
 #' @param note character: note for output table
-#' @param suppress_notes: If TRUE, returns a data frame only
+#' @param suppress_notes logical: If TRUE, returns a data frame only
 #' @inheritParams pct_round
 #' @import dplyr
+#' @importFrom utils write.csv
 #' @family functions for validating license data
 #' @export
 #' @examples
+#' library(dplyr)
 #' data(sale)
 #' summary_sale(sale)
 #'
 #' # example with made-up license revenue
 #' sale2 <- mutate(sale, revenue = 30)
-#' summary_sale(sale2, rnd = 2, include_revenue = T)
+#' summary_sale(sale2, rnd = 2, include_revenue = TRUE)
 summary_sale <- function(
     x, include_revenue = FALSE, rnd = 1, out = NULL, 
     title = "Summarize Sales & Customers", note = NULL, suppress_notes = FALSE
@@ -231,6 +233,7 @@ summary_sale <- function(
 #' @param years numeric: range of years needed to calculate churn
 #' @inheritParams summary_sale
 #' @import dplyr
+#' @importFrom utils write.csv
 #' @family functions for validating license data
 #' @export
 #' @examples
@@ -273,7 +276,7 @@ summary_churn <- function(
 # Validation Helpers ------------------------------------------------------
 # only intended for use by salic functions
 
-#' Round numeric values and print as percent (internal salic only - not exported)
+#' Round numeric values and print as percent (for internal salic use)
 #'
 #' This is a helper function for conveniently displaying percentages. It is used
 #' in other summary functions in salic.
@@ -283,6 +286,7 @@ summary_churn <- function(
 #' @param scale numeric: scaling paramter - defaults to 100 for showing percentages
 #' @family internal helper functions
 #' @keywords internal
+#' @export
 #' @examples
 #' x <- data.frame(id = c(1,2,3,4), pop = c(135, 416, 389, 320))
 #' x$pct <- pct_round(x$pop / sum(x$pop))
@@ -293,18 +297,19 @@ pct_round <- function(x, rnd = 1, scale = 100) {
     paste0(sprintf(sprintf_param, round(x * scale, rnd)), "%")
 }
 
-#' Calculate churn for a single year (internal salic only - not exported)
+#' Calculate churn for a single year (for internal salic use)
 #'
 #' This is a simple calculation that doesn't take into account multi-year
-#' licenses, so it should only be used for initial data validation
+#' licenses, so it should only be used for initial data validation.
 #' 
 #' @param x data frame: Table holding sales by year
-#' @param year numeric: year to calculate churn (e.g., churn for 2014 uses sales
+#' @param yr numeric: year to calculate churn (e.g., churn for 2014 uses sales
 #' for 2 years: 2013 and 2014)
 #' @import dplyr
 #' @return Returns a numeric vector of length 1
 #' @family internal helper functions
 #' @keywords internal
+#' @export
 #' @examples
 #' library(dplyr)
 #' data(sale)
@@ -323,7 +328,7 @@ calc_churn <- function(x, yr) {
     didnt_renew / held_license_y1
 }
 
-#' Format numbers for printing (internal salic only - not exported)
+#' Format numbers for printing (for internal salic use)
 #'
 #' Helper function for use in print_dat
 #' @param x vector to format
@@ -331,6 +336,7 @@ calc_churn <- function(x, yr) {
 #' @param big.mark character: separator between 1000s
 #' @family internal helper functions
 #' @keywords internal
+#' @export
 #' @examples
 #' format_num(c(2005, 2006, NA))
 #' format_num(c(100000, 131000, 150000, NA))
@@ -342,11 +348,11 @@ format_num <- function(x, digits = 1, big.mark = ",") {
     if (is.numeric(x)) {
         # determine whether digits are used
         # only include digits in the absence of whole numbers
-        if (all(x %% 1 == 0, na.rm = T)) digits = 0
+        if (all(x %% 1 == 0, na.rm = TRUE)) digits = 0
         
-        if (min(x, na.rm = T) > 10000) {
+        if (min(x, na.rm = TRUE) > 10000) {
             out <- formatC(x, big.mark = big.mark, digits = 0, format = "f")
-        } else if (min(x, na.rm = T) > 100) {
+        } else if (min(x, na.rm = TRUE) > 100) {
             out <- formatC(x, big.mark = "", digits = 0, format = "f")
         } else {
             out <- formatC(x, big.mark = "", digits = digits, format = "f")
@@ -357,7 +363,7 @@ format_num <- function(x, digits = 1, big.mark = ",") {
     out
 }
 
-#' Print a data frame with caption/note (internal salic only - not exported)
+#' Print a data frame with caption/note (for internal salic use)
 #'
 #' Intended for showing tables with titles & notes in logged output in doc/
 #' @param x data frame: data frame contents to print
@@ -367,6 +373,7 @@ format_num <- function(x, digits = 1, big.mark = ",") {
 #' @inheritParams format_num
 #' @family internal helper functions
 #' @keywords internal
+#' @export
 #' @examples
 #' x <- data.frame(yr = c(2005, 2006), cust = c(100000, 131000),
 #'     sales = c(567891, 673568), churn = c(NA, 25.23), char = c("test", NA))
@@ -385,12 +392,12 @@ print_dat <- function(x, caption = NULL, note = NULL,
     dash_len <- function(caption, note) {
         if (!is.null(note)) {
             notes <- unlist(strsplit(note, "\n"))
-            note_len <- max(nchar(notes), na.rm = T) + 2
+            note_len <- max(nchar(notes), na.rm = TRUE) + 2
         } else {
             note_len <- 0
         }
         caption_len <- nchar(caption) + 1
-        max(caption_len, note_len, na.rm = T)
+        max(caption_len, note_len, na.rm = TRUE)
     }
     if (!is.null(caption) | !is.null(note)) {
         dash_num <- dash_len(caption, note)

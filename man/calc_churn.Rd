@@ -2,14 +2,14 @@
 % Please edit documentation in R/prepare.R
 \name{calc_churn}
 \alias{calc_churn}
-\title{Calculate churn for a single year (internal salic only - not exported)}
+\title{Calculate churn for a single year (for internal salic use)}
 \usage{
 calc_churn(x, yr)
 }
 \arguments{
 \item{x}{data frame: Table holding sales by year}
 
-\item{year}{numeric: year to calculate churn (e.g., churn for 2014 uses sales
+\item{yr}{numeric: year to calculate churn (e.g., churn for 2014 uses sales
 for 2 years: 2013 and 2014)}
 }
 \value{
@@ -17,7 +17,7 @@ Returns a numeric vector of length 1
 }
 \description{
 This is a simple calculation that doesn't take into account multi-year
-licenses, so it should only be used for initial data validation
+licenses, so it should only be used for initial data validation.
 }
 \examples{
 library(dplyr)

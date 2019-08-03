@@ -13,7 +13,7 @@ check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 
 \item{buy_min}{numeric: minimum number of license purchases for customers to include}
 
-\item{buy_max:}{numeric: maximum number of license purchases for customers to include}
+\item{buy_max}{numeric: maximum number of license purchases for customers to include}
 }
 \description{
 Look at a sample of customers from license history table to check the 

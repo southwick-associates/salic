@@ -22,18 +22,19 @@ summary_sale(x, include_revenue = FALSE, rnd = 1, out = NULL,
 
 \item{note}{character: note for output table}
 
-\item{suppress_notes:}{If TRUE, returns a data frame only}
+\item{suppress_notes}{logical: If TRUE, returns a data frame only}
 }
 \description{
 Summarize sales and customers by year
 }
 \examples{
+library(dplyr)
 data(sale)
 summary_sale(sale)
 
 # example with made-up license revenue
 sale2 <- mutate(sale, revenue = 30)
-summary_sale(sale2, rnd = 2, include_revenue = T)
+summary_sale(sale2, rnd = 2, include_revenue = TRUE)
 }
 \seealso{
 Other functions for validating license data: \code{\link{check_dups}},
