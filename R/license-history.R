@@ -254,26 +254,29 @@ identify_R3 <- function(lic_history, yrs) {
 #' sale_unranked <- left_join(sale, lic)
 #' sale <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
-#'     
+#' 
 #' yrs <- 2008:2019
 #' history <- sale %>%
 #'     make_lic_history(yrs) %>%
-#'     identify_lapse(yrs)
+#'     # 2019 is incomplete (1st 6 months) & must be excluded from the function call
+#'     identify_lapse(yrs[-length(yrs)])
 #' check_identify_lapse(history)
+#' 
+#' # calculate churn rate
+#' group_by(history, year) %>% 
+#'     summarise(mean(lapse)) %>%
+#'     mutate(year = year + 1)
 identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
         arrange(cust_id, year) %>% # for correct lead ordering
         group_by(cust_id) %>% # to insure lead calculations are customer-specific
-        mutate(
-            lead_year= lead(year)
-        ) %>%
+        mutate( lead_year= lead(year) ) %>%
         ungroup() %>%
         mutate(
             # if didn't buy next year: lapsed, otherwise: renewed
             lapse = ifelse(lead_year == (year + 1) & !is.na(lead_year), 0L, 1L),
-            
-            # set to NA for final year
-            lapse = ifelse(year == yrs[length(yrs)], NA, lapse)
+            # set to NA for final year (or any following)
+            lapse = ifelse(year >= max(yrs), NA, lapse)
         )
 }
 

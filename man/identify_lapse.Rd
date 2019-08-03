@@ -22,12 +22,18 @@ data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
-    
+
 yrs <- 2008:2019
 history <- sale \%>\%
     make_lic_history(yrs) \%>\%
-    identify_lapse(yrs)
+    # 2019 is incomplete (1st 6 months) & must be excluded from the function call
+    identify_lapse(yrs[-length(yrs)])
 check_identify_lapse(history)
+
+# calculate churn rate
+group_by(history, year) \%>\% 
+    summarise(mean(lapse)) \%>\%
+    mutate(year = year + 1)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},
