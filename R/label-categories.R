@@ -1,7 +1,7 @@
-# functions for labelling numeric variables
-
+# functions for converting numeric categories to labelled factors
 
 # Vector Functions --------------------------------------------------------
+# These act on vectors (typically variables in a data frame)
 
 #' Convert numeric variable to factor
 #' 
@@ -56,6 +56,7 @@ factor_R3 <- function(x, levels = 1:4,
 
 
 # Data Frame Functions ----------------------------------------------------
+# These act on data frames, which is convenient for piping
 
 #' Convert numeric to factor in data frame and check
 #' 

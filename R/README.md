@@ -1,8 +1,20 @@
 
-- **dat**: documentation for sample data
-- **dashboard-summary**: functions for building dashboard summary data
-- **label-categories**: functions for labelling numeric variables
-- **license-history**: functions for building license history
-- **print**: internal helper functions for printing output of summary_sale() & summary_churn()
-- **standardize**: functions for standardizing license data
-- **validate**: functions for validating license data
+## 1. Preparation
+
+Southwick Associates analysts need to prepare license data received from state agencies; ultimately producing 3 tables (cust, lic, sale) in a standardized/anonymized format. This process involves successive recoding and validation steps, some of which have been generalized by means of the functions included in this file.
+
+## 2. License History
+
+Standardized data provide a direct means for producing *license history* tables for specified permissions (e.g., fish, hunt, all_sports). This file includes functions for performing that process. The output history tables include 1 row per customer per year a license is held (annual, multi-year, or otherwise). Additional variables (R3, lapse) are also added for identifying customer dynamics over time.
+
+## 3. Dashboard
+
+Dashboards use summary metrics (participation, churn, etc.) specified across a number of segments (gender, residency, etc.). This file includes functions for calculating these metrics using *license history* as input.
+
+## Dat
+
+This file includes documentation for the package sample data.
+
+## Label Categories
+
+Standardized data (cust, lic, sale) include category variables stored as integer values (e.g., cust$sex, 1=Male, 2=Female). Functions are included to convert these numeric categories to labelled factors.
