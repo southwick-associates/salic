@@ -3,8 +3,8 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: Sales (2008 through 2019)}
-\format{A data frame with 14,935 rows and 5 variables
+\title{Sample Data: Sales (Jan 1, 2008 through June 30, 2019)}
+\format{A data frame with 15,213 rows and 5 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}
@@ -13,11 +13,11 @@
 \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{
-Sample Data: Sales (2008 through 2019)
+Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},
-  \code{\link{lic_history}}, \code{\link{lic}},
+  \code{\link{history}}, \code{\link{lic}},
   \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}

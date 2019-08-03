@@ -14,7 +14,7 @@
 Sample Data: 3,000 Customers
 }
 \seealso{
-Other Sample Data: \code{\link{lic_history}},
+Other Sample Data: \code{\link{history}},
   \code{\link{lic}}, \code{\link{sale}},
   \code{\link{state_abbreviations}}
 }

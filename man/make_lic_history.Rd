@@ -44,10 +44,10 @@ data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
-lic_history <- make_lic_history(sale_ranked, 2007:2018)
+history <- make_lic_history(sale_ranked, 2007:2018)
 
 # check a sample of several customers
-check_history_samp(lic_history)
+check_history_samp(history)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

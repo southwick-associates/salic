@@ -22,7 +22,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 104 rows and 3 variables
+#' @format A data frame with 113 rows and 3 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
@@ -31,12 +31,12 @@ NULL
 #' @family Sample Data
 NULL
 
-#' Sample Data: Sales (2008 through 2019)
+#' Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
 #'
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 14,935 rows and 5 variables
+#' @format A data frame with 15,213 rows and 5 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}
@@ -50,8 +50,7 @@ NULL
 
 # Additional Data ---------------------------------------------------------
 
-
-#' Sample Data: License  History (2008 through 2019)
+#' Sample Data: License  History (Jan 1, 2008 through June 30, 2019)
 #' 
 #' This is a table that corresponds to the "all_sports" permission for the included
 #' license sample data; containing 1 row per customer per year a license was held.
@@ -60,7 +59,7 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
-#' @name lic_history
+#' @name history
 #' @format A data frame with 9,672 rows and 8 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (composite key)}
@@ -75,7 +74,6 @@ NULL
 #' @family Sample Data
 #' @seealso \code{\link{make_lic_history}}
 NULL
-
 
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'

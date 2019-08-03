@@ -25,10 +25,10 @@ sale <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
     
 yrs <- 2008:2019
-lic_history <- sale \%>\%
+history <- sale \%>\%
     make_lic_history(yrs) \%>\%
     identify_R3(yrs)
-check_identify_R3(lic_history, yrs)
+check_identify_R3(history, yrs)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

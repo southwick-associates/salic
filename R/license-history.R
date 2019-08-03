@@ -114,10 +114,10 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
-#' lic_history <- make_lic_history(sale_ranked, 2007:2018)
+#' history <- make_lic_history(sale_ranked, 2007:2018)
 #' 
 #' # check a sample of several customers
-#' check_history_samp(lic_history)
+#' check_history_samp(history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
     # 1. initialize a list to store tracking table
@@ -202,10 +202,10 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     join_first_month(sale_unranked)
 #'     
 #' yrs <- 2008:2019
-#' lic_history <- sale %>%
+#' history <- sale %>%
 #'     make_lic_history(yrs) %>%
 #'     identify_R3(yrs)
-#' check_identify_R3(lic_history, yrs)
+#' check_identify_R3(history, yrs)
 identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
         arrange(cust_id, year) %>% # for correct lag ordering
@@ -256,10 +256,10 @@ identify_R3 <- function(lic_history, yrs) {
 #'     join_first_month(sale_unranked)
 #'     
 #' yrs <- 2008:2019
-#' lic_history <- sale %>%
+#' history <- sale %>%
 #'     make_lic_history(yrs) %>%
 #'     identify_lapse(yrs)
-#' check_identify_lapse(lic_history)
+#' check_identify_lapse(history)
 identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
         arrange(cust_id, year) %>% # for correct lead ordering

@@ -4,7 +4,7 @@
 \name{lic}
 \alias{lic}
 \title{Sample Data: License Types}
-\format{A data frame with 104 rows and 3 variables
+\format{A data frame with 113 rows and 3 variables
 \describe{
 \item{lic_id}{License ID (integer) (primary key)}
 \item{type}{License Type (character) (hunt, fish, combo)}
@@ -15,7 +15,7 @@ Sample Data: License Types
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},
-  \code{\link{lic_history}}, \code{\link{sale}},
+  \code{\link{history}}, \code{\link{sale}},
   \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
