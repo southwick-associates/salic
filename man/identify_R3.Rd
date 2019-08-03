@@ -29,6 +29,12 @@ history <- sale \%>\%
     make_lic_history(yrs) \%>\%
     identify_R3(yrs)
 check_identify_R3(history, yrs)
+
+# calculate recruitment rate
+group_by(history, year, R3) \%>\% 
+summarise(n = n()) \%>\% 
+    mutate(pct = n / sum(n)) \%>\%
+    filter(R3 == 4, year != 2019)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},

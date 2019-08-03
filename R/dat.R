@@ -60,7 +60,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name history
-#' @format A data frame with 9,672 rows and 8 variables
+#' @format A data frame with 9,690 rows and 8 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (composite key)}
 #' \item{year}{License Year (integer) (yyyy) (composite key)}

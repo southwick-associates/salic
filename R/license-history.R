@@ -206,6 +206,12 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     make_lic_history(yrs) %>%
 #'     identify_R3(yrs)
 #' check_identify_R3(history, yrs)
+#' 
+#' # calculate recruitment rate
+#' group_by(history, year, R3) %>% 
+#' summarise(n = n()) %>% 
+#'     mutate(pct = n / sum(n)) %>%
+#'     filter(R3 == 4, year != 2019)
 identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
         arrange(cust_id, year) %>% # for correct lag ordering
