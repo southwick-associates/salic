@@ -1,22 +1,7 @@
 # Documentation for Sample Data
 
-#' Data: State/Province/Territory Abbreviations for US & Canada
-#'
-#' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
-#'
-#' @docType data
-#' @keywords datasets
-#' @name state_abbreviations
-#' @format A data frame with 72 rows and 3 variables
-#' \describe{
-#' \item{name}{State/Province/Territory name}
-#' \item{state}{Abbreviation}
-#' \item{country}{Country Abbreviation where CN = Canada}
-#' }
-#' @family Sample Data
-NULL
 
-# License Data Tables ---------------------------------------------------
+# Standarized License Data ---------------------------------------------------
 
 #' Sample Data: 3,000 Customers
 #'
@@ -58,6 +43,52 @@ NULL
 #' \item{year}{License Year (integer) (yyyy)}
 #' \item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
 #' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
+#' }
+#' @family Sample Data
+NULL
+
+
+# Additional Data ---------------------------------------------------------
+
+
+#' Sample Data: License  History (2008 through 2019)
+#' 
+#' This is a table that corresponds to the "all_sports" permission for the included
+#' license sample data; containing 1 row per customer per year a license was held.
+#' Only the variables needed for dashboard production were included (i.e., certain 
+#' variables potentially useful for validation, such as duration_run, were removed).
+#'
+#' @docType data
+#' @keywords datasets
+#' @name lic_history
+#' @format A data frame with 9,672 rows and 8 variables
+#' \describe{
+#' \item{cust_id}{Customer ID (integer) (composite key)}
+#' \item{year}{License Year (integer) (yyyy) (composite key)}
+#' \item{month}{Earliest Transaction Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
+#' \item{lapse}{Lapsed next Year? (integer) (1=lapse, 0=renew)}
+#' \item{R3}{R3 Group this Year (integer) (1=carry, 2=renew, 3=reactivate, 4=recruit)}
+#' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
+#' \item{sex}{Gender (integer) (1=Male, 2=Female)}
+#' \item{birth_year}{Year of Birth (integer) (yyyy)}
+#' }
+#' @family Sample Data
+#' @seealso \code{\link{make_lic_history}}
+NULL
+
+
+#' Data: State/Province/Territory Abbreviations for US & Canada
+#'
+#' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
+#'
+#' @docType data
+#' @keywords datasets
+#' @name state_abbreviations
+#' @format A data frame with 72 rows and 3 variables
+#' \describe{
+#' \item{name}{State/Province/Territory name}
+#' \item{state}{Abbreviation}
+#' \item{country}{Country Abbreviation where CN = Canada}
 #' }
 #' @family Sample Data
 NULL

@@ -16,7 +16,8 @@
 Sample Data: Sales (2008 through 2019)
 }
 \seealso{
-Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
+Other Sample Data: \code{\link{cust}},
+  \code{\link{lic_history}}, \code{\link{lic}},
   \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
