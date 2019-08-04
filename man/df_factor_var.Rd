@@ -41,12 +41,11 @@ but operate on data frames (useful for piping) and produce a check summary.
 }
 \examples{
 library(dplyr)
-data(cust, sale)
-sale2 <- left_join(sale, cust) \%>\% 
-    recode_agecat()
-sale2 \%>\%
-    select(-agecat) \%>\%
-    df_factor_age()
+data(history)
+x <- history \%>\%
+    df_factor_R3(suppress_check = FALSE) \%>\%
+    df_factor_res(suppress_check = FALSE) \%>\%
+    df_factor_sex(suppress_check = FALSE)
 }
 \seealso{
 Other functions for working with category variables: \code{\link{factor_var}},

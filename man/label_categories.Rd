@@ -4,13 +4,15 @@
 \alias{label_categories}
 \title{Convert multiple numeric variables to factors}
 \usage{
-label_categories(df, categories = c("age", "R3", "sex", "res"))
+label_categories(df, categories = c("R3", "sex", "res"), ...)
 }
 \arguments{
 \item{df}{data frame: Input data frame}
 
 \item{categories}{character: vector of variable names to convert to factor
 (if present)}
+
+\item{...}{additional arguments passed to \code{\link{df_factor_var}}}
 }
 \description{
 This is a convenience function to convert the expected set of numeric
@@ -18,7 +20,9 @@ category variables to factors. It's basically a wrapper for
  \code{\link{df_factor_var}}.
 }
 \examples{
-# example
+library(dplyr)
+data(history)
+x <- label_categories(history, suppress_check = FALSE)
 }
 \seealso{
 Other functions for working with category variables: \code{\link{df_factor_var}},

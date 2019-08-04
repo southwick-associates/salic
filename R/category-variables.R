@@ -54,19 +54,26 @@ recode_agecat <- function(
 #' @param x numeric: Input numeric vector
 #' @param levels numeric: Levels for input numeric vector
 #' @param labels labels: Labels to use for output factor vector
+#' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @param ... Other arguments passed to \code{\link[base]{factor}}
 #' @export
 #' @family functions for working with category variables
 #' @examples
 #' library(dplyr)
-#' data(cust, sale)
-#' sale2 <- left_join(sale, cust) %>% 
-#'     recode_agecat()
-#' sale2 %>%
-#'     select(-agecat) %>%
-#'     mutate(agecat = factor_age(age))
-factor_var <- function(x, levels, labels, ...) {
-    factor(x, levels = levels, labels = labels, ...)
+#' data(history)
+#' x <- history %>% mutate(
+#'     R3 = factor_R3(R3, suppress_check = FALSE),
+#'     sex = factor_sex(sex, suppress_check = FALSE),
+#'     res = factor_res(res, suppress_check = FALSE)
+#' )
+factor_var <- function(x, levels, labels, suppress_check = TRUE, ...) {
+    new <- factor(x, levels = levels, labels = labels, ...)
+    if (!suppress_check) {
+        dplyr::bind_cols(new = new, old = x) %>% 
+            dplyr::count(new, old) %>%
+            print(n = Inf)
+    }
+    new
 }
 
 #' @rdname factor_var
@@ -76,26 +83,26 @@ factor_age <- function(
     labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"),
     ...
 ) {
-    factor(x, levels = levels, labels = labels, ...)
+    factor_var(x, levels = levels, labels = labels, ...)
 }
 
 #' @rdname factor_var
 #' @export
 factor_sex <- function( x, levels = 1:2, labels = c("Male", "Female"), ...) {
-    factor(x, levels = levels, labels = labels, ...)
+    factor_var(x, levels = levels, labels = labels, ...)
 }
 
 #' @rdname factor_var
 #' @export
 factor_res <- function(x, levels = c(1,0), labels = c("Resident", "Nonresident"), ...) {
-    factor(x, levels = levels, labels = labels, ...)
+    factor_var(x, levels = levels, labels = labels, ...)
 }
 
 #' @rdname factor_var
 #' @export
 factor_R3 <- function(x, levels = 1:4,  
                       labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...) {
-    factor(x, levels = levels, labels = labels, ...)
+    factor_var(x, levels = levels, labels = labels, ...)
 }
 
 
@@ -111,15 +118,18 @@ factor_R3 <- function(x, levels = 1:4,
 #' @inheritParams df_factor_var
 #' @param categories character: vector of variable names to convert to factor
 #' (if present)
+#' @param ... additional arguments passed to \code{\link{df_factor_var}}
 #' @export
 #' @family functions for working with category variables
 #' @examples 
-#' # example
-label_categories <- function(df, categories = c("age", "R3", "sex", "res")) {
+#' library(dplyr)
+#' data(history)
+#' x <- label_categories(history, suppress_check = FALSE)
+label_categories <- function(df, categories = c("R3", "sex", "res"), ...) {
     vars <- intersect(categories, colnames(df))
     for (i in vars) {
         df_factor_i <- get(paste0("df_factor_", i)) # df_factor_age, etc.
-        df <- df_factor_i(df)
+        df <- df_factor_i(df, ...)
     }
     df
 }
@@ -130,24 +140,22 @@ label_categories <- function(df, categories = c("age", "R3", "sex", "res")) {
 #' but operate on data frames (useful for piping) and produce a check summary.
 #' @param df data frame: Input data frame
 #' @param var character: Name of numeric variable to convert
-#' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @inheritParams factor_var
 #' @export
 #' @family functions for working with category variables
 #' @examples
 #' library(dplyr)
-#' data(cust, sale)
-#' sale2 <- left_join(sale, cust) %>% 
-#'     recode_agecat()
-#' sale2 %>%
-#'     select(-agecat) %>%
-#'     df_factor_age()
+#' data(history)
+#' x <- history %>%
+#'     df_factor_R3(suppress_check = FALSE) %>%
+#'     df_factor_res(suppress_check = FALSE) %>%
+#'     df_factor_sex(suppress_check = FALSE)
 df_factor_var <- function(df, var, levels, labels, suppress_check = TRUE, ...) {
     df$var_old <- df[[var]]
     df[[var]] <- factor(df[[var]], levels = levels, labels = labels, ...)
     if (!suppress_check) {
-        count(df, .data[[var]], var_old) %>% 
-            data.frame() %>% print(row.names = FALSE)
+        count(df, new = .data[[var]], old = var_old) %>% 
+            print(n = Inf)
     }
     select(df, -var_old)
 }

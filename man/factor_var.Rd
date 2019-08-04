@@ -8,7 +8,7 @@
 \alias{factor_R3}
 \title{Convert numeric variable to factor}
 \usage{
-factor_var(x, levels, labels, ...)
+factor_var(x, levels, labels, suppress_check = TRUE, ...)
 
 factor_age(x, levels = 1:7, labels = c("0-17", "18-24", "25-34",
   "35-44", "45-54", "55-64", "65+"), ...)
@@ -28,6 +28,8 @@ factor_R3(x, levels = 1:4, labels = c("Carry", "Retain", "Reactivate",
 
 \item{labels}{labels: Labels to use for output factor vector}
 
+\item{suppress_check}{logical: If TRUE, does not print a coding summary}
+
 \item{...}{Other arguments passed to \code{\link[base]{factor}}}
 }
 \description{
@@ -36,12 +38,12 @@ wrappers for \code{\link[base]{factor}} with specified values.
 }
 \examples{
 library(dplyr)
-data(cust, sale)
-sale2 <- left_join(sale, cust) \%>\% 
-    recode_agecat()
-sale2 \%>\%
-    select(-agecat) \%>\%
-    mutate(agecat = factor_age(age))
+data(history)
+x <- history \%>\% mutate(
+    R3 = factor_R3(R3, suppress_check = FALSE),
+    sex = factor_sex(sex, suppress_check = FALSE),
+    res = factor_res(res, suppress_check = FALSE)
+)
 }
 \seealso{
 Other functions for working with category variables: \code{\link{df_factor_var}},
