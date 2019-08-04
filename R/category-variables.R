@@ -1,7 +1,50 @@
-# functions for converting numeric categories to labelled factors
+# functions for working with category variables
 
 
-# Vector Functions --------------------------------------------------------
+#' Create age category based on year (of sale) and birth year
+#' 
+#' Uses 'birth_year' (from cust) and 'year' (from sale) to identify
+#' age for each license year
+#' 
+#' @param dat data frame: Input table
+#' @param age_labs character: labels to use for age category
+#' @param age_breaks numeric: breaks for age category passed to 
+#' \code{\link[base]{cut}}
+#' @param max_age numeric: maximum allowed age. Anything above will be set to missing.
+#' @param suppress_check logical: If TRUE, does not print a coding summary
+#' @import dplyr
+#' @family functions for recoding license data
+#' @export
+#' @examples 
+#' library(dplyr)
+#' data(history)
+#' x <- recode_agecat(history, suppress_check = FALSE)
+recode_agecat <- function(
+    dat, 
+    age_labs = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"),  
+    age_breaks = c(-Inf, 17, 24, 34, 44, 54, 64, Inf), 
+    max_age = 110,
+    suppress_check = TRUE
+) {
+    # make variables
+    dat <- dat %>% mutate(
+        age_year = year - birth_year, 
+        age_year = ifelse(age_year > 110, NA, age_year), 
+        age = cut(age_year, breaks = age_breaks, labels = FALSE), 
+        agecat = cut(age_year, breaks = age_breaks, labels = age_labs)
+    )
+    # check output
+    if (!suppress_check) {
+        cat("\nCategory Coding Summary:\n")
+        count(dat, age_year, age, agecat) %>% 
+            data.frame() %>% 
+            print(row.names = FALSE)
+    }
+    dat
+}
+
+
+# Vector-based Labelling --------------------------------------------------------
 # These act on vectors (typically variables in a data frame)
 
 #' Convert numeric variable to factor
@@ -13,7 +56,7 @@
 #' @param labels labels: Labels to use for output factor vector
 #' @param ... Other arguments passed to \code{\link[base]{factor}}
 #' @export
-#' @family functions for labelling numeric variables
+#' @family functions for working with category variables
 #' @examples
 #' library(dplyr)
 #' data(cust, sale)
@@ -56,7 +99,7 @@ factor_R3 <- function(x, levels = 1:4,
 }
 
 
-# Data Frame Functions ----------------------------------------------------
+# Data Frame-based Labelling ----------------------------------------------------
 # These act on data frames, which is convenient for piping
 
 #' Convert multiple numeric variables to factors
@@ -69,7 +112,7 @@ factor_R3 <- function(x, levels = 1:4,
 #' @param categories character: vector of variable names to convert to factor
 #' (if present)
 #' @export
-#' @family functions for labelling numeric variables
+#' @family functions for working with category variables
 #' @examples 
 #' # example
 label_categories <- function(df, categories = c("age", "R3", "sex", "res")) {
@@ -90,7 +133,7 @@ label_categories <- function(df, categories = c("age", "R3", "sex", "res")) {
 #' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @inheritParams factor_var
 #' @export
-#' @family functions for labelling numeric variables
+#' @family functions for working with category variables
 #' @examples
 #' library(dplyr)
 #' data(cust, sale)

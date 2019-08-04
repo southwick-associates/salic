@@ -4,7 +4,7 @@
 # Prepare Data ------------------------------------------------------------
 
 
-#' Create a standardized age category variable
+#' Create age category based on year (of sale) and birth year
 #' 
 #' Uses 'birth_year' (from cust) and 'year' (from sale) to identify
 #' age for each license year

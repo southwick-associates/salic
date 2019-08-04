@@ -15,6 +15,6 @@ Dashboards use summary metrics (participation, churn, etc.) specified across a n
 
 This file includes documentation for the package sample data.
 
-## Label Categories
+## Category Variables
 
-Standardized data (cust, lic, sale) include category variables stored as integer values (e.g., cust$sex, 1=Male, 2=Female). Functions are included to convert these numeric categories to labelled factors.
+Standardized data (cust, lic, sale) include category variables stored as integer values (e.g., cust$sex, 1=Male, 2=Female). Functions are included to work with these variables (mostly converting numeric categories to labelled factors).
