@@ -26,6 +26,6 @@ x <- label_categories(history, suppress_check = FALSE)
 }
 \seealso{
 Other functions for working with category variables: \code{\link{df_factor_var}},
-  \code{\link{factor_var}}
+  \code{\link{factor_var}}, \code{\link{recode_agecat}}
 }
 \concept{functions for working with category variables}

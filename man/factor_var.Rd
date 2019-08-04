@@ -47,6 +47,7 @@ x <- history \%>\% mutate(
 }
 \seealso{
 Other functions for working with category variables: \code{\link{df_factor_var}},
-  \code{\link{label_categories}}
+  \code{\link{label_categories}},
+  \code{\link{recode_agecat}}
 }
 \concept{functions for working with category variables}

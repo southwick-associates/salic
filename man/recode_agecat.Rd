@@ -29,4 +29,8 @@ library(dplyr)
 data(history)
 x <- recode_agecat(history, suppress_check = FALSE)
 }
-\concept{functions for recoding license data}
+\seealso{
+Other functions for working with category variables: \code{\link{df_factor_var}},
+  \code{\link{factor_var}}, \code{\link{label_categories}}
+}
+\concept{functions for working with category variables}
