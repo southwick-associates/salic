@@ -13,7 +13,7 @@
 #' @param max_age numeric: maximum allowed age. Anything above will be set to missing.
 #' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @import dplyr
-#' @family functions for recoding license data
+#' @family functions for working with category variables
 #' @export
 #' @examples 
 #' library(dplyr)
@@ -41,6 +41,31 @@ recode_agecat <- function(
             print(row.names = FALSE)
     }
     dat
+}
+
+#' Convert multiple numeric variables to factors
+#' 
+#' This is a convenience function to convert the expected set of numeric
+#' category variables to factors. It's basically a wrapper for
+#'  \code{\link{df_factor_var}}.
+#'  
+#' @inheritParams df_factor_var
+#' @param categories character: vector of variable names to convert to factor
+#' (if present)
+#' @param ... additional arguments passed to \code{\link{df_factor_var}}
+#' @export
+#' @family functions for working with category variables
+#' @examples 
+#' library(dplyr)
+#' data(history)
+#' x <- label_categories(history, suppress_check = FALSE)
+label_categories <- function(df, categories = c("R3", "sex", "res"), ...) {
+    vars <- intersect(categories, colnames(df))
+    for (i in vars) {
+        df_factor_i <- get(paste0("df_factor_", i)) # df_factor_age, etc.
+        df <- df_factor_i(df, ...)
+    }
+    df
 }
 
 
@@ -109,31 +134,6 @@ factor_R3 <- function(x, levels = 1:4,
 # Data Frame-based Labelling ----------------------------------------------------
 # These act on data frames, which is convenient for piping
 
-#' Convert multiple numeric variables to factors
-#' 
-#' This is a convenience function to convert the expected set of numeric
-#' category variables to factors. It's basically a wrapper for
-#'  \code{\link{df_factor_var}}.
-#'  
-#' @inheritParams df_factor_var
-#' @param categories character: vector of variable names to convert to factor
-#' (if present)
-#' @param ... additional arguments passed to \code{\link{df_factor_var}}
-#' @export
-#' @family functions for working with category variables
-#' @examples 
-#' library(dplyr)
-#' data(history)
-#' x <- label_categories(history, suppress_check = FALSE)
-label_categories <- function(df, categories = c("R3", "sex", "res"), ...) {
-    vars <- intersect(categories, colnames(df))
-    for (i in vars) {
-        df_factor_i <- get(paste0("df_factor_", i)) # df_factor_age, etc.
-        df <- df_factor_i(df, ...)
-    }
-    df
-}
-
 #' Convert numeric to factor in data frame and check
 #' 
 #' These are convenience functions for license data, similar to \code{\link{factor_var}}
@@ -141,6 +141,7 @@ label_categories <- function(df, categories = c("R3", "sex", "res"), ...) {
 #' @param df data frame: Input data frame
 #' @param var character: Name of numeric variable to convert
 #' @inheritParams factor_var
+#' @import dplyr
 #' @export
 #' @family functions for working with category variables
 #' @examples
