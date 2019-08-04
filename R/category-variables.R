@@ -29,7 +29,7 @@ recode_agecat <- function(
     # make variables
     dat <- dat %>% mutate(
         age_year = year - birth_year, 
-        age_year = ifelse(age_year > 110, NA, age_year), 
+        age_year = ifelse(age_year > max_age, NA, age_year), 
         age = cut(age_year, breaks = age_breaks, labels = FALSE), 
         agecat = cut(age_year, breaks = age_breaks, labels = age_labs)
     )
