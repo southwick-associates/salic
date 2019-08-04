@@ -46,7 +46,8 @@ warn <- function(flagged, msg) {
 #' @examples
 #' library(dplyr)
 #' data(history)
-#' history <- label_categories(history) %>%
+#' history <- history %>%
+#'     label_categories() %>%
 #'     recode_agecat() %>%
 #'     filter(!agecat %in% c("0-17", "65+"))
 #' 
@@ -64,6 +65,10 @@ warn <- function(flagged, msg) {
 #' # apply over multiple segments
 #' segs <- c("tot", "res", "sex", "agecat")
 #' sapply(segs, function(x) est_part(history, x), simplify = FALSE)
+#' 
+#' # specify test thesholds by segment
+#' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
+#' sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 est_part <- function(
     history, segment = "tot", test_threshold = 30, include_test_value = FALSE
 ) {
