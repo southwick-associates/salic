@@ -19,5 +19,8 @@ The warning is only printed if the input data frame has more than one row
 x <- data.frame(x = 1:2, val = c("careful", "a bit high"))
 warn(x, "I'm a warning")
 }
+\seealso{
+Other dashboard functions: \code{\link{est_part}}
+}
 \concept{dashboard functions}
 \keyword{internal}
