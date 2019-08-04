@@ -25,7 +25,7 @@ df_factor_age(df, var = "age", levels = 1:7, labels = c("0-17",
 \arguments{
 \item{df}{data frame: Input data frame}
 
-\item{var}{numeric: Numeric variable for input}
+\item{var}{character: Name of numeric variable to convert}
 
 \item{levels}{numeric: Levels for input numeric vector}
 
@@ -49,6 +49,7 @@ sale2 \%>\%
     df_factor_age()
 }
 \seealso{
-Other functions for labelling numeric variables: \code{\link{factor_var}}
+Other functions for labelling numeric variables: \code{\link{factor_var}},
+  \code{\link{label_categories}}
 }
 \concept{functions for labelling numeric variables}

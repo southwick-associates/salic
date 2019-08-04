@@ -44,6 +44,7 @@ sale2 \%>\%
     mutate(agecat = factor_age(age))
 }
 \seealso{
-Other functions for labelling numeric variables: \code{\link{df_factor_var}}
+Other functions for labelling numeric variables: \code{\link{df_factor_var}},
+  \code{\link{label_categories}}
 }
 \concept{functions for labelling numeric variables}

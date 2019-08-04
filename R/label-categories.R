@@ -1,5 +1,6 @@
 # functions for converting numeric categories to labelled factors
 
+
 # Vector Functions --------------------------------------------------------
 # These act on vectors (typically variables in a data frame)
 
@@ -58,12 +59,34 @@ factor_R3 <- function(x, levels = 1:4,
 # Data Frame Functions ----------------------------------------------------
 # These act on data frames, which is convenient for piping
 
+#' Convert multiple numeric variables to factors
+#' 
+#' This is a convenience function to convert the expected set of numeric
+#' category variables to factors. It's basically a wrapper for
+#'  \code{\link{df_factor_var}}.
+#'  
+#' @inheritParams df_factor_var
+#' @param categories character: vector of variable names to convert to factor
+#' (if present)
+#' @export
+#' @family functions for labelling numeric variables
+#' @examples 
+#' # example
+label_categories <- function(df, categories = c("age", "R3", "sex", "res")) {
+    vars <- intersect(categories, colnames(df))
+    for (i in vars) {
+        df_factor_i <- get(paste0("df_factor_", i)) # df_factor_age, etc.
+        df <- df_factor_i(df)
+    }
+    df
+}
+
 #' Convert numeric to factor in data frame and check
 #' 
 #' These are convenience functions for license data, similar to \code{\link{factor_var}}
 #' but operate on data frames (useful for piping) and produce a check summary.
 #' @param df data frame: Input data frame
-#' @param var numeric: Numeric variable for input
+#' @param var character: Name of numeric variable to convert
 #' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @inheritParams factor_var
 #' @export
