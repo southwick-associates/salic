@@ -18,10 +18,10 @@ for pct. change per year. A warning will be printed if the absolute value
 of the change for any year exceeds the threshold.}
 
 \item{include_test_stat}{logical: If TRUE, the output table will include
-a variable holding the test statistic (pct. change per year) for each row.}
+a variable holding the test statistic for each row.}
 
-\item{suppress_warning}{logical: If TRUE, no warning will be displayed 
-(even if threshold is exceeded). Test statistics can still be include by 
+\item{suppress_warning}{logical: If TRUE, no test warning will be displayed 
+(even if threshold is exceeded). Test statistics can still be included by 
 setting include_test_stat = TRUE.}
 }
 \description{
@@ -58,6 +58,7 @@ tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
 sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 }
 \seealso{
-Other dashboard functions: \code{\link{warn}}
+Other dashboard functions: \code{\link{check_threshold}},
+  \code{\link{scaleup_part}}, \code{\link{warn}}
 }
 \concept{dashboard functions}

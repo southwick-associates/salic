@@ -25,6 +25,46 @@ warn <- function(flagged, msg) {
     } 
 }
 
+#' Perform an action (e.g., warning, error) to flag records  (for internal salic use)
+#' 
+#' The action is only triggered if any values in df[[test_variable]] exceed
+#' test_threshold. Intended for use in calculating dashboard metrics
+#'
+#' @param df data frame: table containing statistic to check
+#' @param test_threshold numeric: if exceeded, while produce warning
+#' @param test_variable character: Name of variable in df that contains
+#' the test statistic
+#' @param action function: function call to perform if threshold is exceeded
+#' (intended to be \code{\link[base]{warning}} or \code{\link[base]{stop}}).
+#' @param msg character: message to be printed in action
+#' @family dashboard functions
+#' @keywords internal
+#' @import dplyr
+#' @export
+#' @importFrom utils capture.output
+#' @examples
+#' library(dplyr)
+#' 
+#' # produce a warning
+#' x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 10000, sd = 1000))
+#' x <- mutate(x, pct_change = (part - lag(part)) / lag(part) * 100)
+#' check_threshold(x, 10)
+#' 
+#' # this will produce an error
+#' # check_threshold(x, 10, action = function(...) stop(..., call. = FALSE))
+check_threshold <- function(
+    df, test_threshold, test_variable = "pct_change", 
+    action = function(...) warning(..., call. = FALSE),
+    msg = paste("Threshold of", test_threshold, "for", test_variable, "exceeded:")
+) {
+    flagged <- filter(df, abs(.data[[test_variable]]) > test_threshold) %>%
+        data.frame()
+    if (nrow(flagged) > 0) {
+        action(msg, "\n", paste(capture.output(print(flagged)), collapse = "\n"))
+    } 
+}
+
+
 #' Estimate participants by year from license history
 #' 
 #' This function requires a correctly formated history table (see \code{\link{history}}).
@@ -39,9 +79,9 @@ warn <- function(flagged, msg) {
 #' for pct. change per year. A warning will be printed if the absolute value
 #' of the change for any year exceeds the threshold.
 #' @param include_test_stat logical: If TRUE, the output table will include
-#' a variable holding the test statistic (pct. change per year) for each row.
-#' @param suppress_warning logical: If TRUE, no warning will be displayed 
-#' (even if threshold is exceeded). Test statistics can still be include by 
+#' a variable holding the test statistic for each row.
+#' @param suppress_warning logical: If TRUE, no test warning will be displayed 
+#' (even if threshold is exceeded). Test statistics can still be included by 
 #' setting include_test_stat = TRUE.
 #' @family dashboard functions
 #' @import dplyr
@@ -96,6 +136,78 @@ est_part <- function(
     out
 }
 
-scaleup_part <- function() {
+#' Scale segmented participation counts to total (if needed)
+#' 
+#' This scaling accounts for missing values in segments, scaling up all counts
+#' to ensure the sum matches the total count. It expects 2 tables as input, both
+#' produced by \code{\link{est_part}}. If no scaling is needed (i.e., sum(part_segment$part)
+#' == sum(part_total$part)) the function will simply return the input df.
+#' 
+#' @param part_segment data frame: A segmented  participation table
+#' produced by \code{\link{est_part}} (e.g., with segment argument set to "res")
+#' @param part_total data frame: An overall participation table produced by
+#' \code{\link{est_part}}
+#' @param test_threshold numeric: threshold in whole number percentage points 
+#' which defines the upper limit of acceptable proportion of missing values for 
+#' the segment. The function will stop with an error if this threshold
+#' is exceeded. Relaxing the threshold can allow the check to pass, but use this
+#' with caution since a high percentage of missing values might suggests that 
+#' the breakouts aren't representative (e.g., if not missing at random).
+#' @inheritParams est_part
+#' @family dashboard functions
+#' @import dplyr
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(history)
+#' x <- filter(history, year != 2019) %>%
+#'     label_categories()
+#' 
+#' # demonstrate the need for scaling
+#' part_total <- est_part(x)
+#' part_segment <- est_part(x, "sex", test_threshold = 40)
+#' sum(part_segment$part) == sum(part_total$part)
+#' 
+#' # perform scaling
+#' part_segment <- scaleup_part(part_segment, part_total)
+#' sum(part_segment$part) == sum(part_total$part)
+#' 
+#' # throw an error by making the test threshold more strict
+#' scaleup_part(part_segment, part_total, test_threshold = 0.1)
+scaleup_part <- function(
+    part_segment, part_total, test_threshold = 10, include_test_stat = FALSE
+) {
+    if (sum(part_segment$part) == sum(part_total$part)) {
+        return # scaling not needed
+    }
+    # compute scale factor by comparing to totals
+    part_total <- semi_join(part_total, part_segment, by = "year")
+    compare <- part_segment %>%
+        group_by(year) %>%
+        summarise(part_segment = sum(part)) %>%
+        left_join(select(part_total, year, part), by = "year") %>% 
+        mutate( 
+            pct_na = (part - part_segment) / part * 100,  
+            scale_factor = part / part_segment 
+        )
+    # a high % missing may call missing at random assumption into question
+    check_threshold(
+        compare, test_threshold, "pct_na",
+        action = function(...) stop(..., call. = FALSE)
+    )
+    # scale to match the total - assumes missing at random (otherwise introduces bias)
+    out <- part_segment %>%
+        left_join(select(compare, year, pct_na, scale_factor), by = "year") %>%
+        mutate(part = round(part * scale_factor, 0) %>% as.integer()) %>%
+        select(-scale_factor)
     
+    # a final check of the scaled total
+    # TODO - might not need this if function is tested thoroughly, will leave for now
+    diff <- abs(sum(out$part) - sum(part_total$part))
+    if (diff > 50) { # allows for a small amount of rounding error
+        warning("Something might have gone wrong in scaling since the segment sum of ",
+                sum(out$part), " is different than the total of ", sum(part_total$part))
+    }
+    if (!include_test_stat) out <- select(out, -pct_na) 
+    out
 }
