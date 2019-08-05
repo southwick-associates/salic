@@ -18,7 +18,7 @@ Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
 \seealso{
 Other Sample Data: \code{\link{cust}},
   \code{\link{history}}, \code{\link{lic}},
-  \code{\link{state_abbreviations}}
+  \code{\link{metrics}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

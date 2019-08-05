@@ -25,7 +25,8 @@ variables potentially useful for validation, such as duration_run, were removed)
 \code{\link{make_lic_history}}
 
 Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
-  \code{\link{sale}}, \code{\link{state_abbreviations}}
+  \code{\link{metrics}}, \code{\link{sale}},
+  \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

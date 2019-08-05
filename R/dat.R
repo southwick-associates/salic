@@ -75,6 +75,28 @@ NULL
 #' @seealso \code{\link{make_lic_history}}
 NULL
 
+#' Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)
+#' 
+#' This list holds national/regional dashboard metrics (full-year) for the sample 
+#' data (2008 through 2018) and corresponds to "All Hunters & Anglers". Each element 
+#' (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
+#' "agecat" = by Age Category)
+#'
+#' @docType data
+#' @keywords datasets
+#' @name metrics
+#' @format A list of 3 metrics (part, part_new, churn) with 4 segments each 
+#' (tot, res, sex, agecat): 12 data frames total
+#' \describe{
+#' \item{part}{Sportspersons per Year}
+#' \item{part_new}{New Sportspersons (i.e., recruits) per Year}
+#' \item{churn}{Churn (i.e., turnover) per Year}
+#' }
+#' @family Sample Data
+#' @seealso \code{\link{est_part}} \code{\link{est_churn}}
+NULL
+
+
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'
 #' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
