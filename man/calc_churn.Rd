@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare.R
 \name{calc_churn}
 \alias{calc_churn}
-\title{Calculate churn for a single year (for internal salic use)}
+\title{Internal Function: Calculate churn for a single year}
 \usage{
 calc_churn(x, yr)
 }

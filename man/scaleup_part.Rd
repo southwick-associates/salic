@@ -50,6 +50,6 @@ scaleup_part(part_segment, part_total, test_threshold = 0.1)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_part}}, \code{\link{warn}}
+  \code{\link{est_part}}
 }
 \concept{dashboard functions}

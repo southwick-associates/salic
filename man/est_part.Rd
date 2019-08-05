@@ -55,10 +55,16 @@ sapply(segs, function(x) est_part(history, x), simplify = FALSE)
 
 # specify test thesholds by segment
 tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
-sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
+part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
+
+# scale segments to total
+filter(history, is.na(sex)) # very small number of missing values
+part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
+left_join(part$sex, part_scaled$sex, by = c("sex", "year")) \%>\%
+    filter(part.x != part.y)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{scaleup_part}}, \code{\link{warn}}
+  \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

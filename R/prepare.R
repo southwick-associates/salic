@@ -289,7 +289,7 @@ summary_churn <- function(
 # Validation Helpers ------------------------------------------------------
 # only intended for use by salic functions
 
-#' Round numeric values and print as percent (for internal salic use)
+#' Internal Function: Round numeric values and print as percent
 #'
 #' This is a helper function for conveniently displaying percentages. It is used
 #' in other summary functions in salic.
@@ -310,7 +310,7 @@ pct_round <- function(x, rnd = 1, scale = 100) {
     paste0(sprintf(sprintf_param, round(x * scale, rnd)), "%")
 }
 
-#' Calculate churn for a single year (for internal salic use)
+#' Internal Function: Calculate churn for a single year
 #'
 #' This is a simple calculation that doesn't take into account multi-year
 #' licenses, so it should only be used for initial data validation.
@@ -341,7 +341,7 @@ calc_churn <- function(x, yr) {
     didnt_renew / held_license_y1
 }
 
-#' Format numbers for printing (for internal salic use)
+#' Internal Function: Format numbers for printing
 #'
 #' Helper function for use in print_dat
 #' @param x vector to format
@@ -376,7 +376,7 @@ format_num <- function(x, digits = 1, big.mark = ",") {
     out
 }
 
-#' Print a data frame with caption/note (for internal salic use)
+#' Internal Function: Print a data frame with caption/note
 #'
 #' Intended for showing tables with titles & notes in logged output in doc/
 #' @param x data frame: data frame contents to print

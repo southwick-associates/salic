@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare.R
 \name{print_dat}
 \alias{print_dat}
-\title{Print a data frame with caption/note (for internal salic use)}
+\title{Internal Function: Print a data frame with caption/note}
 \usage{
 print_dat(x, caption = NULL, note = NULL, digits = 1,
   big.mark = ",")

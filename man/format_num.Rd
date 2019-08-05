@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare.R
 \name{format_num}
 \alias{format_num}
-\title{Format numbers for printing (for internal salic use)}
+\title{Internal Function: Format numbers for printing}
 \usage{
 format_num(x, digits = 1, big.mark = ",")
 }

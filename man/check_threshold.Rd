@@ -2,7 +2,7 @@
 % Please edit documentation in R/dashboard.R
 \name{check_threshold}
 \alias{check_threshold}
-\title{Perform an action (e.g., warning, error) to flag records  (for internal salic use)}
+\title{Internal Function: Perform an action (e.g., warning, error) to flag records}
 \usage{
 check_threshold(df, test_threshold, test_variable = "pct_change",
   action = function(...) warning(..., call. = FALSE),
@@ -24,22 +24,22 @@ the test statistic}
 }
 \description{
 The action is only triggered if any values in df[[test_variable]] exceed
-test_threshold. Intended for use in calculating dashboard metrics
+test_threshold. Intended for use in calculating dashboard metrics.
 }
 \examples{
 library(dplyr)
 
 # produce a warning
-x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 10000, sd = 1000))
+x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 1000, sd = 100))
 x <- mutate(x, pct_change = (part - lag(part)) / lag(part) * 100)
-check_threshold(x, 10)
+check_threshold(x, 5)
 
 # this will produce an error
-# check_threshold(x, 10, action = function(...) stop(..., call. = FALSE))
+# check_threshold(x, 5, action = function(...) stop(..., call. = FALSE))
 }
 \seealso{
 Other dashboard functions: \code{\link{est_part}},
-  \code{\link{scaleup_part}}, \code{\link{warn}}
+  \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}
 \keyword{internal}

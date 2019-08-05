@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare.R
 \name{pct_round}
 \alias{pct_round}
-\title{Round numeric values and print as percent (for internal salic use)}
+\title{Internal Function: Round numeric values and print as percent}
 \usage{
 pct_round(x, rnd = 1, scale = 100)
 }

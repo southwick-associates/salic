@@ -3,32 +3,10 @@
 
 # Estimate ------------------------------------------------------------
 
-#' Helper function: print a warning to flag records
-#' 
-#' The warning is only printed if the input data frame has more than one row 
-#' (i.e., only flagged rows should be passed to warn())
-#'
-#' @param flagged data frame: table containing flagged rows
-#' @param msg character: message to be printed in warming
-#' @family dashboard functions
-#' @keywords internal
-#' @export
-#' @importFrom utils capture.output
-#' @examples
-#' x <- data.frame(x = 1:2, val = c("careful", "a bit high"))
-#' warn(x, "I'm a warning")
-warn <- function(flagged, msg) {
-    flagged <- data.frame(flagged)
-    if (nrow(flagged) > 0) {
-        warning(msg, "\n", paste(capture.output(print(flagged)), collapse = "\n"), 
-                call. = FALSE)
-    } 
-}
-
-#' Perform an action (e.g., warning, error) to flag records  (for internal salic use)
+#' Internal Function: Perform an action (e.g., warning, error) to flag records
 #' 
 #' The action is only triggered if any values in df[[test_variable]] exceed
-#' test_threshold. Intended for use in calculating dashboard metrics
+#' test_threshold. Intended for use in calculating dashboard metrics.
 #'
 #' @param df data frame: table containing statistic to check
 #' @param test_threshold numeric: if exceeded, while produce warning
@@ -46,12 +24,12 @@ warn <- function(flagged, msg) {
 #' library(dplyr)
 #' 
 #' # produce a warning
-#' x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 10000, sd = 1000))
+#' x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 1000, sd = 100))
 #' x <- mutate(x, pct_change = (part - lag(part)) / lag(part) * 100)
-#' check_threshold(x, 10)
+#' check_threshold(x, 5)
 #' 
 #' # this will produce an error
-#' # check_threshold(x, 10, action = function(...) stop(..., call. = FALSE))
+#' # check_threshold(x, 5, action = function(...) stop(..., call. = FALSE))
 check_threshold <- function(
     df, test_threshold, test_variable = "pct_change", 
     action = function(...) warning(..., call. = FALSE),
@@ -111,7 +89,13 @@ check_threshold <- function(
 #' 
 #' # specify test thesholds by segment
 #' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
-#' sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
+#' part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
+#' 
+#' # scale segments to total
+#' filter(history, is.na(sex)) # very small number of missing values
+#' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
+#' left_join(part$sex, part_scaled$sex, by = c("sex", "year")) %>%
+#'     filter(part.x != part.y)
 est_part <- function(
     history, segment = "tot", test_threshold = 30, include_test_stat = FALSE,
     suppress_warning = FALSE
@@ -127,11 +111,7 @@ est_part <- function(
         summarise(part = n()) %>%
         mutate(pct_change = (part - lag(part)) / lag(part) * 100) %>%
         ungroup()
-    
-    if (!suppress_warning) {
-        filter(out, abs(pct_change) > test_threshold) %>%
-            warn(paste0("Annual % change beyond ", test_threshold, "% in at least one year"))
-    }
+    if (!suppress_warning) check_threshold(out, test_threshold)
     if (!include_test_stat) out <- select(out, -pct_change) 
     out
 }
@@ -180,7 +160,7 @@ scaleup_part <- function(
     if (sum(part_segment$part) == sum(part_total$part)) {
         return # scaling not needed
     }
-    # compute scale factor by comparing to totals
+    # compute scale factor
     part_total <- semi_join(part_total, part_segment, by = "year")
     compare <- part_segment %>%
         group_by(year) %>%
@@ -190,12 +170,11 @@ scaleup_part <- function(
             pct_na = (part - part_segment) / part * 100,  
             scale_factor = part / part_segment 
         )
-    # a high % missing may call missing at random assumption into question
     check_threshold(
         compare, test_threshold, "pct_na",
         action = function(...) stop(..., call. = FALSE)
     )
-    # scale to match the total - assumes missing at random (otherwise introduces bias)
+    # scale to match the total
     out <- part_segment %>%
         left_join(select(compare, year, pct_na, scale_factor), by = "year") %>%
         mutate(part = round(part * scale_factor, 0) %>% as.integer()) %>%
@@ -203,6 +182,7 @@ scaleup_part <- function(
     
     # a final check of the scaled total
     # TODO - might not need this if function is tested thoroughly, will leave for now
+    #      - probably better to consider what problem it catches and write a test
     diff <- abs(sum(out$part) - sum(part_total$part))
     if (diff > 50) { # allows for a small amount of rounding error
         warning("Something might have gone wrong in scaling since the segment sum of ",
