@@ -38,10 +38,11 @@ warn <- function(flagged, msg) {
 #' @param test_threshold numeric: threshold in whole number percentage points 
 #' for pct. change per year. A warning will be printed if the absolute value
 #' of the change for any year exceeds the threshold.
-#' @param include_test_value logical: If TRUE, the output table will include
-#' a variable holding the test value (pct. change per year) for each row.
-#' @param suppress_test logical: If TRUE, no test will be run (so no warnings
-#' related to exceeding thresholds will be generated)
+#' @param include_test_stat logical: If TRUE, the output table will include
+#' a variable holding the test statistic (pct. change per year) for each row.
+#' @param suppress_warning logical: If TRUE, no warning will be displayed 
+#' (even if threshold is exceeded). Test statistics can still be include by 
+#' setting include_test_stat = TRUE.
 #' @family dashboard functions
 #' @import dplyr
 #' @export
@@ -54,7 +55,7 @@ warn <- function(flagged, msg) {
 #'     filter(!agecat %in% c("0-17", "65+"))
 #' 
 #' # a flag will be raised since 2019 is a partial year
-#' est_part(history, include_test_value = TRUE)
+#' est_part(history, include_test_stat = TRUE)
 #' 
 #' # fix by dropping partial year
 #' history <- filter(history, year != 2019)
@@ -72,8 +73,8 @@ warn <- function(flagged, msg) {
 #' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
 #' sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 est_part <- function(
-    history, segment = "tot", test_threshold = 30, include_test_value = FALSE,
-    suppress_test = FALSE
+    history, segment = "tot", test_threshold = 30, include_test_stat = FALSE,
+    suppress_warning = FALSE
 ) {
     if (segment == "tot") {
         history <- mutate(history, tot = "All") # for group_by()
@@ -87,11 +88,11 @@ est_part <- function(
         mutate(pct_change = (part - lag(part)) / lag(part) * 100) %>%
         ungroup()
     
-    if (!suppress_test) {
+    if (!suppress_warning) {
         filter(out, abs(pct_change) > test_threshold) %>%
             warn(paste0("Annual % change beyond ", test_threshold, "% in at least one year"))
     }
-    if (!include_test_value) out <- select(out, -pct_change) 
+    if (!include_test_stat) out <- select(out, -pct_change) 
     out
 }
 

@@ -5,7 +5,7 @@
 \title{Estimate participants by year from license history}
 \usage{
 est_part(history, segment = "tot", test_threshold = 30,
-  include_test_value = FALSE, suppress_test = FALSE)
+  include_test_stat = FALSE, suppress_warning = FALSE)
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -17,11 +17,12 @@ Alternatively specifiy other license history variables ("res", "sex", etc.)}
 for pct. change per year. A warning will be printed if the absolute value
 of the change for any year exceeds the threshold.}
 
-\item{include_test_value}{logical: If TRUE, the output table will include
-a variable holding the test value (pct. change per year) for each row.}
+\item{include_test_stat}{logical: If TRUE, the output table will include
+a variable holding the test statistic (pct. change per year) for each row.}
 
-\item{suppress_test}{logical: If TRUE, no test will be run (so no warnings
-related to exceeding thresholds will be generated)}
+\item{suppress_warning}{logical: If TRUE, no warning will be displayed 
+(even if threshold is exceeded). Test statistics can still be include by 
+setting include_test_stat = TRUE.}
 }
 \description{
 This function requires a correctly formated history table (see \code{\link{history}}).
@@ -38,7 +39,7 @@ history <- history \%>\%
     filter(!agecat \%in\% c("0-17", "65+"))
 
 # a flag will be raised since 2019 is a partial year
-est_part(history, include_test_value = TRUE)
+est_part(history, include_test_stat = TRUE)
 
 # fix by dropping partial year
 history <- filter(history, year != 2019)
