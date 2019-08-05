@@ -40,6 +40,8 @@ warn <- function(flagged, msg) {
 #' of the change for any year exceeds the threshold.
 #' @param include_test_value logical: If TRUE, the output table will include
 #' a variable holding the test value (pct. change per year) for each row.
+#' @param suppress_test logical: If TRUE, no test will be run (so no warnings
+#' related to exceeding thresholds will be generated)
 #' @family dashboard functions
 #' @import dplyr
 #' @export
@@ -70,7 +72,8 @@ warn <- function(flagged, msg) {
 #' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
 #' sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 est_part <- function(
-    history, segment = "tot", test_threshold = 30, include_test_value = FALSE
+    history, segment = "tot", test_threshold = 30, include_test_value = FALSE,
+    suppress_test = FALSE
 ) {
     if (segment == "tot") {
         history <- mutate(history, tot = "All") # for group_by()
@@ -84,9 +87,10 @@ est_part <- function(
         mutate(pct_change = (part - lag(part)) / lag(part) * 100) %>%
         ungroup()
     
-    filter(out, abs(pct_change) > test_threshold) %>%
-        warn(paste0("Annual % change beyond ", test_threshold, "% in at least one year"))
-    
+    if (!suppress_test) {
+        filter(out, abs(pct_change) > test_threshold) %>%
+            warn(paste0("Annual % change beyond ", test_threshold, "% in at least one year"))
+    }
     if (!include_test_value) out <- select(out, -pct_change) 
     out
 }

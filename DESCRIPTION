@@ -22,4 +22,5 @@ Imports:
 RoxygenNote: 6.1.0
 Suggests:
     lubridate (>= 1.7.4),
-    tidyr (>= 0.8.1)
+    tidyr (>= 0.8.1),
+    testthat

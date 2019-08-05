@@ -5,7 +5,7 @@
 \title{Estimate participants by year from license history}
 \usage{
 est_part(history, segment = "tot", test_threshold = 30,
-  include_test_value = FALSE)
+  include_test_value = FALSE, suppress_test = FALSE)
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -19,6 +19,9 @@ of the change for any year exceeds the threshold.}
 
 \item{include_test_value}{logical: If TRUE, the output table will include
 a variable holding the test value (pct. change per year) for each row.}
+
+\item{suppress_test}{logical: If TRUE, no test will be run (so no warnings
+related to exceeding thresholds will be generated)}
 }
 \description{
 This function requires a correctly formated history table (see \code{\link{history}}).
