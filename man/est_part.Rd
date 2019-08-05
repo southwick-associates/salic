@@ -5,7 +5,7 @@
 \title{Estimate participants by year from license history}
 \usage{
 est_part(history, segment = "tot", test_threshold = 30,
-  include_test_stat = FALSE, suppress_warning = FALSE)
+  show_test_stat = FALSE, suppress_warning = FALSE)
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -14,21 +14,20 @@ est_part(history, segment = "tot", test_threshold = 30,
 Alternatively specifiy other license history variables ("res", "sex", etc.)}
 
 \item{test_threshold}{numeric: threshold in whole number percentage points 
-for pct. change per year. A warning will be printed if the absolute value
+for pct change per year. A warning will be printed if the absolute value
 of the change for any year exceeds the threshold.}
 
-\item{include_test_stat}{logical: If TRUE, the output table will include
+\item{show_test_stat}{logical: If TRUE, the output table will include
 a variable holding the test statistic for each row.}
 
 \item{suppress_warning}{logical: If TRUE, no test warning will be displayed 
 (even if threshold is exceeded). Test statistics can still be included by 
-setting include_test_stat = TRUE.}
+setting show_test_stat = TRUE.}
 }
 \description{
 This function requires a correctly formated history table (see \code{\link{history}}).
 It produces a simple count of records per year, optionally by segment, 
-& runs a validation test: pct. change per year. A large pct. change in a year
-can often indicate a problem.
+& runs a validation test: pct change per year.
 }
 \examples{
 library(dplyr)
@@ -39,7 +38,7 @@ history <- history \%>\%
     filter(!agecat \%in\% c("0-17", "65+"))
 
 # a flag will be raised since 2019 is a partial year
-est_part(history, include_test_stat = TRUE)
+est_part(history, show_test_stat = TRUE)
 
 # fix by dropping partial year
 history <- filter(history, year != 2019)
@@ -62,9 +61,14 @@ filter(history, is.na(sex)) # very small number of missing values
 part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
 left_join(part$sex, part_scaled$sex, by = c("sex", "year")) \%>\%
     filter(part.x != part.y)
+
+# new recruits
+history_new <- filter(history, !is.na(R3), R3 == "Recruit")
+part_new <- sapply(segs, function(x) est_part(history_new, x, 50), simplify = FALSE)
+part_new <- lapply(part_new, function(x) scaleup_part(x, part_new$tot))
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{scaleup_part}}
+  \code{\link{est_churn}}, \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

@@ -5,7 +5,7 @@
 \title{Scale segmented participation counts to total (if needed)}
 \usage{
 scaleup_part(part_segment, part_total, test_threshold = 10,
-  include_test_stat = FALSE)
+  show_test_stat = FALSE)
 }
 \arguments{
 \item{part_segment}{data frame: A segmented  participation table
@@ -21,7 +21,7 @@ is exceeded. Relaxing the threshold can allow the check to pass, but use this
 with caution since a high percentage of missing values might suggests that 
 the breakouts aren't representative (e.g., if not missing at random).}
 
-\item{include_test_stat}{logical: If TRUE, the output table will include
+\item{show_test_stat}{logical: If TRUE, the output table will include
 a variable holding the test statistic for each row.}
 }
 \description{
@@ -50,6 +50,6 @@ scaleup_part(part_segment, part_total, test_threshold = 0.1)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_part}}
+  \code{\link{est_churn}}, \code{\link{est_part}}
 }
 \concept{dashboard functions}

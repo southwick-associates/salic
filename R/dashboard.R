@@ -38,7 +38,7 @@ check_threshold <- function(
     flagged <- filter(df, abs(.data[[test_variable]]) > test_threshold) %>%
         data.frame()
     if (nrow(flagged) > 0) {
-        action(msg, "\n", paste(capture.output(print(flagged)), collapse = "\n"))
+        action(msg, "\n", paste(capture.output(print(flagged)), collapse = "\n"), "\n")
     } 
 }
 
@@ -47,20 +47,19 @@ check_threshold <- function(
 #' 
 #' This function requires a correctly formated history table (see \code{\link{history}}).
 #' It produces a simple count of records per year, optionally by segment, 
-#' & runs a validation test: pct. change per year. A large pct. change in a year
-#' can often indicate a problem.
+#' & runs a validation test: pct change per year.
 #' 
 #' @param history data frame: input license history table
 #' @param segment character: defaults to "tot", which indicates no segmentation.
 #' Alternatively specifiy other license history variables ("res", "sex", etc.)
 #' @param test_threshold numeric: threshold in whole number percentage points 
-#' for pct. change per year. A warning will be printed if the absolute value
+#' for pct change per year. A warning will be printed if the absolute value
 #' of the change for any year exceeds the threshold.
-#' @param include_test_stat logical: If TRUE, the output table will include
+#' @param show_test_stat logical: If TRUE, the output table will include
 #' a variable holding the test statistic for each row.
 #' @param suppress_warning logical: If TRUE, no test warning will be displayed 
 #' (even if threshold is exceeded). Test statistics can still be included by 
-#' setting include_test_stat = TRUE.
+#' setting show_test_stat = TRUE.
 #' @family dashboard functions
 #' @import dplyr
 #' @export
@@ -73,7 +72,7 @@ check_threshold <- function(
 #'     filter(!agecat %in% c("0-17", "65+"))
 #' 
 #' # a flag will be raised since 2019 is a partial year
-#' est_part(history, include_test_stat = TRUE)
+#' est_part(history, show_test_stat = TRUE)
 #' 
 #' # fix by dropping partial year
 #' history <- filter(history, year != 2019)
@@ -96,8 +95,13 @@ check_threshold <- function(
 #' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
 #' left_join(part$sex, part_scaled$sex, by = c("sex", "year")) %>%
 #'     filter(part.x != part.y)
+#' 
+#' # new recruits
+#' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
+#' part_new <- sapply(segs, function(x) est_part(history_new, x, 50), simplify = FALSE)
+#' part_new <- lapply(part_new, function(x) scaleup_part(x, part_new$tot))
 est_part <- function(
-    history, segment = "tot", test_threshold = 30, include_test_stat = FALSE,
+    history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
     suppress_warning = FALSE
 ) {
     if (segment == "tot") {
@@ -112,9 +116,58 @@ est_part <- function(
         mutate(pct_change = (part - lag(part)) / lag(part) * 100) %>%
         ungroup()
     if (!suppress_warning) check_threshold(out, test_threshold)
-    if (!include_test_stat) out <- select(out, -pct_change) 
+    if (!show_test_stat) out <- select(out, -pct_change) 
     out
 }
+
+#' Estimate churn by year from license history
+#' 
+#' This function requires a correctly formated history table (see \code{\link{history}}).
+#' It runs a mean of the lapse value (per year), optionally by segment (and also shifts 
+#' year forward by 1 so that churn in current year reflects lapse pct from last year). 
+#' It also runs a validation test: pct change per year.
+#' @inheritParams est_part
+#' @family dashboard functions
+#' @import dplyr
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(history)
+#' history <- history %>%
+#'     label_categories() %>%
+#'     recode_agecat() %>%
+#'     filter(!agecat %in% c("0-17", "65+"), year != 2019)
+#' est_churn(history)
+#' 
+#' # apply across all segments
+#' segs <- c("tot", "res", "sex", "agecat")
+#' churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
+est_churn <- function(
+    history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
+    suppress_warning = FALSE
+) {
+    if (segment == "tot") {
+        history <- mutate(history, tot = "All")
+    } else {
+        history <- filter(history, !is.na(!! as.name(segment)))
+    }
+    # churn is simply lapse % per year
+    out <- history %>%
+        group_by_at(c(segment, "year")) %>%
+        summarise(churn = mean(lapse)) %>%
+        mutate(pct_change = (churn - lag(churn)) / lag(churn) * 100) %>%
+        ungroup()
+    
+    # shifting one year forward so current year always has a value
+    # hence churn = % of last years buyers who didn't renew this year
+    lastyr <- max(out$year)
+    out <- mutate(out, year = year + 1) %>%
+        filter(year != lastyr + 1)
+    if (!suppress_warning) check_threshold(out, test_threshold)
+    if (!show_test_stat) out <- select(out, -pct_change) 
+    ungroup(out)
+}
+
 
 #' Scale segmented participation counts to total (if needed)
 #' 
@@ -155,7 +208,7 @@ est_part <- function(
 #' # throw an error by making the test threshold more strict
 #' scaleup_part(part_segment, part_total, test_threshold = 0.1)
 scaleup_part <- function(
-    part_segment, part_total, test_threshold = 10, include_test_stat = FALSE
+    part_segment, part_total, test_threshold = 10, show_test_stat = FALSE
 ) {
     if (sum(part_segment$part) == sum(part_total$part)) {
         return # scaling not needed
@@ -188,6 +241,7 @@ scaleup_part <- function(
         warning("Something might have gone wrong in scaling since the segment sum of ",
                 sum(out$part), " is different than the total of ", sum(part_total$part))
     }
-    if (!include_test_stat) out <- select(out, -pct_na) 
+    if (!show_test_stat) out <- select(out, -pct_na) 
     out
 }
+
