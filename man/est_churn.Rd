@@ -45,6 +45,7 @@ churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_part}}, \code{\link{scaleup_part}}
+  \code{\link{est_part}}, \code{\link{format_tableau}},
+  \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

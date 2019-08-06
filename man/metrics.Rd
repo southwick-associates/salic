@@ -4,7 +4,7 @@
 \name{metrics}
 \alias{metrics}
 \title{Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)}
-\format{A list of 3 metrics (part, part_new, churn) with 4 segments each 
+\format{A list of 3 metrics (participants, recruits, churn) with 4 segments each 
 (tot, res, sex, agecat): 12 data frames total
 \describe{
 \item{part}{Sportspersons per Year}

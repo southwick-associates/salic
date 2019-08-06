@@ -6,10 +6,10 @@
 \title{Scale segmented participation counts to total (if needed)}
 \usage{
 scaleup_part(part_segment, part_total, test_threshold = 10,
-  show_test_stat = FALSE, outvar = "part")
+  show_test_stat = FALSE, outvar = "participants")
 
 scaleup_recruit(part_segment, part_total, test_threshold = 10,
-  show_test_stat = FALSE, outvar = "recruit")
+  show_test_stat = FALSE, outvar = "recruits")
 }
 \arguments{
 \item{part_segment}{data frame: A segmented  participation table
@@ -45,11 +45,11 @@ history <- filter(history, year != 2019) \%>\%
 # demonstrate the need for scaling
 part_total <- est_part(history)
 part_segment <- est_part(history, "sex", test_threshold = 40)
-sum(part_segment$part) == sum(part_total$part)
+sum(part_segment$participants) == sum(part_total$participants)
 
 # perform scaling
 part_segment <- scaleup_part(part_segment, part_total)
-sum(part_segment$part) == sum(part_total$part)
+sum(part_segment$participants) == sum(part_total$participants)
 
 # making test threshold more strict
 part_segment <- est_part(history, "sex")
@@ -63,6 +63,7 @@ scaleup_recruit(part_segment, part_total)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{est_part}}
+  \code{\link{est_churn}}, \code{\link{est_part}},
+  \code{\link{format_tableau}}
 }
 \concept{dashboard functions}

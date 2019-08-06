@@ -85,7 +85,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name metrics
-#' @format A list of 3 metrics (part, part_new, churn) with 4 segments each 
+#' @format A list of 3 metrics (participants, recruits, churn) with 4 segments each 
 #' (tot, res, sex, agecat): 12 data frames total
 #' \describe{
 #' \item{part}{Sportspersons per Year}

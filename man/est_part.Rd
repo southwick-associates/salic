@@ -6,11 +6,12 @@
 \title{Estimate participants by year from license history}
 \usage{
 est_part(history, segment = "tot", test_threshold = 20,
-  show_test_stat = FALSE, suppress_warning = FALSE, outvar = "part")
+  show_test_stat = FALSE, suppress_warning = FALSE,
+  outvar = "participants")
 
 est_recruit(history, segment = "tot", test_threshold = 35,
   show_test_stat = FALSE, suppress_warning = FALSE,
-  outvar = "recruit")
+  outvar = "recruits")
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -75,18 +76,19 @@ part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALS
 # missing values can cause problem with counts by segment
 filter(history, is.na(sex))
 group_by(part$sex, year) \%>\% 
-    summarise(part_sex = sum(part)) \%>\%
-    left_join(select(part$tot, year, part), by = "year")
+    summarise(part_sex = sum(participants)) \%>\%
+    left_join(select(part$tot, year, participants), by = "year")
 
 # fix by scaling segments to total
 # reasonable assumption if missing at random (less so otherwise)
 part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
 group_by(part_scaled$sex, year) \%>\% 
-    summarise(part_sex = sum(part)) \%>\%
-    left_join(select(part_scaled$tot, year, part), by = "year")
+    summarise(part_sex = sum(participants)) \%>\%
+    left_join(select(part_scaled$tot, year, participants), by = "year")
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{scaleup_part}}
+  \code{\link{est_churn}}, \code{\link{format_tableau}},
+  \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

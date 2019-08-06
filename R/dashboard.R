@@ -101,18 +101,18 @@ check_threshold <- function(
 #' # missing values can cause problem with counts by segment
 #' filter(history, is.na(sex))
 #' group_by(part$sex, year) %>% 
-#'     summarise(part_sex = sum(part)) %>%
-#'     left_join(select(part$tot, year, part), by = "year")
+#'     summarise(part_sex = sum(participants)) %>%
+#'     left_join(select(part$tot, year, participants), by = "year")
 #' 
 #' # fix by scaling segments to total
 #' # reasonable assumption if missing at random (less so otherwise)
 #' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
 #' group_by(part_scaled$sex, year) %>% 
-#'     summarise(part_sex = sum(part)) %>%
-#'     left_join(select(part_scaled$tot, year, part), by = "year")
+#'     summarise(part_sex = sum(participants)) %>%
+#'     left_join(select(part_scaled$tot, year, participants), by = "year")
 est_part <- function(
     history, segment = "tot", test_threshold = 20, show_test_stat = FALSE,
-    suppress_warning = FALSE, outvar = "part"
+    suppress_warning = FALSE, outvar = "participants"
 ) {
     if (segment == "tot") {
         history <- mutate(history, tot = "All") # for group_by()
@@ -138,7 +138,7 @@ est_part <- function(
 #' @export
 est_recruit <- function(
     history, segment = "tot", test_threshold = 35, show_test_stat = FALSE,
-    suppress_warning = FALSE, outvar = "recruit"
+    suppress_warning = FALSE, outvar = "recruits"
 ) {
     est_part(history, segment, test_threshold, show_test_stat, 
              suppress_warning, outvar)
@@ -226,11 +226,11 @@ est_churn <- function(
 #' # demonstrate the need for scaling
 #' part_total <- est_part(history)
 #' part_segment <- est_part(history, "sex", test_threshold = 40)
-#' sum(part_segment$part) == sum(part_total$part)
+#' sum(part_segment$participants) == sum(part_total$participants)
 #' 
 #' # perform scaling
 #' part_segment <- scaleup_part(part_segment, part_total)
-#' sum(part_segment$part) == sum(part_total$part)
+#' sum(part_segment$participants) == sum(part_total$participants)
 #' 
 #' # making test threshold more strict
 #' part_segment <- est_part(history, "sex")
@@ -243,7 +243,7 @@ est_churn <- function(
 #' scaleup_recruit(part_segment, part_total)
 scaleup_part <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
-    outvar = "part"
+    outvar = "participants"
 ) {
     # TODO this could potentially be part of defined data format checks
     # and placed at the top of these functions that have very strict format rules
@@ -301,8 +301,72 @@ scaleup_part <- function(
 #' @export
 scaleup_recruit <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
-    outvar = "recruit"
+    outvar = "recruits"
 ) {
     scaleup_part(part_segment, part_total, test_threshold, 
                  show_test_stat, outvar)
+}
+
+
+# Data Format -------------------------------------------------------------
+
+#' Format estimated metrics for input to Tableau Dashboard
+#' 
+#' This function expects a data frame produced by an salic estimation function (
+#' \code{\link{est_part}}, \code{\link{est_recruit}}, \code{\link{est_churn}}).
+#' It returns a data frame with additional formatting that allows stacking all results
+#' into a single table.
+#' 
+#' @param df data frame: Input table with estimated metrics
+#' @param timeframe character: value to store in the 'timeframe' variable of 
+#' the output (e.g, 'full-year', 'mid-year')
+#' @param group character: value to sore in the 'group' variable of the 
+#' output (e.g., 'all_sports', 'fish', 'hunt')
+#' @family dashboard functions
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(metrics)
+#' 
+#' # format some different tables
+#' x <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
+#' y <- format_tableau(metrics$participants$res, "full-year", "all_sports")
+#' z <- format_tableau(metrics$recruits$sex, "full-year", "all_sports")
+#' bind_rows(x, y, z) # combine
+#' 
+#' # apply formatting across segments
+#' lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")) %>%
+#'    bind_rows
+#'    
+#' # apply across metrics & segments
+#' bind_rows(
+#'     lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")),
+#'     lapply(metrics$recruits, function(x) format_tableau(x, "full-year", "sports")),
+#'     lapply(metrics$churn, function(x) format_tableau(x, "full-year", "sports"))
+#' )
+format_tableau <- function(df, timeframe, group) {
+    # expecting exactly 3 columns in the input data frame
+    out <- df
+    names(out) <- c("category", "year", "value")
+    
+    # stored as input variable names >> placed in output variable values
+    segment <- colnames(df)[1]
+    metric <- colnames(df)[3]
+    
+    # adding variables to represent structure in a single table
+    out$segment <- segment
+    out$metric <- metric
+    out$timeframe <- timeframe
+    out$group <- group
+    out$category <- as.character(out$category)
+    
+    # modify segment names
+    out <- out %>% dplyr::mutate(segment = dplyr::case_when(
+        segment == "tot" ~ "All",
+        segment == "res" ~ "Residency",
+        segment == "sex" ~ "Gender",
+        segment == "agecat" ~ "Age",
+        segment == "county" ~ "County"
+    ))
+    dplyr::select(out, timeframe, group, segment, year, category, metric, value)
 }
