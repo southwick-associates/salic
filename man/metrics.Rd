@@ -8,12 +8,12 @@
 (tot, res, sex, agecat): 12 data frames total
 \describe{
 \item{part}{Sportspersons per Year}
-\item{part_new}{New Sportspersons (i.e., recruits) per Year}
+\item{recruit}{New Sportspersons (i.e., recruits) per Year}
 \item{churn}{Churn (i.e., turnover) per Year}
 }}
 \description{
 This list holds national/regional dashboard metrics (full-year) for the sample 
-data (2008 through 2018) and corresponds to "All Hunters & Anglers". Each element 
+data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each element 
 (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
 "agecat" = by Age Category)
 }

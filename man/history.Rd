@@ -4,7 +4,7 @@
 \name{history}
 \alias{history}
 \title{Sample Data: License  History (Jan 1, 2008 through June 30, 2019)}
-\format{A data frame with 9,690 rows and 8 variables
+\format{A data frame with 8 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (composite key)}
 \item{year}{License Year (integer) (yyyy) (composite key)}

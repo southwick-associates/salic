@@ -4,7 +4,7 @@
 \name{sale}
 \alias{sale}
 \title{Sample Data: Sales (Jan 1, 2008 through June 30, 2019)}
-\format{A data frame with 15,213 rows and 5 variables
+\format{A data frame with 5 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}

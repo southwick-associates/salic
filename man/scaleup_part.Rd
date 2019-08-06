@@ -52,8 +52,8 @@ part_segment <- scaleup_part(part_segment, part_total)
 sum(part_segment$part) == sum(part_total$part)
 
 # making test threshold more strict
-part_segment <- est_part(history, "sex", test_threshold = 40)
-# scaleup_part(part_segment, part_total, test_threshold = 0.1) # throws error if run
+part_segment <- est_part(history, "sex")
+# scaleup_part(part_segment, part_total, test_threshold = 3) # throws error if run
 
 # new recruits
 history_new <- filter(history, R3 == "Recruit")

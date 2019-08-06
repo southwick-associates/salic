@@ -81,9 +81,13 @@ check_threshold <- function(
 #' history <- filter(history, year != 2019)
 #' est_part(history)
 #' 
-#' # by age category
+#' ### for new recruits
+#' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
+#' est_recruit(history_new)
+#' 
+#' ### by segment
 #' est_part(history, "agecat")
-#' est_part(history, "agecat", test_threshold = 35)
+#' est_part(history, "agecat", test_threshold = 15) # produce a warning
 #' 
 #' # apply over multiple segments
 #' segs <- c("tot", "res", "sex", "agecat")
@@ -93,15 +97,19 @@ check_threshold <- function(
 #' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
 #' part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 #' 
-#' # scale segments to total
-#' filter(history, is.na(sex)) # very small number of missing values
-#' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
-#' left_join(part$sex, part_scaled$sex, by = c("sex", "year")) %>%
-#'     filter(part.x != part.y)
+#' ### scaleup_part()
+#' # missing values can cause problem with counts by segment
+#' filter(history, is.na(sex))
+#' group_by(part$sex, year) %>% 
+#'     summarise(part_sex = sum(part)) %>%
+#'     left_join(select(part$tot, year, part), by = "year")
 #' 
-#' # new recruits
-#' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
-#' est_recruit(history_new)
+#' # fix by scaling segments to total
+#' # reasonable assumption if missing at random (less so otherwise)
+#' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
+#' group_by(part_scaled$sex, year) %>% 
+#'     summarise(part_sex = sum(part)) %>%
+#'     left_join(select(part_scaled$tot, year, part), by = "year")
 est_part <- function(
     history, segment = "tot", test_threshold = 20, show_test_stat = FALSE,
     suppress_warning = FALSE, outvar = "part"
@@ -225,8 +233,8 @@ est_churn <- function(
 #' sum(part_segment$part) == sum(part_total$part)
 #' 
 #' # making test threshold more strict
-#' part_segment <- est_part(history, "sex", test_threshold = 40)
-#' # scaleup_part(part_segment, part_total, test_threshold = 0.1) # throws error if run
+#' part_segment <- est_part(history, "sex")
+#' # scaleup_part(part_segment, part_total, test_threshold = 3) # throws error if run
 #' 
 #' # new recruits
 #' history_new <- filter(history, R3 == "Recruit")

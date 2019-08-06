@@ -3,15 +3,15 @@
 \docType{data}
 \name{cust}
 \alias{cust}
-\title{Sample Data: 3,000 Customers}
-\format{A data frame with 3,000 rows and 3 variables
+\title{Sample Data: 15,000 Customers}
+\format{A data frame with 3 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (primary key)}
 \item{sex}{Gender (integer) (1=Male, 2=Female)}
 \item{birth_year}{Year of Birth (integer) (yyyy)}
 }}
 \description{
-Sample Data: 3,000 Customers
+Sample Data: 15,000 Customers
 }
 \seealso{
 Other Sample Data: \code{\link{history}},
