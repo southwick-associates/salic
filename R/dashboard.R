@@ -61,6 +61,8 @@ check_threshold <- function(
 #' (even if threshold is exceeded). Test statistics can still be included by 
 #' setting show_test_stat = TRUE.
 #' @param outvar character: name of variable that stores metric
+#' @return Returns a data frame with 3 variables (segment, "year", outvar), and
+#' optionally with 2 extra variables ("change", "pct_change") if show_test_stat = TRUE
 #' @family dashboard functions
 #' @import dplyr
 #' @export
@@ -99,10 +101,9 @@ check_threshold <- function(
 #' 
 #' # new recruits
 #' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
-#' part_new <- sapply(segs, function(x) est_part(history_new, x, 50), simplify = FALSE)
-#' part_new <- lapply(part_new, function(x) scaleup_part(x, part_new$tot))
+#' est_recruit(history_new)
 est_part <- function(
-    history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
+    history, segment = "tot", test_threshold = 20, show_test_stat = FALSE,
     suppress_warning = FALSE, outvar = "part"
 ) {
     if (segment == "tot") {
@@ -124,43 +125,13 @@ est_part <- function(
     out
 }
 
-#' Estimate new participants by year from license history
-#' 
-#' This function requires a correctly formated history table (see \code{\link{history}}).
-#' It produces a simple count of records per year (filtered by R3 to exclude non-recruits),
-#' optionally by segment. It also runs a validation test: pct change per year.
-#' 
-#' @inheritParams est_part
-#' @param recruit_values character: Values of R3 variable that indicate a recruit
-#' (passed to \code{\link[dplyr]{filter}} to exclude non-recruits)
-#' @family dashboard functions
-#' @import dplyr
+# convenience function for recruit participation
+#' @rdname est_part
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(history)
-#' 
-#' history <- filter(history, year != 2019)
-#' est_recruit(history)
-#' 
-#' # works whether or not R3 variable has been labelled
-#' count(history, R3)
-#' history <- label_categories(history)
-#' count(history, R3)
-#' est_recruit(history)
 est_recruit <- function(
-    history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
-    suppress_warning = FALSE, outvar = "recruit", 
-    recruit_values = c("Recruit", "4")
+    history, segment = "tot", test_threshold = 35, show_test_stat = FALSE,
+    suppress_warning = FALSE, outvar = "recruit"
 ) {
-    if (!"R3" %in% colnames(history)) {
-        stop("R3 variable is needed to identify new participants", call. = FALSE)
-    }
-    history <- filter(history, .data$R3 %in% recruit_values)
-    
-    if (nrow(history) == 0) {
-        stop(paste0("No recruits (R3 = ", recruit_values, ") in input data frame"))
-    }
     est_part(history, segment, test_threshold, show_test_stat, 
              suppress_warning, outvar)
 }

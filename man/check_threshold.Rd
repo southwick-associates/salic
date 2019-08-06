@@ -39,8 +39,7 @@ check_threshold(x, 5)
 }
 \seealso{
 Other dashboard functions: \code{\link{est_churn}},
-  \code{\link{est_part}}, \code{\link{est_recruit}},
-  \code{\link{scaleup_part}}
+  \code{\link{est_part}}, \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}
 \keyword{internal}

@@ -53,7 +53,6 @@ part_segment <- est_part(x, "sex", test_threshold = 40)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{est_part}},
-  \code{\link{est_recruit}}
+  \code{\link{est_churn}}, \code{\link{est_part}}
 }
 \concept{dashboard functions}

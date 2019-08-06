@@ -2,10 +2,15 @@
 % Please edit documentation in R/dashboard.R
 \name{est_part}
 \alias{est_part}
+\alias{est_recruit}
 \title{Estimate participants by year from license history}
 \usage{
-est_part(history, segment = "tot", test_threshold = 30,
+est_part(history, segment = "tot", test_threshold = 20,
   show_test_stat = FALSE, suppress_warning = FALSE, outvar = "part")
+
+est_recruit(history, segment = "tot", test_threshold = 35,
+  show_test_stat = FALSE, suppress_warning = FALSE,
+  outvar = "recruit")
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -25,6 +30,10 @@ a variable holding the test statistic for each row.}
 setting show_test_stat = TRUE.}
 
 \item{outvar}{character: name of variable that stores metric}
+}
+\value{
+Returns a data frame with 3 variables (segment, "year", outvar), and
+optionally with 2 extra variables ("change", "pct_change") if show_test_stat = TRUE
 }
 \description{
 This function requires a correctly formated history table (see \code{\link{history}}).
@@ -66,12 +75,10 @@ left_join(part$sex, part_scaled$sex, by = c("sex", "year")) \%>\%
 
 # new recruits
 history_new <- filter(history, !is.na(R3), R3 == "Recruit")
-part_new <- sapply(segs, function(x) est_part(history_new, x, 50), simplify = FALSE)
-part_new <- lapply(part_new, function(x) scaleup_part(x, part_new$tot))
+est_recruit(history_new)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{est_recruit}},
-  \code{\link{scaleup_part}}
+  \code{\link{est_churn}}, \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}
