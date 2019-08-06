@@ -260,7 +260,7 @@ scaleup_part <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
     outvar = "part"
 ) {
-    if (sum(part_segment$part) == sum(part_total$part)) {
+    if (sum(part_segment[[outvar]]) == sum(part_total[[outvar]])) {
         return # scaling not needed
     }
     # compute scale factor
@@ -287,10 +287,11 @@ scaleup_part <- function(
     # a final check of the scaled total
     # TODO - might not need this if function is tested thoroughly, will leave for now
     #      - probably better to consider what problem it catches and write a test
-    diff <- abs(sum(out$part) - sum(part_total$part))
+    diff <- abs(sum(out[[outvar]]) - sum(part_total[[outvar]]))
     if (diff > 50) { # allows for a small amount of rounding error
         warning("Something might have gone wrong in scaling since the segment sum of ",
-                sum(out$part), " is different than the total of ", sum(part_total$part))
+                sum(out[[outvar]]), " is different than the total of ", 
+                sum(part_total[[outvar]]))
     }
     if (!show_test_stat) out <- select(out, -.data$pct_na) 
     out
