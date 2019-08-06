@@ -3,12 +3,12 @@
 
 # Standarized License Data ---------------------------------------------------
 
-#' Sample Data: 3,000 Customers
+#' Sample Data: 15,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
 #' @name cust
-#' @format A data frame with 3,000 rows and 3 variables
+#' @format A data frame with 3 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (primary key)}
 #' \item{sex}{Gender (integer) (1=Male, 2=Female)}
@@ -22,7 +22,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name lic
-#' @format A data frame with 113 rows and 3 variables
+#' @format A data frame with 3 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
@@ -36,7 +36,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name sale
-#' @format A data frame with 15,213 rows and 5 variables
+#' @format A data frame with 5 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}
@@ -60,7 +60,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @name history
-#' @format A data frame with 9,690 rows and 8 variables
+#' @format A data frame with 8 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (composite key)}
 #' \item{year}{License Year (integer) (yyyy) (composite key)}
