@@ -5,7 +5,7 @@
 \title{Scale segmented participation counts to total (if needed)}
 \usage{
 scaleup_part(part_segment, part_total, test_threshold = 10,
-  show_test_stat = FALSE)
+  show_test_stat = FALSE, outvar = "part")
 }
 \arguments{
 \item{part_segment}{data frame: A segmented  participation table
@@ -23,6 +23,8 @@ the breakouts aren't representative (e.g., if not missing at random).}
 
 \item{show_test_stat}{logical: If TRUE, the output table will include
 a variable holding the test statistic for each row.}
+
+\item{outvar}{character: name of variable that stores metric}
 }
 \description{
 This scaling accounts for missing values in segments, scaling up all counts
@@ -45,11 +47,13 @@ sum(part_segment$part) == sum(part_total$part)
 part_segment <- scaleup_part(part_segment, part_total)
 sum(part_segment$part) == sum(part_total$part)
 
-# throw an error by making the test threshold more strict
-scaleup_part(part_segment, part_total, test_threshold = 0.1)
+# this throws an error by making the test threshold more strict
+part_segment <- est_part(x, "sex", test_threshold = 40)
+# scaleup_part(part_segment, part_total, test_threshold = 0.1)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{est_part}}
+  \code{\link{est_churn}}, \code{\link{est_part}},
+  \code{\link{est_recruit}}
 }
 \concept{dashboard functions}
