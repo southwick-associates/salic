@@ -2,10 +2,14 @@
 % Please edit documentation in R/dashboard.R
 \name{scaleup_part}
 \alias{scaleup_part}
+\alias{scaleup_recruit}
 \title{Scale segmented participation counts to total (if needed)}
 \usage{
 scaleup_part(part_segment, part_total, test_threshold = 10,
   show_test_stat = FALSE, outvar = "part")
+
+scaleup_recruit(part_segment, part_total, test_threshold = 10,
+  show_test_stat = FALSE, outvar = "recruit")
 }
 \arguments{
 \item{part_segment}{data frame: A segmented  participation table
@@ -35,21 +39,27 @@ produced by \code{\link{est_part}}. If no scaling is needed (i.e., sum(part_segm
 \examples{
 library(dplyr)
 data(history)
-x <- filter(history, year != 2019) \%>\%
+history <- filter(history, year != 2019) \%>\%
     label_categories()
 
 # demonstrate the need for scaling
-part_total <- est_part(x)
-part_segment <- est_part(x, "sex", test_threshold = 40)
+part_total <- est_part(history)
+part_segment <- est_part(history, "sex", test_threshold = 40)
 sum(part_segment$part) == sum(part_total$part)
 
 # perform scaling
 part_segment <- scaleup_part(part_segment, part_total)
 sum(part_segment$part) == sum(part_total$part)
 
-# this throws an error by making the test threshold more strict
-part_segment <- est_part(x, "sex", test_threshold = 40)
-# scaleup_part(part_segment, part_total, test_threshold = 0.1)
+# making test threshold more strict
+part_segment <- est_part(history, "sex", test_threshold = 40)
+# scaleup_part(part_segment, part_total, test_threshold = 0.1) # throws error if run
+
+# new recruits
+history_new <- filter(history, R3 == "Recruit")
+part_total <- est_recruit(history_new, "tot")
+part_segment <- est_recruit(history_new, "sex")
+scaleup_recruit(part_segment, part_total)
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},

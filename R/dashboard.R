@@ -212,59 +212,89 @@ est_churn <- function(
 #' @examples
 #' library(dplyr)
 #' data(history)
-#' x <- filter(history, year != 2019) %>%
+#' history <- filter(history, year != 2019) %>%
 #'     label_categories()
 #' 
 #' # demonstrate the need for scaling
-#' part_total <- est_part(x)
-#' part_segment <- est_part(x, "sex", test_threshold = 40)
+#' part_total <- est_part(history)
+#' part_segment <- est_part(history, "sex", test_threshold = 40)
 #' sum(part_segment$part) == sum(part_total$part)
 #' 
 #' # perform scaling
 #' part_segment <- scaleup_part(part_segment, part_total)
 #' sum(part_segment$part) == sum(part_total$part)
 #' 
-#' # this throws an error by making the test threshold more strict
-#' part_segment <- est_part(x, "sex", test_threshold = 40)
-#' # scaleup_part(part_segment, part_total, test_threshold = 0.1)
+#' # making test threshold more strict
+#' part_segment <- est_part(history, "sex", test_threshold = 40)
+#' # scaleup_part(part_segment, part_total, test_threshold = 0.1) # throws error if run
+#' 
+#' # new recruits
+#' history_new <- filter(history, R3 == "Recruit")
+#' part_total <- est_recruit(history_new, "tot")
+#' part_segment <- est_recruit(history_new, "sex")
+#' scaleup_recruit(part_segment, part_total)
 scaleup_part <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
     outvar = "part"
 ) {
+    # TODO this could potentially be part of defined data format checks
+    # and placed at the top of these functions that have very strict format rules
+    if (!outvar %in% colnames(part_segment) | !outvar %in% colnames(part_segment)) {
+        stop("Missing '", outvar, "' from at least one of the input tables", call. = FALSE)
+    }
     if (sum(part_segment[[outvar]]) == sum(part_total[[outvar]])) {
         return # scaling not needed
     }
+    if (nrow(part_total) > nrow(part_segment)) {
+        warning("Argument part_segment has fewer rows than part_total.\n",
+                "Maybe you mixed up the arguments?", call. = FALSE)
+    }
     # compute scale factor
-    part_total <- semi_join(part_total, part_segment, by = "year")
-    compare <- part_segment %>%
+    part_total2 <- part_total %>%
+        semi_join(part_segment, by = "year") %>%
         group_by(year) %>%
-        summarise(part_segment = sum(.data[[outvar]])) %>%
-        left_join(select(part_total, .data$year, .data[[outvar]]), by = "year") %>% 
+        summarise(total = sum(.data[[outvar]]))
+    part_segment2 <- part_segment %>%
+        group_by(year) %>%
+        summarise(segment = sum(.data[[outvar]]))
+    compare <- part_segment2 %>%
+        left_join(part_total2, by = "year") %>%
         mutate( 
-            pct_na = (.data[[outvar]] - part_segment) / .data[[outvar]] * 100,  
-            scale_factor = .data[[outvar]] / part_segment 
+            total_na = .data$total - .data$segment,
+            pct_na = .data$total_na / .data$total * 100,  
+            scale_factor = .data$total / .data$segment 
         )
     check_threshold(
         compare, test_threshold, "pct_na",
         action = function(...) stop(..., call. = FALSE)
     )
     # scale to match the total
+    compare <- select(compare, .data$year, .data$pct_na, .data$scale_factor)
     out <- part_segment %>%
-        left_join(select(compare, .data$year, .data$pct_na, .data$scale_factor), 
-                  by = "year") %>%
+        left_join(compare, by = "year") %>%
         mutate(!! outvar := as.integer(round(.data[[outvar]] * .data$scale_factor, 0))) %>%
         select(-.data$scale_factor)
     
     # a final check of the scaled total
     # TODO - might not need this if function is tested thoroughly, will leave for now
     #      - probably better to consider what problem it catches and write a test
-    diff <- abs(sum(out[[outvar]]) - sum(part_total[[outvar]]))
+    diff <- abs(sum(out[[outvar]]) - sum(part_total2$total))
     if (diff > 50) { # allows for a small amount of rounding error
         warning("Something might have gone wrong in scaling since the segment sum of ",
                 sum(out[[outvar]]), " is different than the total of ", 
-                sum(part_total[[outvar]]))
+                sum(part_total2$total))
     }
     if (!show_test_stat) out <- select(out, -.data$pct_na) 
     out
 }
 
+# convenience function for recruit scaleup
+#' @rdname scaleup_part
+#' @export
+scaleup_recruit <- function(
+    part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
+    outvar = "recruit"
+) {
+    scaleup_part(part_segment, part_total, test_threshold, 
+                 show_test_stat, outvar)
+}
