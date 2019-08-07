@@ -16,3 +16,4 @@ Additional Material:
 - inst/new-state-Rfiles (some default template files)
 - inst/new-state (detailed license workflow templates)
 
+Fake notes
