@@ -1,0 +1,118 @@
+---
+title: "Introduction to salic"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(dplyr)
+devtools::load_all() # eventually change to library(salic)
+```
+
+```{r}
+# playing around
+library(ggplot2)
+data(dashboard)
+
+dashboard %>%
+    filter(metric == "participants", segment == "Gender") %>%
+    ggplot(aes(year, value, fill = category)) +
+    geom_col() +
+    facet_wrap(~ group) +
+    ggtitle("Hunter vs. Anglers over Time",
+            "'all_sports' refer to those who are both hunters and anglers")
+```
+
+```{r}
+data(history)
+x <- history %>%
+    label_categories() %>%
+    recode_agecat()
+
+x %>%
+    filter(age_year >= 25, age_year <= 55, !is.na(R3), !is.na(lapse)) %>%
+    group_by(year, R3) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(year, churn)) +
+    geom_col() +
+    facet_wrap(~ R3, nrow = 1) +
+    ggtitle("Churn rates for different R3 groups for all_sports permission")
+```
+
+Processing data for dashboard involves successive steps:
+
+1. **Standardize Data**: First get necessary license data into a standard (anonymized) format well-suited for generalized data processing functions.
+
+2. **Build License History**: Convert into a license history, which tracks license holding at the permission level across years, enabling easy calculation of dashboard metrics.
+
+3. **Calculate Dashboard Metrics**: Apply estimation functions to license history data, which produces the summaries used as input to the dashboard software.
+
+## TODO
+
+- obviously do some outlining/thinking about a good narrative, could potentially use the existing Word documentation to help this process.
+- running R code to show sample data, operations,
+
+## Standardizing License Data
+
+These need to be prepared into a standardized format (which is also anonymized to remove any personally-identifiable information).
+
+This process is state-specific since agencies vary in how license data is stored. The standardization is intended to produce a standard format that is well-suited for the generalized presented here. An important part of this step involves anonymizing data by excluding any personally identifiable information from the standard storage format.
+
+### Sample Data
+
+To get started, first load package dependencies:
+
+```r
+library(salic)
+library(dplyr)
+```
+
+Samples of standardized data are provided in salic:
+
+```{r}
+data(cust)
+glimpse(cust)
+
+data(lic)
+glimpse(lic)
+
+data(sale)
+glimpse(sale)
+```
+
+A function is provided to check that your data fits the specifications (strict for this reason...):
+
+```r
+# produces no output (i.e., silent) if no issues detected
+check_format(cust, lic, sale)
+```
+
+## Building License History
+
+- `rank_sale()` to do this...
+    + `join_first_month()` to do that...
+    
+- `make_lic_history()`
+    + `identify_R3()`
+    + `identify_lapse()`
+
+Need to also consider the key parameters for this process:
+
+- permission: specifically related to license types include (fish, hunt, combo)
+- timeframe: full-year or mid-year
+- years
+
+## Calculating Dashboard Metrics
+
+- filter by age
+- `label_categories()` & `recode_agecat()`
+- `est_part()`, `est_recruit()`, `est_churn()`
+
+### Formatting for final Output

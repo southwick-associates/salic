@@ -14,5 +14,5 @@ Binary installers are included (here)
 Might make sense to link to the vignette here (to be written), could show some basics as well.
 
 ```r
-'vignette("salic-intro")'
+'vignette("salic")'
 ```
