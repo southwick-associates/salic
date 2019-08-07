@@ -5,13 +5,13 @@ test_that("est_part() returns simple count", {
     data(history)
     
     # overall
-    x <- est_part(history, suppress_warning = TRUE)
+    x <- est_part(history, suppress_warning = TRUE, outvar = "var")
     y <- dplyr::count(history, year)
-    expect_equal(x$participants, y$n)
+    expect_equal(x$var, y$n)
     
     # by variable
-    x <- est_part(history, "R3", suppress_warning = TRUE)
+    x <- est_part(history, "R3", suppress_warning = TRUE, outvar = "var")
     y <- dplyr::filter(history, !is.na(R3))
     y <- dplyr::count(y, R3, year)
-    expect_equal(x$participants, y$n)
+    expect_equal(x$var, y$n)
 })

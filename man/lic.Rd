@@ -8,15 +8,16 @@
 \describe{
 \item{lic_id}{License ID (integer) (primary key)}
 \item{type}{License Type (character) (hunt, fish, combo)}
-\item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
+\item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,..., 99=lifetime)}
 }}
 \description{
 Sample Data: License Types
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},
-  \code{\link{history}}, \code{\link{metrics}},
-  \code{\link{sale}}, \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{history}},
+  \code{\link{metrics}}, \code{\link{sale}},
+  \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

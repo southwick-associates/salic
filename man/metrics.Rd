@@ -13,7 +13,7 @@
 }}
 \description{
 This list holds national/regional dashboard metrics (full-year) for the sample 
-data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each element 
+data and corresponds to "Hunters & Anglers" aged 18-64 each year. Each element 
 (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
 "agecat" = by Age Category)
 }
@@ -21,8 +21,9 @@ data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each eleme
 \code{\link{est_part}} \code{\link{est_churn}}
 
 Other Sample Data: \code{\link{cust}},
-  \code{\link{history}}, \code{\link{lic}},
-  \code{\link{sale}}, \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{history}},
+  \code{\link{lic}}, \code{\link{sale}},
+  \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

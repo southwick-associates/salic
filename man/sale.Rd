@@ -9,7 +9,7 @@
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}
 \item{year}{License Year (integer) (yyyy)}
-\item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
+\item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ...)}
 \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{
@@ -17,8 +17,9 @@ Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},
-  \code{\link{history}}, \code{\link{lic}},
-  \code{\link{metrics}}, \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{history}},
+  \code{\link{lic}}, \code{\link{metrics}},
+  \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

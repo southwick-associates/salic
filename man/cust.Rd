@@ -3,7 +3,7 @@
 \docType{data}
 \name{cust}
 \alias{cust}
-\title{Sample Data: 15,000 Customers}
+\title{Sample Data: 25,000 Customers}
 \format{A data frame with 3 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (primary key)}
@@ -11,12 +11,13 @@
 \item{birth_year}{Year of Birth (integer) (yyyy)}
 }}
 \description{
-Sample Data: 15,000 Customers
+Sample Data: 25,000 Customers
 }
 \seealso{
-Other Sample Data: \code{\link{history}},
-  \code{\link{lic}}, \code{\link{metrics}},
-  \code{\link{sale}}, \code{\link{state_abbreviations}}
+Other Sample Data: \code{\link{dashboard}},
+  \code{\link{history}}, \code{\link{lic}},
+  \code{\link{metrics}}, \code{\link{sale}},
+  \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

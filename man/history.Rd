@@ -24,7 +24,8 @@ variables potentially useful for validation, such as duration_run, were removed)
 \seealso{
 \code{\link{make_lic_history}}
 
-Other Sample Data: \code{\link{cust}}, \code{\link{lic}},
+Other Sample Data: \code{\link{cust}},
+  \code{\link{dashboard}}, \code{\link{lic}},
   \code{\link{metrics}}, \code{\link{sale}},
   \code{\link{state_abbreviations}}
 }

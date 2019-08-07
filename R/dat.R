@@ -3,7 +3,7 @@
 
 # Standarized License Data ---------------------------------------------------
 
-#' Sample Data: 15,000 Customers
+#' Sample Data: 25,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
@@ -26,7 +26,7 @@ NULL
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
 #' \item{type}{License Type (character) (hunt, fish, combo)}
-#' \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,...,99=lifetime)}
+#' \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,..., 99=lifetime)}
 #' }
 #' @family Sample Data
 NULL
@@ -41,14 +41,14 @@ NULL
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}
 #' \item{year}{License Year (integer) (yyyy)}
-#' \item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
+#' \item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ...)}
 #' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 #' }
 #' @family Sample Data
 NULL
 
 
-# Additional Data ---------------------------------------------------------
+# Derived License Data ----------------------------------------------------
 
 #' Sample Data: License  History (Jan 1, 2008 through June 30, 2019)
 #' 
@@ -78,7 +78,7 @@ NULL
 #' Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)
 #' 
 #' This list holds national/regional dashboard metrics (full-year) for the sample 
-#' data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each element 
+#' data and corresponds to "Hunters & Anglers" aged 18-64 each year. Each element 
 #' (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
 #' "agecat" = by Age Category)
 #'
@@ -96,6 +96,33 @@ NULL
 #' @seealso \code{\link{est_part}} \code{\link{est_churn}}
 NULL
 
+#' Sample Data: Metrics formatted for Dashboard Input
+#' 
+#' This data frame holds national/regional dashboard metrics formatted for dashboard input.
+#' The results correspond to full-year metrics for the sample data and include permission 
+#' breakouts for customers aged 18-64 each year. Three permissions are included: 
+#' Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and 
+#' Anglers (group = "fish") . 
+#'
+#' @docType data
+#' @keywords datasets
+#' @name dashboard
+#' @format A data frame with 7 variables
+#' \describe{
+#' \item{timeframe}{Time period covered ("full-year" or "mid-year")}
+#' \item{group}{Permission group ("all_sports", "hunt", "fish")}
+#' \item{segment}{Demographic group ("All", "Age", "Gender", "Residency")}
+#' \item{year}{Calendar Year (2008, 2009, ..., 2018)}
+#' \item{category}{Category breakouts for segment}
+#' \item{metric}{Metric Summarized ("participants", "recruits", "churn")}
+#' \item{value}{Value of metric for given dimension}
+#' }
+#' @family Sample Data
+#' @seealso \code{\link{format_tableau}}
+NULL
+
+
+# Additional Data ---------------------------------------------------------
 
 #' Data: State/Province/Territory Abbreviations for US & Canada
 #'
