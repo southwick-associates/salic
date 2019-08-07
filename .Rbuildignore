@@ -2,7 +2,7 @@
 ^\.Rproj\.user$
 ^tmp/
 TODO.md
-Maintaining.md
+Developing.md
 .Rprofile
 snapshot-library.csv
 README.html
