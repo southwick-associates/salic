@@ -5,7 +5,7 @@
 \title{Estimate churn by year from license history}
 \usage{
 est_churn(history, segment = "tot", test_threshold = 30,
-  show_test_stat = FALSE, suppress_warning = FALSE)
+  show_test_stat = FALSE, suppress_warning = FALSE, outvar = "churn")
 }
 \arguments{
 \item{history}{data frame: input license history table}
@@ -23,6 +23,8 @@ a variable holding the test statistic for each row.}
 \item{suppress_warning}{logical: If TRUE, no test warning will be displayed 
 (even if threshold is exceeded). Test statistics can still be included by 
 setting show_test_stat = TRUE.}
+
+\item{outvar}{character: name of variable that stores metric}
 }
 \description{
 This function requires a correctly formated history table (see \code{\link{history}}).

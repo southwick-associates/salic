@@ -168,7 +168,7 @@ est_recruit <- function(
 #' churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
 est_churn <- function(
     history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
-    suppress_warning = FALSE
+    suppress_warning = FALSE, outvar = "churn"
 ) {
     if (segment == "tot") {
         history <- mutate(history, tot = "All")
@@ -178,10 +178,10 @@ est_churn <- function(
     # churn is simply lapse % per year
     out <- history %>%
         group_by_at(c(segment, "year")) %>%
-        summarise(churn = mean(lapse)) %>%
+        summarise(!! outvar := mean(lapse)) %>%
         mutate(
-            change = .data$churn - lag(.data$churn),
-            pct_change = .data$change / lag(.data$churn) * 100
+            change = .data[[outvar]] - lag(.data[[outvar]]),
+            pct_change = .data$change / lag(.data[[outvar]]) * 100
         ) %>%
         ungroup()
     
