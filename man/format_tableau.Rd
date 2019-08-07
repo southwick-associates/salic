@@ -4,16 +4,20 @@
 \alias{format_tableau}
 \title{Format estimated metrics for input to Tableau Dashboard}
 \usage{
-format_tableau(df, timeframe, group)
+format_tableau(df, timeframe, group, rename_input = c("category", "year",
+  "value"))
 }
 \arguments{
-\item{df}{data frame: Input table with estimated metrics}
+\item{df}{data frame: Input table (3 variables) with estimated metrics}
 
 \item{timeframe}{character: value to store in the 'timeframe' variable of 
 the output (e.g, 'full-year', 'mid-year')}
 
 \item{group}{character: value to sore in the 'group' variable of the 
 output (e.g., 'all_sports', 'fish', 'hunt')}
+
+\item{rename_input}{character: generic names for input variables as they
+will appear in the output}
 }
 \description{
 This function expects a data frame produced by an salic estimation function (
@@ -25,17 +29,20 @@ into a single table.
 library(dplyr)
 data(metrics)
 
-# format some different tables
-x <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
-y <- format_tableau(metrics$participants$res, "full-year", "all_sports")
-z <- format_tableau(metrics$recruits$sex, "full-year", "all_sports")
-bind_rows(x, y, z) # combine
+# format a table
+metrics$participants$res
+x <- format_tableau(metrics$participants$res, "full-year", "all_sports")
+x
 
-# apply formatting across segments
-lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")) \%>\%
-   bind_rows
+# combine formatted tables
+y <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
+bind_rows(y, x)
+
+# apply formatting across all segments
+x <- lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports"))
+bind_rows(x)
    
-# apply across metrics & segments
+# apply across all metrics & segments
 bind_rows(
     lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")),
     lapply(metrics$recruits, function(x) format_tableau(x, "full-year", "sports")),

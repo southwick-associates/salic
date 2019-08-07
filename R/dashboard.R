@@ -317,37 +317,44 @@ scaleup_recruit <- function(
 #' It returns a data frame with additional formatting that allows stacking all results
 #' into a single table.
 #' 
-#' @param df data frame: Input table with estimated metrics
+#' @param df data frame: Input table (3 variables) with estimated metrics
 #' @param timeframe character: value to store in the 'timeframe' variable of 
 #' the output (e.g, 'full-year', 'mid-year')
 #' @param group character: value to sore in the 'group' variable of the 
 #' output (e.g., 'all_sports', 'fish', 'hunt')
+#' @param rename_input character: generic names for input variables as they
+#' will appear in the output
 #' @family dashboard functions
 #' @export
 #' @examples
 #' library(dplyr)
 #' data(metrics)
 #' 
-#' # format some different tables
-#' x <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
-#' y <- format_tableau(metrics$participants$res, "full-year", "all_sports")
-#' z <- format_tableau(metrics$recruits$sex, "full-year", "all_sports")
-#' bind_rows(x, y, z) # combine
+#' # format a table
+#' metrics$participants$res
+#' x <- format_tableau(metrics$participants$res, "full-year", "all_sports")
+#' x
 #' 
-#' # apply formatting across segments
-#' lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")) %>%
-#'    bind_rows
+#' # combine formatted tables
+#' y <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
+#' bind_rows(y, x)
+#' 
+#' # apply formatting across all segments
+#' x <- lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports"))
+#' bind_rows(x)
 #'    
-#' # apply across metrics & segments
+#' # apply across all metrics & segments
 #' bind_rows(
 #'     lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")),
 #'     lapply(metrics$recruits, function(x) format_tableau(x, "full-year", "sports")),
 #'     lapply(metrics$churn, function(x) format_tableau(x, "full-year", "sports"))
 #' )
-format_tableau <- function(df, timeframe, group) {
+format_tableau <- function(
+    df, timeframe, group, rename_input = c("category", "year", "value")
+) {
     # expecting exactly 3 columns in the input data frame
     out <- df
-    names(out) <- c("category", "year", "value")
+    names(out) <- rename_input
     
     # stored as input variable names >> placed in output variable values
     segment <- colnames(df)[1]
@@ -361,12 +368,17 @@ format_tableau <- function(df, timeframe, group) {
     out$category <- as.character(out$category)
     
     # modify segment names
-    out <- out %>% dplyr::mutate(segment = dplyr::case_when(
-        segment == "tot" ~ "All",
-        segment == "res" ~ "Residency",
-        segment == "sex" ~ "Gender",
-        segment == "agecat" ~ "Age",
-        segment == "county" ~ "County"
-    ))
-    dplyr::select(out, timeframe, group, segment, year, category, metric, value)
+    out <- out %>% dplyr::mutate(
+        segment = dplyr::case_when(
+            segment == "tot" ~ "All",
+            segment == "res" ~ "Residency",
+            segment == "sex" ~ "Gender",
+            segment == "agecat" ~ "Age",
+            segment == "county" ~ "County"
+        )
+    )
+    out %>% dplyr::select(
+        .data$timeframe, .data$group, .data$segment, .data$year,  
+        .data$category, .data$metric, .data$value
+    )
 }
