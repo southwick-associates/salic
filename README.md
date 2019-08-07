@@ -1,19 +1,18 @@
 
-# Prepare License Data from Wildlife Agencies
-Write an Overview Here
-- make sure to include disclaimer about the scope of this software package (specifically designed to work with agency license data)
+# salic
+
+## Overview
+
+A set of functions for summarizing wildlife agency data for data dashboards, originally developed under the leadership of the Western Association of Fish and Wildlife Agencies R3 Committee.
+
+## Installation
+
+Binary installers are included (here)
 
 ## Usage
-Might make sense to link to the vignette here (to be written)
 
-## Software Environment
+Might make sense to link to the vignette here (to be written), could show some basics as well.
 
-## File Organization
-Functions are separated into xx files:
-- 
-Additional Material:
-- vignettes/salic-intro (not yet written)
-- inst/new-state-Rfiles (some default template files)
-- inst/new-state (detailed license workflow templates)
-
-Fake notes
+```r
+'vignette("salic-intro")'
+```

@@ -1,16 +1,12 @@
 Package: salic
 Type: Package
-Title: Prepare License Data from Wildlife Agencies
+Title: Prepare National/Regional Dashboard Data
 Version: 1.4.1
 Author: Dan Kary
 Maintainer: Dan Kary <Rsoftware@SouthwickAssociates.com>
-Description: A set of functions for getting license data into a standard format
-    that facilitates further analysis (churn, R3, etc.). Much of this functionality
-    was built for producing state data dashboards, originally developed under the
-    leadership of the Western Association of Fish and Wildlife Agencies R3
-    Committee. Chris Willard at Oregon Dept of Fish and Wildlife spearheaded
-    the initial effort to develop graphical "scorecards", which evolved into
-    interactive data dashboards.
+Description: A set of functions for summarizing agency data for dashboards, 
+    originally developed under the leadership of the Western Association of Fish 
+    and Wildlife Agencies R3 Committee.
 License: GPL-3
 Encoding: UTF-8
 LazyData: FALSE
