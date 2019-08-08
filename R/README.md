@@ -7,7 +7,7 @@ Agency data requires initial preparation; ultimately to be stored in 3 tables (c
 
 ## 2. License-History
 
-The primary function (make_lic_history) takes standardized data as input. It produces license history tables for specified permissions (e.g., fish, hunt, all_sports), which include 1 row per customer per year a license is held (annual, multi-year, or otherwise). Additional variables (R3, lapse) can also be added for identifying customer dynamics over time.
+The primary function (make_lic_history) takes standardized data as input. It produces license history tables for specified permissions (e.g., fish), which include 1 row per customer per year a license is held (annual, multi-year, or otherwise). Additional variables (R3, lapse) can also be added for identifying customer dynamics over time.
 
 ## 3. Dashboard
 
