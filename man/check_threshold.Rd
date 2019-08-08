@@ -39,7 +39,7 @@ check_threshold(x, 5)
 }
 \seealso{
 Other dashboard functions: \code{\link{est_churn}},
-  \code{\link{est_part}}, \code{\link{format_tableau}},
+  \code{\link{est_part}}, \code{\link{format_result}},
   \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

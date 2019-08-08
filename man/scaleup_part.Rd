@@ -64,6 +64,6 @@ scaleup_recruit(part_segment, part_total)
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
   \code{\link{est_churn}}, \code{\link{est_part}},
-  \code{\link{format_tableau}}
+  \code{\link{format_result}}
 }
 \concept{dashboard functions}

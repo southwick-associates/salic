@@ -22,7 +22,7 @@ Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and
 Anglers (group = "fish") .
 }
 \seealso{
-\code{\link{format_tableau}}
+\code{\link{format_result}}
 
 Other Sample Data: \code{\link{cust}},
   \code{\link{history}}, \code{\link{lic}},

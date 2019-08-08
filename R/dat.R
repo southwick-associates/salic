@@ -118,7 +118,7 @@ NULL
 #' \item{value}{Value of metric for given dimension}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{format_tableau}}
+#' @seealso \code{\link{format_result}}
 NULL
 
 

@@ -88,7 +88,7 @@ group_by(part_scaled$sex, year) \%>\%
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},
-  \code{\link{est_churn}}, \code{\link{format_tableau}},
+  \code{\link{est_churn}}, \code{\link{format_result}},
   \code{\link{scaleup_part}}
 }
 \concept{dashboard functions}

@@ -310,7 +310,7 @@ scaleup_recruit <- function(
 
 # Data Format -------------------------------------------------------------
 
-#' Format estimated metrics for input to Tableau Dashboard
+#' Format estimated metrics for input to Dashboard
 #' 
 #' This function expects a data frame produced by an salic estimation function (
 #' \code{\link{est_part}}, \code{\link{est_recruit}}, \code{\link{est_churn}}).
@@ -332,24 +332,24 @@ scaleup_recruit <- function(
 #' 
 #' # format a table
 #' metrics$participants$res
-#' x <- format_tableau(metrics$participants$res, "full-year", "all_sports")
+#' x <- format_result(metrics$participants$res, "full-year", "all_sports")
 #' x
 #' 
 #' # combine formatted tables
-#' y <- format_tableau(metrics$participants$tot, "full-year", "all_sports")
+#' y <- format_result(metrics$participants$tot, "full-year", "all_sports")
 #' bind_rows(y, x)
 #' 
 #' # apply formatting across all segments
-#' x <- lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports"))
+#' x <- lapply(metrics$participants, function(x) format_result(x, "full-year", "sports"))
 #' bind_rows(x)
 #'    
 #' # apply across all metrics & segments
 #' bind_rows(
-#'     lapply(metrics$participants, function(x) format_tableau(x, "full-year", "sports")),
-#'     lapply(metrics$recruits, function(x) format_tableau(x, "full-year", "sports")),
-#'     lapply(metrics$churn, function(x) format_tableau(x, "full-year", "sports"))
+#'     lapply(metrics$participants, function(x) format_result(x, "full-year", "sports")),
+#'     lapply(metrics$recruits, function(x) format_result(x, "full-year", "sports")),
+#'     lapply(metrics$churn, function(x) format_result(x, "full-year", "sports"))
 #' )
-format_tableau <- function(
+format_result <- function(
     df, timeframe, group, rename_input = c("category", "year", "value")
 ) {
     # expecting exactly 3 columns in the input data frame
