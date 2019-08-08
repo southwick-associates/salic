@@ -13,9 +13,13 @@ The primary function (make_lic_history) takes standardized data as input. It pro
 
 The dashboard summary functions take license history tables as input. Dashboards use summary metrics (participation, churn, etc.) specified across a number of segments (gender, residency, etc.). 
 
-## Dat
+## Data-Doc
 
 Documentation for the package sample data.
+
+## Data-Check
+
+Automated checks to help ensure standardized data is stored in the required format.
 
 ## Category-Variables
 
