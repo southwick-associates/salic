@@ -1,8 +1,6 @@
 
 # salic
 
-## Overview
-
 A set of functions for summarizing wildlife agency data for data dashboards, originally developed under the leadership of the Western Association of Fish and Wildlife Agencies R3 Committee.
 
 ## Installation
