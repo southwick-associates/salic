@@ -1,13 +1,12 @@
 Package: salic
 Type: Package
-Title: Prepare National/Regional Dashboard Data
+Title: Prepare Agency Dashboard Data
 Version: 1.4.1
 Author: Dan Kary
 Maintainer: Dan Kary <Rsoftware@SouthwickAssociates.com>
 Description: A set of functions for summarizing agency data for dashboards, 
-    developed under the leadership of the Association of Fish 
-    and Wildlife Agencies.
-License: MIT + file license
+    developed under the leadership of the Association of Fish and Wildlife Agencies.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: FALSE
 Depends:
