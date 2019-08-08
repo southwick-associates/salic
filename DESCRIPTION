@@ -7,7 +7,7 @@ Maintainer: Dan Kary <Rsoftware@SouthwickAssociates.com>
 Description: A set of functions for summarizing agency data for dashboards, 
     developed under the leadership of the Association of Fish 
     and Wildlife Agencies.
-License: GPL-3
+License: MIT + file license
 Encoding: UTF-8
 LazyData: FALSE
 Depends:
