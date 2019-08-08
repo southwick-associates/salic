@@ -15,9 +15,10 @@ Imports:
     dplyr (>= 0.7.6)
 RoxygenNote: 6.1.0
 Suggests:
-    lubridate (>= 1.7.4),
-    tidyr (>= 0.8.1),
-    testthat,
+    ggplot2,
     knitr,
-    rmarkdown
+    lubridate (>= 1.7.4),
+    rmarkdown,
+    testthat,
+    tidyr (>= 0.8.1)
 VignetteBuilder: knitr

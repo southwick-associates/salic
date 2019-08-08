@@ -10,10 +10,13 @@ vignette: >
 ```{r setup, include = FALSE, message = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7
 )
 library(dplyr)
-devtools::load_all() # eventually change to library(salic)
+library(salic)
+# library(devtools)
+# devtools::load_all()
 ```
 
 ```{r}
@@ -31,20 +34,12 @@ dashboard %>%
 ```
 
 ```{r}
-data(history)
-x <- history %>%
-    label_categories() %>%
-    recode_agecat()
-
-x %>%
-    filter(age_year >= 25, age_year <= 55, !is.na(R3), !is.na(lapse)) %>%
-    group_by(year, R3) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(year, churn)) +
-    geom_col() +
-    facet_wrap(~ R3, nrow = 1) +
-    ggtitle("Churn rates for different R3 groups for all_sports permission")
+# test
+data(history, package = "salic")
+est_part(history)
 ```
+
+Could maybe present an example of how to dig into questions using the license history. Perhaps this would go at the very end if I want to include it.
 
 Processing data for dashboard involves successive steps:
 
@@ -116,3 +111,80 @@ Need to also consider the key parameters for this process:
 - `est_part()`, `est_recruit()`, `est_churn()`
 
 ### Formatting for final Output
+
+
+## License History Data Mining Example
+
+```{r}
+data(history)
+x <- history %>%
+    label_categories() %>%
+    recode_agecat()
+
+filter(x, !is.na(sex), !is.na(lapse)) %>%
+    group_by(sex) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(sex, churn)) +
+    geom_col() +
+    ggtitle("Women churn at a higher rate than men")
+
+filter(x, !is.na(sex), !is.na(R3)) %>%
+    count(sex, R3) %>%
+    ggplot(aes(R3, n)) +
+    geom_col() +
+    facet_wrap(~ sex, scales = "free") +
+    ggtitle("But, women are more likely to be recruits (a higher churn group)")
+
+filter(x, !is.na(sex), !is.na(R3), R3 == "Recruit", !is.na(lapse), !is.na(agecat)) %>%
+    group_by(sex, agecat) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(sex, churn)) +
+    geom_col() +
+    facet_wrap(~ agecat, nrow = 2) +
+    ggtitle("Not clear that femail recruits churn at a higher rate than male recruits",
+            "Although maybe an exception for youths, complex dynamics could be at work")
+```
+
+```{r}
+
+# I thought this would disappear, but it doesn't
+# previously retained women appear especially more likely to churn
+filter(x, !is.na(sex), !is.na(lapse), !is.na(R3)) %>%
+    group_by(sex, R3) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(sex, churn)) +
+    geom_col() +
+    facet_wrap(~ R3)
+
+# look closer at retained by gender, maybe age is playing a role?
+filter(x, !is.na(sex), !is.na(lapse), !is.na(R3), !is.na(agecat)) %>%
+    filter(R3 == "Retain") %>%
+    group_by(sex, agecat) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(sex, churn)) +
+    geom_col() +
+    facet_wrap(~ agecat)
+
+filter(x, !is.na(sex), !is.na(lapse), !is.na(R3), !is.na(agecat)) %>%
+    filter(R3 == "Recruit") %>%
+    group_by(sex, agecat) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(sex, churn)) +
+    geom_col() +
+    facet_wrap(~ agecat)
+
+# of course it is difficult to infer alot from this sample...
+# perhaps women have lower avidity generally
+# recruits who are women don't seem to be any more likely to churn out
+
+x %>%
+    filter(!is.na(agecat), !is.na(R3), !is.na(lapse), !is.na(sex),
+           age_year >= 18, age_year <= 64) %>%
+    group_by(R3, sex, agecat) %>%
+    summarise(churn = mean(lapse)) %>%
+    ggplot(aes(agecat, churn)) +
+    geom_col() +
+    facet_grid(sex ~ R3) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Churn rates by R3, gender, age (all_sports permission)")
+```
