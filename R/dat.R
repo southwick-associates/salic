@@ -139,3 +139,74 @@ NULL
 #' }
 #' @family Sample Data
 NULL
+
+
+# Checking Data -----------------------------------------------------------
+
+# done: does it have the required columns?
+# are the primary keys correctly set?
+# are categorcial variables restricted to the allowed values?
+# are values completely populated for variables that can't have missing values?
+
+# call any number of data_check_[table] functions
+data_check <- function(...) {
+    
+}
+#' Check format for data tables
+#' 
+#' Any failing checks will produce warnings.
+#' 
+#' @param df data frame: table to check
+#' @param df_name character: name of relevant data table (e.g., "lic", "sale", etc.)
+#' @param required_vars character: variables that should be included
+#' @param allowed_values list: named list with allowed values for specific variables
+#' @param primary_key character: name of variable that acts as primary key (if applicable)
+#' @param no_missing character: name of variables that shouldn't contain missing values
+#' @family functions to check data format
+#' @keywords internal
+#' @import dplyr
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(lic)
+#' 
+#' # one table
+#' select(lic, -duration) %>%
+#'    data_check_lic()
+data_check_table <- function(
+    df, df_name, required_vars, primary_key, allowed_values, no_missing
+) {
+    data_required_vars(df, df_name, required_vars)
+}
+
+#' @rdname data_check_table
+#' @export
+data_check_lic <- function(
+    df, df_name = "lic", required_vars = c("lic_id", "type", "duration"), 
+    allowed_values = list(type = c("fish", "hunt", "combo"), duration = 1:99),
+    primary_key = "lic_id", no_missing = "duration"
+) {
+    data_check_table(df, df_name, required_vars)
+}
+
+#' Internal Function: Check for required columns
+#' 
+#' @inheritParams data_check_table
+#' @family functions to check data format
+#' @keywords internal
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(lic)
+#' 
+#' select(lic, -duration, -lic_id) %>%
+#'     data_required_vars("lic", c("lic_id", "type", "duration"))
+data_required_vars <- function(df, df_name, required_vars) {
+    not_included <- dplyr::setdiff(required_vars, colnames(df))
+    if (length(not_included) > 0) {
+        warning(length(not_included), " Missing column(s) for '", df_name, 
+                "' table: ", paste(not_included, collapse = ", "), "\n", 
+                call. = FALSE)
+    }
+}
+
