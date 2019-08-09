@@ -25,15 +25,8 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 \item{allowed_values}{list: named list with allowed values for specific variables}
 }
 \description{
-These functions are intended to be called from \code{\link{data_check_table}}. 
-Prints a warning message on a failed check.
-\itemize{
-  \item data_primary_key: check that primary keys are unique and non-missing
-  \item data_required_vars: check that required variables are included
-  \item data_allowed_values: check that variables are restriced to allowed values.
-  Note that \code{\link{data_allowed_values}} is a wrapper for the single variable
-  function,  \code{\link{variable_allowed_values}}
-}
+These single check functions are intended to be called from \code{\link{data_check_table}}. 
+Each prints a warning message on a failed check.
 }
 \examples{
 library(dplyr)

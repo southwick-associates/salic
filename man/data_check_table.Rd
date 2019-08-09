@@ -37,9 +37,13 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 \item{allowed_values}{list: named list with allowed values for specific variables}
 }
 \description{
-Prints a warning for every formatting rule that is flagged for the specified table. 
-Table-specific versions are convenience functions that call data_check_table()
-with relevant arguments.
+Prints a warning for specied formatting rules. Table-specific versions are 
+convenience functions that call data_check_table() with appropriate defaults.
+\itemize{
+  \item \code{\link{data_primary_key}}: checks that primary keys are unique and non-missing
+  \item \code{\link{data_required_vars}}: checks that all required variables are present
+  \item \code{\link{data_allowed_values}}: checks that variables only contain allowed values
+}
 }
 \examples{
 library(dplyr)

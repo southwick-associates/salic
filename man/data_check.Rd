@@ -20,9 +20,9 @@ data tables. Rules are designed to ensure:
 \itemize{
   \item primary keys are unique and non-missing
   \item all required variables are present
-  \item variables only contain allowed values
+  \item variables only contain prescribed values
   \item foreign keys are present in relevant primary key table (i.e., all cust_ids
-  in sale can be found in cust)
+  in "sale" can be found in "cust")
 }
 }
 \examples{

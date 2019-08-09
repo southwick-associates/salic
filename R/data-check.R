@@ -4,15 +4,8 @@
 
 #' Internal Functions: Individual Data Checks
 #' 
-#' These functions are intended to be called from \code{\link{data_check_table}}. 
-#' Prints a warning message on a failed check.
-#' \itemize{
-#'   \item data_primary_key: check that primary keys are unique and non-missing
-#'   \item data_required_vars: check that required variables are included
-#'   \item data_allowed_values: check that variables are restriced to allowed values.
-#'   Note that \code{\link{data_allowed_values}} is a wrapper for the single variable
-#'   function,  \code{\link{variable_allowed_values}}
-#' }
+#' These single check functions are intended to be called from \code{\link{data_check_table}}. 
+#' Each prints a warning message on a failed check.
 #' 
 #' @inheritParams data_check_table
 #' @family functions to check data format
@@ -136,10 +129,14 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 
 #' Check formatting rules for standardized data tables
 #' 
-#' Prints a warning for every formatting rule that is flagged for the specified table. 
-#' Table-specific versions are convenience functions that call data_check_table()
-#' with relevant arguments.
-#' 
+#' Prints a warning for specied formatting rules. Table-specific versions are 
+#' convenience functions that call data_check_table() with appropriate defaults.
+#' \itemize{
+#'   \item \code{\link{data_primary_key}}: checks that primary keys are unique and non-missing
+#'   \item \code{\link{data_required_vars}}: checks that all required variables are present
+#'   \item \code{\link{data_allowed_values}}: checks that variables only contain allowed values
+#' }
+#'  
 #' @param df data frame: table to check
 #' @param df_name character: name of relevant data table ("cust", "lic", or "sale")
 #' @param primary_key character: name of variable that acts as primary key,  
@@ -223,9 +220,9 @@ data_check_sale <- function(
 #' \itemize{
 #'   \item primary keys are unique and non-missing
 #'   \item all required variables are present
-#'   \item variables only contain allowed values
+#'   \item variables only contain prescribed values
 #'   \item foreign keys are present in relevant primary key table (i.e., all cust_ids
-#'   in sale can be found in cust)
+#'   in "sale" can be found in "cust")
 #' }
 #' 
 #' @param cust data frame: customer table
