@@ -4,6 +4,7 @@
 # done: are the primary keys correctly set?
 # are categorcial variables restricted to the allowed values?
 # are values completely populated for variables that can't have missing values?
+# are foreign keys covered in primary keys?
 
 # Single Test Functions ---------------------------------------------------
 
@@ -49,7 +50,37 @@ data_no_missing <- function(df, df_name, no_missing) {
     
 }
 
-# Table Check Functions ---------------------------------------------------
+#' Internal Function: Check key coverage between two tables
+#' 
+#' Intended to be called from \code{\link{data_check}}, prints a warning if
+#' there are rows in df_foreign with keys that aren't included in df_primary
+#' 
+#' @param df_foreign data frame: table that stores key as foreign
+#' @param df_primary data frame: table that stores key as primary
+#' @param key character: name of variable that acts as key
+#' @family functions to check data format
+#' @keywords internal
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, cust)
+#' data_foreign_key(sale, cust, "cust_id")
+#' 
+#' cust <- filter(cust, cust_id > 5)
+#' data_foreign_key(sale, cust, "cust_id")
+data_foreign_key <- function(df_foreign, df_primary, key) {
+    foreign_name <- deparse(substitute(df_foreign))
+    primary_name <- deparse(substitute(df_primary))
+    missing_keys <- dplyr::anti_join(df_foreign, df_primary, by = key)
+    
+    msg <- paste0(
+        primary_name, ": missing 1 or more ", key, 
+        " values that are present in the ", foreign_name,  " table"
+    )
+    if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
+}
+
+# Single-Table Functions ---------------------------------------------------
 
 #' Check format for data tables
 #' 
@@ -98,7 +129,10 @@ data_check_cust <- function() {
 data_check_sale <- function() {
     
 }
-# call any number of data_check_[table] functions
-data_check <- function(...) {
+
+# Multi-Table Functions ---------------------------------------------------
+
+# Check standardized Data
+data_check <- function(cust, lic, sale) {
     
 }

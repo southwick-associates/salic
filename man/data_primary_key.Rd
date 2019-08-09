@@ -32,7 +32,8 @@ select(lic, -duration) \%>\%
     data_required_vars("lic", c("lic_id", "type", "duration"))
 }
 \seealso{
-Other functions to check data format: \code{\link{data_check_table}}
+Other functions to check data format: \code{\link{data_check_table}},
+  \code{\link{data_foreign_key}}
 }
 \concept{functions to check data format}
 \keyword{internal}
