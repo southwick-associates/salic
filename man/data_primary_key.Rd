@@ -15,7 +15,7 @@ data_allowed_values(df, df_name, allowed)
 \arguments{
 \item{df}{data frame: table to check}
 
-\item{df_name}{character: name of relevant data table (e.g., "cust", "lic", or "sale")}
+\item{df_name}{character: name of relevant data table ("cust", "lic", or "sale")}
 
 \item{primary_key}{character: name of variable that acts as primary key 
 (which should be unique and non-missing)}
@@ -55,7 +55,7 @@ data_allowed_values(lic, "lic", allowed_values)
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
-  \code{\link{data_foreign_key}},
+  \code{\link{data_check}}, \code{\link{data_foreign_key}},
   \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/data-check.R
 \name{data_foreign_key}
 \alias{data_foreign_key}
-\title{Internal Function: Check key coverage between two tables}
+\title{Check key coverage between two tables}
 \usage{
 data_foreign_key(df_foreign, df_primary, key)
 }
@@ -27,8 +27,7 @@ data_foreign_key(sale, cust, "cust_id")
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
-  \code{\link{data_primary_key}},
+  \code{\link{data_check}}, \code{\link{data_primary_key}},
   \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}
-\keyword{internal}

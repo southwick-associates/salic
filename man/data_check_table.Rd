@@ -3,7 +3,9 @@
 \name{data_check_table}
 \alias{data_check_table}
 \alias{data_check_lic}
-\title{Check format for data tables}
+\alias{data_check_cust}
+\alias{data_check_sale}
+\title{Check formatting rules for standardized data tables}
 \usage{
 data_check_table(df, df_name, primary_key, required_vars, allowed_values,
   no_missing)
@@ -12,11 +14,15 @@ data_check_lic(df, df_name = "lic", primary_key = "lic_id",
   required_vars = c("lic_id", "type", "duration"),
   allowed_values = list(type = c("fish", "hunt", "combo"), duration =
   1:99), no_missing = "duration")
+
+data_check_cust()
+
+data_check_sale()
 }
 \arguments{
 \item{df}{data frame: table to check}
 
-\item{df_name}{character: name of relevant data table (e.g., "cust", "lic", or "sale")}
+\item{df_name}{character: name of relevant data table ("cust", "lic", or "sale")}
 
 \item{primary_key}{character: name of variable that acts as primary key 
 (which should be unique and non-missing)}
@@ -26,7 +32,9 @@ data_check_lic(df, df_name = "lic", primary_key = "lic_id",
 \item{allowed_values}{list: named list with allowed values for specific variables}
 }
 \description{
-Any failing checks will produce warnings.
+Prints a warning for every formatting rule that is flagged for the specified table. 
+Table-specific versions are convenience functions that call data_check_table()
+with specified arguments.
 }
 \examples{
 library(dplyr)
@@ -40,7 +48,8 @@ x <- bind_rows(x, x)
 data_check_lic(x)
 }
 \seealso{
-Other functions to check data format: \code{\link{data_foreign_key}},
+Other functions to check data format: \code{\link{data_check}},
+  \code{\link{data_foreign_key}},
   \code{\link{data_primary_key}},
   \code{\link{variable_allowed_values}}
 }

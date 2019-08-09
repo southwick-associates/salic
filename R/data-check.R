@@ -1,6 +1,6 @@
 # Checks for Data
 
-# Single-test Functions ---------------------------------------------------
+# Internal Functions ---------------------------------------------------
 
 #' Internal Functions: Individual Data Checks
 #' 
@@ -100,7 +100,9 @@ data_allowed_values <- function(df, df_name, allowed) {
     }
 }
 
-#' Internal Function: Check key coverage between two tables
+# User-facing Functions ---------------------------------------------------
+
+#' Check key coverage between two tables
 #' 
 #' Intended to be called from \code{\link{data_check}}, prints a warning if
 #' there are rows in df_foreign with keys that aren't included in df_primary
@@ -109,7 +111,6 @@ data_allowed_values <- function(df, df_name, allowed) {
 #' @param df_primary data frame: table that stores key as primary
 #' @param key character: name of variable that acts as key
 #' @family functions to check data format
-#' @keywords internal
 #' @export
 #' @examples
 #' library(dplyr)
@@ -130,16 +131,16 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
     if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
 }
 
-# Multi-test Functions ---------------------------------------------------
-
 ### TODO - START HERE ###
 
-#' Check format for data tables
+#' Check formatting rules for standardized data tables
 #' 
-#' Any failing checks will produce warnings.
+#' Prints a warning for every formatting rule that is flagged for the specified table. 
+#' Table-specific versions are convenience functions that call data_check_table()
+#' with specified arguments.
 #' 
 #' @param df data frame: table to check
-#' @param df_name character: name of relevant data table (e.g., "cust", "lic", or "sale")
+#' @param df_name character: name of relevant data table ("cust", "lic", or "sale")
 #' @param primary_key character: name of variable that acts as primary key 
 #' (which should be unique and non-missing)
 #' @param required_vars character: variables that should be included
@@ -175,17 +176,37 @@ data_check_lic <- function(
 ) {
     data_check_table(df, df_name, primary_key, required_vars)
 }
+
+#' @rdname data_check_table
+#' @export
 data_check_cust <- function() {
     
 }
+
+#' @rdname data_check_table
+#' @export
 data_check_sale <- function() {
     
 }
 
-# Multi-Table Functions ---------------------------------------------------
-
-#' Check standardized Data
+#' Check standardized data (cust, lic, sale) formatting rules 
 #' 
+#' This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
+#' \code{\link{data_foreign_key}} to check formatting rules for all standardized 
+#' data tables
+#' 
+#' @param cust data frame: customer table
+#' @param lic data frame: license types table
+#' @param sale data frame: transactions table
+#' @family functions to check data format
+#' @import dplyr
+#' @export
+#' @examples
+#' #examples
 data_check <- function(cust, lic, sale) {
-    
+    data_check_cust(cust)
+    data_check_lic(lic)
+    data_check_sale(sale)
+    data_foreign_key(sale, cust, "cust_id")
+    data_foreign_key(sale, lic, "lic_id")
 }

@@ -2,10 +2,29 @@
 % Please edit documentation in R/data-check.R
 \name{data_check}
 \alias{data_check}
-\title{Check standardized Data}
+\title{Check standardized data (cust, lic, sale) formatting rules}
 \usage{
 data_check(cust, lic, sale)
 }
-\description{
-Check standardized Data
+\arguments{
+\item{cust}{data frame: customer table}
+
+\item{lic}{data frame: license types table}
+
+\item{sale}{data frame: transactions table}
 }
+\description{
+This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
+\code{\link{data_foreign_key}} to check formatting rules for all standardized 
+data tables
+}
+\examples{
+#examples
+}
+\seealso{
+Other functions to check data format: \code{\link{data_check_table}},
+  \code{\link{data_foreign_key}},
+  \code{\link{data_primary_key}},
+  \code{\link{variable_allowed_values}}
+}
+\concept{functions to check data format}
