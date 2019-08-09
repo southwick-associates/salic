@@ -6,11 +6,12 @@
 #' 
 #' These functions are intended to be called from \code{\link{data_check_table}}. 
 #' Prints a warning message on a failed check.
-#' 
 #' \itemize{
 #'   \item data_primary_key: check that primary keys are unique and non-missing
 #'   \item data_required_vars: check that required variables are included
-#'   \item data_allowed_values: check that variables are restriced to allowed values
+#'   \item data_allowed_values: check that variables are restriced to allowed values.
+#'   Note that \code{\link{data_allowed_values}} is a wrapper for the single variable
+#'   function,  \code{\link{variable_allowed_values}}
 #' }
 #' 
 #' @inheritParams data_check_table
@@ -37,6 +38,9 @@
 #' allowed_values <- list(type = c("hunt", "fish"), duration = 1)
 #' data_allowed_values(lic, "lic", allowed_values)
 data_primary_key <- function(df, df_name, primary_key) {
+    if (is.na(primary_key) || is.null(primary_key)) {
+        return(invisible())
+    }
     # uniqueness condition
     unique_keys <- length(unique(df[[primary_key]]))
     msg <- paste0(
@@ -63,6 +67,15 @@ data_required_vars <- function(df, df_name, required_vars) {
     if (length(not_included) > 0) warning(msg, call. = FALSE)
 }
 
+#' @rdname data_primary_key
+#' @export
+data_allowed_values <- function(df, df_name, allowed_values) {
+    vars <- names(allowed_values)
+    for (i in vars) {
+        variable_allowed_values(
+            df[[i]], paste(df_name, i, sep = "$"), allowed_values[[i]])
+    }
+}
 
 #' Internal Function: Check allowed values for a single variable
 #' 
@@ -88,16 +101,6 @@ variable_allowed_values <- function(x, x_name, allowed_values) {
         paste(not_allowed, collapse = ", ")
     )
     if (length(not_allowed) > 0) warning(msg, call. = FALSE)
-}
-
-#' @rdname data_primary_key
-#' @export
-data_allowed_values <- function(df, df_name, allowed) {
-    vars <- names(allowed)
-    for (i in vars) {
-        variable_allowed_values(
-            df[[i]], paste(df_name, i, sep = "-"), allowed[[i]])
-    }
 }
 
 # User-facing Functions ---------------------------------------------------
@@ -131,18 +134,16 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
     if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
 }
 
-### TODO - START HERE ###
-
 #' Check formatting rules for standardized data tables
 #' 
 #' Prints a warning for every formatting rule that is flagged for the specified table. 
 #' Table-specific versions are convenience functions that call data_check_table()
-#' with specified arguments.
+#' with relevant arguments.
 #' 
 #' @param df data frame: table to check
 #' @param df_name character: name of relevant data table ("cust", "lic", or "sale")
-#' @param primary_key character: name of variable that acts as primary key 
-#' (which should be unique and non-missing)
+#' @param primary_key character: name of variable that acts as primary key,  
+#' which should be unique and non-missing. NULL indicates no primary key in table.
 #' @param required_vars character: variables that should be included
 #' @param allowed_values list: named list with allowed values for specific variables
 #' @family functions to check data format
@@ -151,19 +152,27 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' @export
 #' @examples
 #' library(dplyr)
+#' 
+#' # produce various format warnings
+#' data(cust)
+#' bind_rows(cust, cust) %>% data_check_cust()
+#' 
+#' cust$birth_year[1] <- 2100
+#' data_check_cust(cust)
+#' 
 #' data(lic)
+#' select(lic, -duration) %>% data_check_lic()
+#' mutate(lic, duration = 0) %>% data_check_lic()
 #' 
-#' # one table
-#' x <- select(lic, -duration)
-#' data_check_lic(x)
-#' 
-#' x <- bind_rows(x, x)
-#' data_check_lic(x)
+#' data(sale)
+#' sale$year[1] <- NA
+#' data_check_sale(sale)
 data_check_table <- function(
-    df, df_name, primary_key, required_vars, allowed_values, no_missing
+    df, df_name, primary_key, required_vars, allowed_values
 ) {
     data_primary_key(df, df_name, primary_key)
     data_required_vars(df, df_name, required_vars)
+    data_allowed_values(df, df_name, allowed_values)
 }
 
 #' @rdname data_check_table
@@ -171,29 +180,53 @@ data_check_table <- function(
 data_check_lic <- function(
     df, df_name = "lic", primary_key = "lic_id", 
     required_vars = c("lic_id", "type", "duration"), 
-    allowed_values = list(type = c("fish", "hunt", "combo"), duration = 1:99),
-    no_missing = "duration"
+    allowed_values = list(
+        type = c("fish", "hunt", "combo"), 
+        duration = 1:99
+    )
 ) {
-    data_check_table(df, df_name, primary_key, required_vars)
+    data_check_table(df, df_name, primary_key, required_vars, allowed_values)
 }
 
 #' @rdname data_check_table
 #' @export
-data_check_cust <- function() {
-    
+data_check_cust <- function( 
+    df, df_name = "cust", primary_key = "cust_id", 
+    required_vars = c("cust_id", "sex", "birth_year"), 
+    allowed_values = list(
+        sex = c(1, 2, NA),  
+        birth_year = c(1900:substr(Sys.Date(), 1, 4), NA)
+    )
+) {
+    data_check_table(df, df_name, primary_key, required_vars, allowed_values)
 }
 
 #' @rdname data_check_table
 #' @export
-data_check_sale <- function() {
-    
+data_check_sale <- function(
+    df, df_name = "sale", primary_key = NULL, 
+    required_vars = c("cust_id", "lic_id", "year", "month", "res"), 
+    allowed_values = list(
+        year = c(2000:substr(Sys.Date(), 1, 4)),
+        month = 1:12,
+        res = c(1, 0, NA)
+    )
+) {
+    data_check_table(df, df_name, primary_key, required_vars, allowed_values)
 }
 
 #' Check standardized data (cust, lic, sale) formatting rules 
 #' 
 #' This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
-#' \code{\link{data_foreign_key}} to check formatting rules for all standardized 
-#' data tables
+#' \code{\link{data_foreign_key}}; checking formatting rules for all standardized 
+#' data tables. Rules are designed to ensure:
+#' \itemize{
+#'   \item primary keys are unique and non-missing
+#'   \item all required variables are present
+#'   \item variables only contain allowed values
+#'   \item foreign keys are present in relevant primary key table (i.e., all cust_ids
+#'   in sale can be found in cust)
+#' }
 #' 
 #' @param cust data frame: customer table
 #' @param lic data frame: license types table
@@ -202,11 +235,23 @@ data_check_sale <- function() {
 #' @import dplyr
 #' @export
 #' @examples
-#' #examples
+#' library(dplyr)
+#' data(cust, lic, sale)
+#' data_check(cust, lic, sale)
+#' 
+#' # introduce some warnings
+#' cust <- filter(cust, cust_id > 5)
+#' cust <- bind_rows(cust, cust)
+#' cust$res[1] <- "Canada"
+#' lic$lic_id[1] <- NA
+#' sale$month <- NULL
+#' sale$year[1] <- "-2010"
+#' sale$year[2] <- 0
+#' data_check(cust, lic, sale)
 data_check <- function(cust, lic, sale) {
     data_check_cust(cust)
-    data_check_lic(lic)
-    data_check_sale(sale)
     data_foreign_key(sale, cust, "cust_id")
+    data_check_lic(lic)
     data_foreign_key(sale, lic, "lic_id")
+    data_check_sale(sale)
 }

@@ -3,7 +3,7 @@ library(salic)
 library(dplyr)
 data(cust, lic, sale)
 
-test_that("data_primary_key() produces warning appropriately", {
+test_that("data_primary_key() warnings", {
     # should warn
     x <- bind_rows(lic, lic) # not unique
     expect_warning(
@@ -21,7 +21,7 @@ test_that("data_primary_key() produces warning appropriately", {
     )
 })
 
-test_that("data_required_vars() produces warning appropriately", {
+test_that("data_required_vars() warnings", {
     # should warn
     vars = c("cust_id", "lic_id", "year", "month", "res")
     x <- select(sale, "lic_id")
@@ -35,7 +35,7 @@ test_that("data_required_vars() produces warning appropriately", {
     )
 })
 
-test_that("data_foreign_key() produces warning appropriately", {
+test_that("data_foreign_key() warnings", {
     # should warn
     x <- filter(cust, cust_id > 5)
     expect_warning(
@@ -48,7 +48,7 @@ test_that("data_foreign_key() produces warning appropriately", {
     )
 })
 
-test_that("variable_allowed_values() produces warning appropriately", {
+test_that("variable_allowed_values() warnings", {
     # should warn
     x <- c(13, sale$month)
     expect_warning(
@@ -70,7 +70,7 @@ test_that("variable_allowed_values() produces warning appropriately", {
     )
 })
 
-test_that("data_allowed_values() produces warning appropriately", {
+test_that("data_allowed_values() warnings", {
     allowed_values <- list(
         type = c("hunt", "fish", "combo"), duration = 1:99
     )
@@ -91,4 +91,30 @@ test_that("data_allowed_values() produces warning appropriately", {
         data_allowed_values(x, "lic", allowed_values), 
         regexp = NA
     )
+})
+
+test_that("data_check_table() warnings", {
+    # no warn
+    expect_warning(data_check_cust(cust), regexp = NA)
+    expect_warning(data_check_lic(lic), regexp = NA)
+    expect_warning(data_check_sale(sale), regexp = NA)
+    
+    # warn
+    c <- select(cust, -sex)
+    l <- mutate(lic, lic_id = 1)
+    s <- mutate(sale, year = NA)
+    expect_warning(data_check_cust(c))
+    expect_warning(data_check_lic(l))
+    expect_warning(data_check_sale(s))
+})
+
+test_that("data_check() warnings", {
+    # no warn
+    expect_warning(data_check(cust, lic, sale), regexp = NA)
+    
+    # warn
+    c <- select(cust, -birth_year)
+    l <- mutate(lic, lic_id = NA)
+    s <- mutate(sale, res = 2)
+    expect_warning(data_check(c, l, s))
 })

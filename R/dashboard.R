@@ -251,7 +251,7 @@ scaleup_part <- function(
         stop("Missing '", outvar, "' from at least one of the input tables", call. = FALSE)
     }
     if (sum(part_segment[[outvar]]) == sum(part_total[[outvar]])) {
-        return # scaling not needed
+        return(part_segment) # scaling not needed
     }
     if (nrow(part_total) > nrow(part_segment)) {
         warning("Argument part_segment has fewer rows than part_total.\n",

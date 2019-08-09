@@ -10,27 +10,29 @@ data_primary_key(df, df_name, primary_key)
 
 data_required_vars(df, df_name, required_vars)
 
-data_allowed_values(df, df_name, allowed)
+data_allowed_values(df, df_name, allowed_values)
 }
 \arguments{
 \item{df}{data frame: table to check}
 
 \item{df_name}{character: name of relevant data table ("cust", "lic", or "sale")}
 
-\item{primary_key}{character: name of variable that acts as primary key 
-(which should be unique and non-missing)}
+\item{primary_key}{character: name of variable that acts as primary key,
+which should be unique and non-missing. NULL indicates no primary key in table.}
 
 \item{required_vars}{character: variables that should be included}
+
+\item{allowed_values}{list: named list with allowed values for specific variables}
 }
 \description{
 These functions are intended to be called from \code{\link{data_check_table}}. 
 Prints a warning message on a failed check.
-}
-\details{
 \itemize{
   \item data_primary_key: check that primary keys are unique and non-missing
   \item data_required_vars: check that required variables are included
-  \item data_allowed_values: check that variables are restriced to allowed values
+  \item data_allowed_values: check that variables are restriced to allowed values.
+  Note that \code{\link{data_allowed_values}} is a wrapper for the single variable
+  function,  \code{\link{variable_allowed_values}}
 }
 }
 \examples{

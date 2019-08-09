@@ -7,25 +7,30 @@
 \alias{data_check_sale}
 \title{Check formatting rules for standardized data tables}
 \usage{
-data_check_table(df, df_name, primary_key, required_vars, allowed_values,
-  no_missing)
+data_check_table(df, df_name, primary_key, required_vars, allowed_values)
 
 data_check_lic(df, df_name = "lic", primary_key = "lic_id",
   required_vars = c("lic_id", "type", "duration"),
   allowed_values = list(type = c("fish", "hunt", "combo"), duration =
-  1:99), no_missing = "duration")
+  1:99))
 
-data_check_cust()
+data_check_cust(df, df_name = "cust", primary_key = "cust_id",
+  required_vars = c("cust_id", "sex", "birth_year"),
+  allowed_values = list(sex = c(1, 2, NA), birth_year =
+  c(1900:substr(Sys.Date(), 1, 4), NA)))
 
-data_check_sale()
+data_check_sale(df, df_name = "sale", primary_key = NULL,
+  required_vars = c("cust_id", "lic_id", "year", "month", "res"),
+  allowed_values = list(year = c(2000:substr(Sys.Date(), 1, 4)), month =
+  1:12, res = c(1, 0, NA)))
 }
 \arguments{
 \item{df}{data frame: table to check}
 
 \item{df_name}{character: name of relevant data table ("cust", "lic", or "sale")}
 
-\item{primary_key}{character: name of variable that acts as primary key 
-(which should be unique and non-missing)}
+\item{primary_key}{character: name of variable that acts as primary key,
+which should be unique and non-missing. NULL indicates no primary key in table.}
 
 \item{required_vars}{character: variables that should be included}
 
@@ -34,18 +39,25 @@ data_check_sale()
 \description{
 Prints a warning for every formatting rule that is flagged for the specified table. 
 Table-specific versions are convenience functions that call data_check_table()
-with specified arguments.
+with relevant arguments.
 }
 \examples{
 library(dplyr)
+
+# produce various format warnings
+data(cust)
+bind_rows(cust, cust) \%>\% data_check_cust()
+
+cust$birth_year[1] <- 2100
+data_check_cust(cust)
+
 data(lic)
+select(lic, -duration) \%>\% data_check_lic()
+mutate(lic, duration = 0) \%>\% data_check_lic()
 
-# one table
-x <- select(lic, -duration)
-data_check_lic(x)
-
-x <- bind_rows(x, x)
-data_check_lic(x)
+data(sale)
+sale$year[1] <- NA
+data_check_sale(sale)
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check}},

@@ -15,11 +15,30 @@ data_check(cust, lic, sale)
 }
 \description{
 This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
-\code{\link{data_foreign_key}} to check formatting rules for all standardized 
-data tables
+\code{\link{data_foreign_key}}; checking formatting rules for all standardized 
+data tables. Rules are designed to ensure:
+\itemize{
+  \item primary keys are unique and non-missing
+  \item all required variables are present
+  \item variables only contain allowed values
+  \item foreign keys are present in relevant primary key table (i.e., all cust_ids
+  in sale can be found in cust)
+}
 }
 \examples{
-#examples
+library(dplyr)
+data(cust, lic, sale)
+data_check(cust, lic, sale)
+
+# introduce some warnings
+cust <- filter(cust, cust_id > 5)
+cust <- bind_rows(cust, cust)
+cust$res[1] <- "Canada"
+lic$lic_id[1] <- NA
+sale$month <- NULL
+sale$year[1] <- "-2010"
+sale$year[2] <- 0
+data_check(cust, lic, sale)
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
