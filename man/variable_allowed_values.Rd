@@ -21,8 +21,8 @@ Prints a warning message on a failed check.
 data(lic)
 variable_allowed_values(lic$type, "lic-type", c("hunt", "fish", "combo"))
 
-x <- c(NA, "hi", lic$type)
-variable_allowed_values(x, "lic-type", c("hunt", "fish", "combo", NA, "hi"))
+x <- c(NA, "hi", 1, lic$type)
+variable_allowed_values(x, "lic-type", c("hunt", "fish", "combo"))
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},

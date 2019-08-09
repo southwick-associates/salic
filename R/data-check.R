@@ -2,9 +2,9 @@
 
 # done: does it have the required columns?
 # done: are the primary keys correctly set?
-# are categorcial variables restricted to the allowed values?
+# done: are categorcial variables restricted to the allowed values?
 # are values completely populated for variables that can't have missing values?
-# are foreign keys covered in primary keys?
+# done: are foreign keys covered in primary keys?
 
 # Single-test Functions ---------------------------------------------------
 
@@ -21,11 +21,17 @@
 #' library(dplyr)
 #' data(lic)
 #' 
+#' # primary keys
 #' bind_rows(lic, lic) %>% 
 #'     data_primary_key("lic", "lic_id")
-#'     
+#' 
+#' # required variables
 #' select(lic, -duration) %>%
 #'     data_required_vars("lic", c("lic_id", "type", "duration"))
+#' 
+#' # allowed values
+#' allowed_values <- list(type = c("hunt", "fish"), duration = 1)
+#' data_allowed_values(lic, "lic", allowed_values)
 data_primary_key <- function(df, df_name, primary_key) {
     unique_keys <- length(unique(df[[primary_key]]))
     msg <- paste0(
@@ -62,8 +68,8 @@ data_required_vars <- function(df, df_name, required_vars) {
 #' data(lic)
 #' variable_allowed_values(lic$type, "lic-type", c("hunt", "fish", "combo"))
 #' 
-#' x <- c(NA, "hi", lic$type)
-#' variable_allowed_values(x, "lic-type", c("hunt", "fish", "combo", NA, "hi"))
+#' x <- c(NA, "hi", 1, lic$type)
+#' variable_allowed_values(x, "lic-type", c("hunt", "fish", "combo"))
 variable_allowed_values <- function(x, x_name, allowed_values) {
     not_allowed <- dplyr::setdiff(unique(x), allowed_values)
     msg <- paste0(
@@ -75,8 +81,12 @@ variable_allowed_values <- function(x, x_name, allowed_values) {
 
 #' @rdname data_primary_key
 #' @export
-data_allowed_values <- function(df, df_name, allowed_values) {
-
+data_allowed_values <- function(df, df_name, allowed) {
+    vars <- names(allowed)
+    for (i in vars) {
+        variable_allowed_values(
+            df[[i]], paste(df_name, i, sep = "-"), allowed[[i]])
+    }
 }
 
 #' @rdname data_primary_key

@@ -45,7 +45,11 @@ test_that("data_foreign_key() produces warning appropriately", {
 
 test_that("variable_allowed_values() produces warning appropriately", {
     # should warn
-    x <- c(NA, "hi", sale$month)
+    x <- c(13, sale$month)
+    expect_warning(
+        variable_allowed_values(x, "sale-month", 1:12)
+    )
+    x <- c(NA, "hi", -100, sale$month) # various values
     expect_warning(
         variable_allowed_values(x, "sale-month", 1:12)
     )
@@ -57,6 +61,29 @@ test_that("variable_allowed_values() produces warning appropriately", {
     x <- c(NA, sale$month) # allowing NAs
     expect_warning(
         variable_allowed_values(x, "sale-month", c(1:12, NA)),
+        regexp = NA
+    )
+})
+
+test_that("data_allowed_values() produces warning appropriately", {
+    allowed_values <- list(
+        type = c("hunt", "fish", "combo"), duration = 1:99
+    )
+    # should warn
+    x <- lic
+    x$duration[1] <- NA
+    expect_warning(
+        data_allowed_values(x, "lic", allowed_values)
+    )
+    x <- lic
+    x$type[1] <- "hi there"
+    expect_warning(
+        data_allowed_values(x, "lic", allowed_values)
+    )
+    # should not warn
+    allowed_values$type <- c(allowed_values$type, "hi there")
+    expect_warning(
+        data_allowed_values(x, "lic", allowed_values), 
         regexp = NA
     )
 })

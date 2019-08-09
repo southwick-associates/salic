@@ -11,7 +11,7 @@ data_primary_key(df, df_name, primary_key)
 
 data_required_vars(df, df_name, required_vars)
 
-data_allowed_values(df, df_name, allowed_values)
+data_allowed_values(df, df_name, allowed)
 
 data_no_missing(df, df_name, no_missing)
 }
@@ -24,8 +24,6 @@ data_no_missing(df, df_name, no_missing)
 
 \item{required_vars}{character: variables that should be included}
 
-\item{allowed_values}{list: named list with allowed values for specific variables}
-
 \item{no_missing}{character: name of variables that shouldn't contain missing values}
 }
 \description{
@@ -36,11 +34,17 @@ Prints a warning message on a failed check.
 library(dplyr)
 data(lic)
 
+# primary keys
 bind_rows(lic, lic) \%>\% 
     data_primary_key("lic", "lic_id")
-    
+
+# required variables
 select(lic, -duration) \%>\%
     data_required_vars("lic", c("lic_id", "type", "duration"))
+
+# allowed values
+allowed_values <- list(type = c("hunt", "fish"), duration = 1)
+data_allowed_values(lic, "lic", allowed_values)
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
