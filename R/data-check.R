@@ -60,7 +60,7 @@ data_no_missing <- function(df, df_name, no_missing) {
 #' Any failing checks will produce warnings.
 #' 
 #' @param df data frame: table to check
-#' @param df_name character: name of relevant data table (e.g., "lic", "sale", etc.)
+#' @param df_name character: name of relevant data table (e.g., "cust", "lic", or "sale")
 #' @param primary_key character: name of variable that acts as primary key (if applicable)
 #' @param required_vars character: variables that should be included
 #' @param allowed_values list: named list with allowed values for specific variables

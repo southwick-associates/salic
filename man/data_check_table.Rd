@@ -16,7 +16,7 @@ data_check_lic(df, df_name = "lic", primary_key = "lic_id",
 \arguments{
 \item{df}{data frame: table to check}
 
-\item{df_name}{character: name of relevant data table (e.g., "lic", "sale", etc.)}
+\item{df_name}{character: name of relevant data table (e.g., "cust", "lic", or "sale")}
 
 \item{primary_key}{character: name of variable that acts as primary key (if applicable)}
 
