@@ -18,13 +18,12 @@ data_check_lic(df, df_name = "lic", primary_key = "lic_id",
 
 \item{df_name}{character: name of relevant data table (e.g., "cust", "lic", or "sale")}
 
-\item{primary_key}{character: name of variable that acts as primary key (if applicable)}
+\item{primary_key}{character: name of variable that acts as primary key 
+(which should be unique and non-missing)}
 
 \item{required_vars}{character: variables that should be included}
 
 \item{allowed_values}{list: named list with allowed values for specific variables}
-
-\item{no_missing}{character: name of variables that shouldn't contain missing values}
 }
 \description{
 Any failing checks will produce warnings.

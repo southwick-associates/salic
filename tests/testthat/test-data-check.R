@@ -5,9 +5,14 @@ data(cust, lic, sale)
 
 test_that("data_primary_key() produces warning appropriately", {
     # should warn
-    x <- bind_rows(lic, lic)
+    x <- bind_rows(lic, lic) # not unique
     expect_warning(
         data_primary_key(x, df_name = "lic", primary_key = "lic_id")
+    )
+    x <- cust
+    x$cust_id[1] <- NA # contains missings
+    expect_warning(
+        data_primary_key(x, df_name = "cust", primary_key = "cust_id")
     )
     # should not warn
     expect_warning(

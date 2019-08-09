@@ -1,17 +1,17 @@
 # Checks for Data
 
-# done: does it have the required columns?
-# done: are the primary keys correctly set?
-# done: are categorcial variables restricted to the allowed values?
-# are values completely populated for variables that can't have missing values?
-# done: are foreign keys covered in primary keys?
-
 # Single-test Functions ---------------------------------------------------
 
 #' Internal Functions: Individual Data Checks
 #' 
 #' These functions are intended to be called from \code{\link{data_check_table}}. 
 #' Prints a warning message on a failed check.
+#' 
+#' \itemize{
+#'   \item data_primary_key: check that primary keys are unique and non-missing
+#'   \item data_required_vars: check that required variables are included
+#'   \item data_allowed_values: check that variables are restriced to allowed values
+#' }
 #' 
 #' @inheritParams data_check_table
 #' @family functions to check data format
@@ -21,24 +21,35 @@
 #' library(dplyr)
 #' data(lic)
 #' 
-#' # primary keys
+#' # primary keys not unique
 #' bind_rows(lic, lic) %>% 
 #'     data_primary_key("lic", "lic_id")
+#'     
+#' # primary keys missing
+#' lic$lic_id[1] <- NA
+#' data_primary_key(lic, "lic", "lic_id")
 #' 
-#' # required variables
+#' # missing required variables
 #' select(lic, -duration) %>%
 #'     data_required_vars("lic", c("lic_id", "type", "duration"))
 #' 
-#' # allowed values
+#' # includes values that aren't allowed
 #' allowed_values <- list(type = c("hunt", "fish"), duration = 1)
 #' data_allowed_values(lic, "lic", allowed_values)
 data_primary_key <- function(df, df_name, primary_key) {
+    # uniqueness condition
     unique_keys <- length(unique(df[[primary_key]]))
     msg <- paste0(
         df_name, ": Primary key (", primary_key, ") not unique: ", unique_keys,  
         " keys and ", nrow(df), " rows"
     )
     if (unique_keys < nrow(df)) warning(msg, call. = FALSE)
+    
+    # non-missing condition
+    msg <- paste0(
+        df_name, ": Primary key (", primary_key, ") contains missing values"
+    )
+    if (any(is.na(df[[primary_key]]))) warning(msg, call. = FALSE)
 }
 
 #' @rdname data_primary_key
@@ -89,12 +100,6 @@ data_allowed_values <- function(df, df_name, allowed) {
     }
 }
 
-#' @rdname data_primary_key
-#' @export
-data_no_missing <- function(df, df_name, no_missing) {
-    
-}
-
 #' Internal Function: Check key coverage between two tables
 #' 
 #' Intended to be called from \code{\link{data_check}}, prints a warning if
@@ -127,16 +132,18 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 
 # Multi-test Functions ---------------------------------------------------
 
+### TODO - START HERE ###
+
 #' Check format for data tables
 #' 
 #' Any failing checks will produce warnings.
 #' 
 #' @param df data frame: table to check
 #' @param df_name character: name of relevant data table (e.g., "cust", "lic", or "sale")
-#' @param primary_key character: name of variable that acts as primary key (if applicable)
+#' @param primary_key character: name of variable that acts as primary key 
+#' (which should be unique and non-missing)
 #' @param required_vars character: variables that should be included
 #' @param allowed_values list: named list with allowed values for specific variables
-#' @param no_missing character: name of variables that shouldn't contain missing values
 #' @family functions to check data format
 #' @keywords internal
 #' @import dplyr
@@ -177,7 +184,8 @@ data_check_sale <- function() {
 
 # Multi-Table Functions ---------------------------------------------------
 
-# Check standardized Data
+#' Check standardized Data
+#' 
 data_check <- function(cust, lic, sale) {
     
 }

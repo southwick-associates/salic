@@ -4,7 +4,6 @@
 \alias{data_primary_key}
 \alias{data_required_vars}
 \alias{data_allowed_values}
-\alias{data_no_missing}
 \title{Internal Functions: Individual Data Checks}
 \usage{
 data_primary_key(df, df_name, primary_key)
@@ -12,37 +11,45 @@ data_primary_key(df, df_name, primary_key)
 data_required_vars(df, df_name, required_vars)
 
 data_allowed_values(df, df_name, allowed)
-
-data_no_missing(df, df_name, no_missing)
 }
 \arguments{
 \item{df}{data frame: table to check}
 
 \item{df_name}{character: name of relevant data table (e.g., "cust", "lic", or "sale")}
 
-\item{primary_key}{character: name of variable that acts as primary key (if applicable)}
+\item{primary_key}{character: name of variable that acts as primary key 
+(which should be unique and non-missing)}
 
 \item{required_vars}{character: variables that should be included}
-
-\item{no_missing}{character: name of variables that shouldn't contain missing values}
 }
 \description{
 These functions are intended to be called from \code{\link{data_check_table}}. 
 Prints a warning message on a failed check.
 }
+\details{
+\itemize{
+  \item data_primary_key: check that primary keys are unique and non-missing
+  \item data_required_vars: check that required variables are included
+  \item data_allowed_values: check that variables are restriced to allowed values
+}
+}
 \examples{
 library(dplyr)
 data(lic)
 
-# primary keys
+# primary keys not unique
 bind_rows(lic, lic) \%>\% 
     data_primary_key("lic", "lic_id")
+    
+# primary keys missing
+lic$lic_id[1] <- NA
+data_primary_key(lic, "lic", "lic_id")
 
-# required variables
+# missing required variables
 select(lic, -duration) \%>\%
     data_required_vars("lic", c("lic_id", "type", "duration"))
 
-# allowed values
+# includes values that aren't allowed
 allowed_values <- list(type = c("hunt", "fish"), duration = 1)
 data_allowed_values(lic, "lic", allowed_values)
 }
