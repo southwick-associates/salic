@@ -42,7 +42,8 @@ data_check_lic(x)
 }
 \seealso{
 Other functions to check data format: \code{\link{data_foreign_key}},
-  \code{\link{data_primary_key}}
+  \code{\link{data_primary_key}},
+  \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}
 \keyword{internal}

@@ -6,7 +6,7 @@
 # are values completely populated for variables that can't have missing values?
 # are foreign keys covered in primary keys?
 
-# Single Test Functions ---------------------------------------------------
+# Single-test Functions ---------------------------------------------------
 
 #' Internal Functions: Individual Data Checks
 #' 
@@ -46,14 +46,76 @@ data_required_vars <- function(df, df_name, required_vars) {
     if (length(not_included) > 0) warning(msg, call. = FALSE)
 }
 
-data_allowed_values <- function(df, df_name, allowed_values) {
-    
+
+#' Internal Function: Check allowed values for a single variable
+#' 
+#' This is intended to be called from \code{\link{data_allowed_values}}. 
+#' Prints a warning message on a failed check.
+#' 
+#' @param x vector: variable to check
+#' @param x_name character: name of variable to print in warning
+#' @param allowed_values vector: values the variable is allowed to take
+#' @family functions to check data format
+#' @keywords internal
+#' @export
+#' @examples
+#' data(lic)
+#' variable_allowed_values(lic$type, "lic-type", c("hunt", "fish", "combo"))
+#' 
+#' x <- c(NA, "hi", lic$type)
+#' variable_allowed_values(x, "lic-type", c("hunt", "fish", "combo", NA, "hi"))
+variable_allowed_values <- function(x, x_name, allowed_values) {
+    not_allowed <- dplyr::setdiff(unique(x), allowed_values)
+    msg <- paste0(
+        x_name, ": contains values that aren't allowed: ", 
+        paste(not_allowed, collapse = ", ")
+    )
+    if (length(not_allowed) > 0) warning(msg, call. = FALSE)
 }
+
+#' @rdname data_primary_key
+#' @export
+data_allowed_values <- function(df, df_name, allowed_values) {
+
+}
+
+#' @rdname data_primary_key
+#' @export
 data_no_missing <- function(df, df_name, no_missing) {
     
 }
 
-# Single-Table Functions ---------------------------------------------------
+#' Internal Function: Check key coverage between two tables
+#' 
+#' Intended to be called from \code{\link{data_check}}, prints a warning if
+#' there are rows in df_foreign with keys that aren't included in df_primary
+#' 
+#' @param df_foreign data frame: table that stores key as foreign
+#' @param df_primary data frame: table that stores key as primary
+#' @param key character: name of variable that acts as key
+#' @family functions to check data format
+#' @keywords internal
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, cust)
+#' data_foreign_key(sale, cust, "cust_id")
+#' 
+#' cust <- filter(cust, cust_id > 5)
+#' data_foreign_key(sale, cust, "cust_id")
+data_foreign_key <- function(df_foreign, df_primary, key) {
+    foreign_name <- deparse(substitute(df_foreign))
+    primary_name <- deparse(substitute(df_primary))
+    missing_keys <- dplyr::anti_join(df_foreign, df_primary, by = key)
+    
+    msg <- paste0(
+        primary_name, ": missing 1 or more ", key, 
+        " values that are present in the ", foreign_name,  " table"
+    )
+    if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
+}
+
+# Multi-test Functions ---------------------------------------------------
 
 #' Check format for data tables
 #' 
@@ -104,36 +166,6 @@ data_check_sale <- function() {
 }
 
 # Multi-Table Functions ---------------------------------------------------
-
-#' Internal Function: Check key coverage between two tables
-#' 
-#' Intended to be called from \code{\link{data_check}}, prints a warning if
-#' there are rows in df_foreign with keys that aren't included in df_primary
-#' 
-#' @param df_foreign data frame: table that stores key as foreign
-#' @param df_primary data frame: table that stores key as primary
-#' @param key character: name of variable that acts as key
-#' @family functions to check data format
-#' @keywords internal
-#' @export
-#' @examples
-#' library(dplyr)
-#' data(sale, cust)
-#' data_foreign_key(sale, cust, "cust_id")
-#' 
-#' cust <- filter(cust, cust_id > 5)
-#' data_foreign_key(sale, cust, "cust_id")
-data_foreign_key <- function(df_foreign, df_primary, key) {
-    foreign_name <- deparse(substitute(df_foreign))
-    primary_name <- deparse(substitute(df_primary))
-    missing_keys <- dplyr::anti_join(df_foreign, df_primary, by = key)
-    
-    msg <- paste0(
-        primary_name, ": missing 1 or more ", key, 
-        " values that are present in the ", foreign_name,  " table"
-    )
-    if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
-}
 
 # Check standardized Data
 data_check <- function(cust, lic, sale) {

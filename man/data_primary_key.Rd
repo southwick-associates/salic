@@ -3,11 +3,17 @@
 \name{data_primary_key}
 \alias{data_primary_key}
 \alias{data_required_vars}
+\alias{data_allowed_values}
+\alias{data_no_missing}
 \title{Internal Functions: Individual Data Checks}
 \usage{
 data_primary_key(df, df_name, primary_key)
 
 data_required_vars(df, df_name, required_vars)
+
+data_allowed_values(df, df_name, allowed_values)
+
+data_no_missing(df, df_name, no_missing)
 }
 \arguments{
 \item{df}{data frame: table to check}
@@ -17,6 +23,10 @@ data_required_vars(df, df_name, required_vars)
 \item{primary_key}{character: name of variable that acts as primary key (if applicable)}
 
 \item{required_vars}{character: variables that should be included}
+
+\item{allowed_values}{list: named list with allowed values for specific variables}
+
+\item{no_missing}{character: name of variables that shouldn't contain missing values}
 }
 \description{
 These functions are intended to be called from \code{\link{data_check_table}}. 
@@ -34,7 +44,8 @@ select(lic, -duration) \%>\%
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
-  \code{\link{data_foreign_key}}
+  \code{\link{data_foreign_key}},
+  \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}
 \keyword{internal}
