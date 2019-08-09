@@ -19,7 +19,8 @@ data_required_vars(df, df_name, required_vars)
 \item{required_vars}{character: variables that should be included}
 }
 \description{
-These functions are intended to be called from \code{\link{data_check_table}}
+These functions are intended to be called from \code{\link{data_check_table}}. 
+Prints a warning message on a failed check.
 }
 \examples{
 library(dplyr)
