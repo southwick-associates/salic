@@ -129,8 +129,9 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 
 #' Check formatting rules for standardized data tables
 #' 
-#' Prints a warning for specied formatting rules. Table-specific versions are 
-#' convenience functions that call data_check_table() with appropriate defaults.
+#' Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
+#' Table-specific versions are convenience functions that call data_check_table() 
+#' with appropriate defaults.
 #' \itemize{
 #'   \item \code{\link{data_primary_key}}: checks that primary keys are unique and non-missing
 #'   \item \code{\link{data_required_vars}}: checks that all required variables are present
@@ -214,6 +215,7 @@ data_check_sale <- function(
 
 #' Check standardized data (cust, lic, sale) formatting rules 
 #' 
+#' Produces warnings if any checks fail (stays silent on success).
 #' This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
 #' \code{\link{data_foreign_key}}; checking formatting rules for all standardized 
 #' data tables. Rules are designed to ensure:
@@ -234,6 +236,8 @@ data_check_sale <- function(
 #' @examples
 #' library(dplyr)
 #' data(cust, lic, sale)
+#' 
+#' # a successful check passes silently
 #' data_check(cust, lic, sale)
 #' 
 #' # introduce some warnings

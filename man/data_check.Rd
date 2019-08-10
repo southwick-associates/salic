@@ -14,6 +14,7 @@ data_check(cust, lic, sale)
 \item{sale}{data frame: transactions table}
 }
 \description{
+Produces warnings if any checks fail (stays silent on success).
 This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
 \code{\link{data_foreign_key}}; checking formatting rules for all standardized 
 data tables. Rules are designed to ensure:
@@ -28,6 +29,8 @@ data tables. Rules are designed to ensure:
 \examples{
 library(dplyr)
 data(cust, lic, sale)
+
+# a successful check passes silently
 data_check(cust, lic, sale)
 
 # introduce some warnings

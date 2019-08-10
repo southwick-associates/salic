@@ -14,9 +14,11 @@ rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 \item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
-This function takes an input sale table and returns the max duration
-value present in each year (per customer) - essentially a ranking by
-license duration.
+This function takes an input sale table and returns a filtered version with
+a single row per customer-year. The filter is based on one or more variables 
+identified in rank_var; the row with the maximum value(s) is selected. 
+The default (and intended purpose) is to pick the highest "duration" value 
+per customer-year.
 }
 \examples{
 library(dplyr)
@@ -25,7 +27,7 @@ sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
     
-# check sale ranking
+# check sale ranking - highest duration will always be picked
 left_join(
     count(sale_ranked, duration), 
     distinct(sale_unranked, cust_id, year, duration) \%>\% count(duration), 

@@ -5,9 +5,11 @@
 
 #' Aggregate a Sale Table to ensure 1 row per customer per year.
 #'
-#' This function takes an input sale table and returns the max duration
-#' value present in each year (per customer) - essentially a ranking by
-#' license duration.
+#' This function takes an input sale table and returns a filtered version with
+#' a single row per customer-year. The filter is based on one or more variables 
+#' identified in rank_var; the row with the maximum value(s) is selected. 
+#' The default (and intended purpose) is to pick the highest "duration" value 
+#' per customer-year.
 #' 
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
@@ -22,7 +24,7 @@
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
 #'     
-#' # check sale ranking
+#' # check sale ranking - highest duration will always be picked
 #' left_join(
 #'     count(sale_ranked, duration), 
 #'     distinct(sale_unranked, cust_id, year, duration) %>% count(duration), 
@@ -30,13 +32,19 @@
 #'     suffix = c(".ranked", ".unranked")
 #' )
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
+    # programming with dplyr, string input (which is a bit unusual):
+    # - https://github.com/tidyverse/dplyr/issues/2662
+    grp_var <- syms(grp_var)
+    rank_var <- syms(rank_var)
+    
     sale %>%
-        # to insure highest value is picked - sort ascending, pick last
-        arrange_(.dots = c(grp_var, rank_var)) %>%
-        group_by_(.dots = grp_var) %>%
+        # to ensure highest value of rank_var - sort ascending, pick last
+        arrange(!!! grp_var, !!! rank_var) %>%
+        group_by(!!! grp_var) %>%
         slice(n()) %>%
         ungroup()
 }
+
 
 #' Join earliest sale month by customer-year to ranked sale table.
 #'
