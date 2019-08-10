@@ -14,8 +14,9 @@ join_first_month(sale_ranked, sale_unranked)
 \description{
 This function is only intended to be run following \code{\link{rank_sale}};
 necessary since the sale ranking only keeps one row per cust_id-year,
-which is determined by duration, not month. This step ensures the earliest 
-month value gets recorded in the license history table.
+(determined by highest duration value). This step ensures the earliest 
+month value gets recorded in the license history table; enabling a simple
+month filter of license history to display mid-year vs. full-year results.
 }
 \examples{
 library(dplyr)
@@ -24,7 +25,7 @@ sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
 
-# check month ranking
+# check month ranking - earliest month will always be picked
 left_join(
     count(sale_ranked, month), 
     distinct(sale_unranked, cust_id, year, month) \%>\% count(month), 

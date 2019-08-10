@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{rank_sale}
 \alias{rank_sale}
-\title{Aggregate a Sale Table to ensure 1 row per customer per year.}
+\title{Filter sales to 1 row per customer per year.}
 \usage{
 rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 }
@@ -14,11 +14,11 @@ rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 \item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
-This function takes an input sale table and returns a filtered version with
-a single row per customer-year. The filter is based on one or more variables 
-identified in rank_var; the row with the maximum value(s) is selected. 
-The default (and intended purpose) is to pick the highest "duration" value 
-per customer-year.
+The filter is based on one or more variables (rank_var); the row with the maximum 
+value(s) of rank_var is selected. The default (and intended purpose) is to 
+pick the maximum "duration" value per customer-year. This is a preliminary step
+to \code{\link{make_lic_history}} which ensures that multi-year & lifetime sales
+are always accounted for.
 }
 \examples{
 library(dplyr)

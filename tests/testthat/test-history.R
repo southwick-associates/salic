@@ -27,3 +27,16 @@ test_that("rank_sale() produces expected result", {
         ungroup() %>%
         select(cust_id, year, duration, res)
 })
+
+test_that("join_first_month() produces expected result", {
+    sale_unranked <- left_join(sale, lic)
+    sale_ranked <- rank_sale(sale_unranked)
+    x <- join_first_month(sale_ranked, sale_unranked) %>%
+        select(cust_id, year, month)
+    y <- group_by(sale_unranked, cust_id, year) %>%
+        arrange(month) %>%
+        slice(1L) %>%
+        ungroup() %>%
+        select(cust_id, year, month)
+    expect_equal(x, y)
+})

@@ -1,15 +1,14 @@
 # license history functions
 
-
 # Making Tables -----------------------------------------------------------
 
-#' Aggregate a Sale Table to ensure 1 row per customer per year.
+#' Filter sales to 1 row per customer per year.
 #'
-#' This function takes an input sale table and returns a filtered version with
-#' a single row per customer-year. The filter is based on one or more variables 
-#' identified in rank_var; the row with the maximum value(s) is selected. 
-#' The default (and intended purpose) is to pick the highest "duration" value 
-#' per customer-year.
+#' The filter is based on one or more variables (rank_var); the row with the maximum 
+#' value(s) of rank_var is selected. The default (and intended purpose) is to 
+#' pick the maximum "duration" value per customer-year. This is a preliminary step
+#' to \code{\link{make_lic_history}} which ensures that multi-year & lifetime sales
+#' are always accounted for.
 #' 
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
@@ -32,6 +31,10 @@
 #'     suffix = c(".ranked", ".unranked")
 #' )
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
+    if (!all(rank_var %in% colnames(sale))) {
+        stop("All rank_var variable(s) (", paste(rank_var, collapse = ", "), 
+             ") must be included in sale", call. = FALSE)
+    }
     # programming with dplyr, string input (which is a bit unusual):
     # - https://github.com/tidyverse/dplyr/issues/2662
     grp_var <- syms(grp_var)
@@ -50,8 +53,9 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #'
 #' This function is only intended to be run following \code{\link{rank_sale}};
 #' necessary since the sale ranking only keeps one row per cust_id-year,
-#' which is determined by duration, not month. This step ensures the earliest 
-#' month value gets recorded in the license history table.
+#' (determined by highest duration value). This step ensures the earliest 
+#' month value gets recorded in the license history table; enabling a simple
+#' month filter of license history to display mid-year vs. full-year results.
 #' 
 #' @param sale_ranked data frame: Input ranked sales data
 #' @param sale_unranked data frame: Input unranked sales data
@@ -65,7 +69,7 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
 #' 
-#' # check month ranking
+#' # check month ranking - earliest month will always be picked
 #' left_join(
 #'     count(sale_ranked, month), 
 #'     distinct(sale_unranked, cust_id, year, month) %>% count(month), 
@@ -73,8 +77,8 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #'     suffix = c(".ranked", ".unranked")
 #' )
 join_first_month <- function(sale_ranked, sale_unranked) {
-    if (is.null(sale_unranked$month)) {
-        stop("'month' must be included in 'sale_unranked' data frame")
+    if (!"month" %in% colnames(sale_unranked)) {
+        stop("month variable must be included in sale_unranked", call. = FALSE)
     }
     first_month <- sale_unranked %>%
         arrange(month) %>%
