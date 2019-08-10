@@ -14,7 +14,7 @@ to create license history}
 }
 \description{
 This is intended to be called following \code{\link{make_lic_history}} 
-and codes lapse: 0 = renew next year, 1 = lapse next year.
+and codes lapse: 0 = renews next year, 1 = lapses next year.
 }
 \examples{
 library(dplyr)

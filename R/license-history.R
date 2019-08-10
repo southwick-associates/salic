@@ -254,7 +254,8 @@ identify_R3 <- function(lic_history, yrs) {
 #' Identify lapse group each year
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} 
-#' and codes lapse: 0 = renew next year, 1 = lapse next year.
+#' and codes lapse: 0 = renews next year, 1 = lapses next year.
+#' 
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
@@ -279,10 +280,12 @@ identify_R3 <- function(lic_history, yrs) {
 #'     mutate(year = year + 1)
 identify_lapse <- function(lic_history, yrs) {
     lic_history %>%
-        arrange(cust_id, year) %>% # for correct lead ordering
-        group_by(cust_id) %>% # to insure lead calculations are customer-specific
-        mutate( lead_year= lead(year) ) %>%
+        arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
+        group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
+        mutate(lead_year = lead(.data$year) ) %>%
         ungroup() %>%
+        
+        # TODO - use case_when() for this instead
         mutate(
             # if didn't buy next year: lapsed, otherwise: renewed
             lapse = ifelse(lead_year == (year + 1) & !is.na(lead_year), 0L, 1L),
