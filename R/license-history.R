@@ -48,7 +48,6 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
         ungroup()
 }
 
-
 #' Join earliest sale month by customer-year to ranked sale table.
 #'
 #' This function is only intended to be run following \code{\link{rank_sale}};
@@ -81,23 +80,20 @@ join_first_month <- function(sale_ranked, sale_unranked) {
         stop("month variable must be included in sale_unranked", call. = FALSE)
     }
     first_month <- sale_unranked %>%
-        arrange(month) %>%
-        group_by(cust_id, year) %>%
+        arrange(.data$month) %>%
+        group_by(.data$cust_id, .data$year) %>%
         slice(1L) %>%
         ungroup() %>%
-        select(cust_id, year, month)
+        select(.data$cust_id, .data$year, .data$month)
     sale_ranked$month <- NULL
     left_join(sale_ranked, first_month, by = c("cust_id", "year"))
 }
 
-#' Make a License History Table
+#' Make a License History table with 1 row per customer per year
 #'
-#' Output table is stored in a data frame with 1 row per customer-year
-#'
-#' The input data frame (sale) must have at least 3 columns
+#' The input data frame (sale_ranked) must have at least 3 columns
 #' (cust_id, year, duration) and should only have 1 record per customer per year
-#' (which can be insured by running \code{\link{rank_sale}}).
-#'
+#' (ensured by running \code{\link{rank_sale}} beforehand).
 #' Each data frame in the output data frame has at least 6 columns:
 #' \itemize{
 #' \item \emph{cust_id}: Customer ID
@@ -112,6 +108,7 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' \item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
 #' indicates a license carried over from a previous year
 #' }
+#' 
 #' @param sale_ranked data frame: Sales table from which license history will be made
 #' @param yrs numeric: Years in sales data (column 'year') from which
 #' to create license history
@@ -138,39 +135,44 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     
     # 2. Initialize running duration for first year
     lic_history[[1]] <- sale_ranked %>%
-        filter(year == yrs[1]) %>%
+        filter(.data$year == yrs[1]) %>%
         mutate(
             bought = TRUE, # bought a license this year
-            duration_run = duration # years remaining on privilege
+            duration_run = .data$duration # years remaining on privilege
         )
     
     # 3. Calculate running duration for subsequent years
     for (i in 2:length(yrs)) {
         lic_history[[i]] <- sale_ranked %>%
-            filter(year == yrs[i]) %>%
+            filter(.data$year == yrs[i]) %>%
+            
             # a. join current year (i) to previous year (i-1) to get lag_duration_run
-            full_join(select(lic_history[[i-1]], cust_id, lag_duration_run = duration_run),  
-                      by = "cust_id"
+            full_join(
+                select(lic_history[[i-1]], .data$cust_id, lag_duration_run = .data$duration_run), 
+                by = "cust_id"
             ) %>%
+            
             # b. create current year variables
+            # TODO - maybe create a separate function for this
             mutate(
                 year = yrs[i],
-                bought = ifelse(!is.na(duration), TRUE, FALSE),
+                bought = ifelse(!is.na(.data$duration), TRUE, FALSE),
                 
-                # make variable (duration_run), coding depends on "bought" condition
                 duration_run = ifelse(
-                    # if (bought in current year) we use current year's value
-                    # UNLESS it's smaller than the running duration (lag_duration_run - 1)
-                    # - this avoids the situation where (for example) a 1-year priv would replace
-                    # - a multi-year (or lifetime) license
-                    # - (i.e., it always favors the license with the longest remaining duration)
-                    bought, pmax(duration, lag_duration_run - 1, na.rm = TRUE),
+                    # duration_run coding depends on "bought" condition
+                    # - if (bought in current year) we use current year's value
+                    # - UNLESS it's smaller than the running duration (lag_duration_run - 1)
+                    #   + this avoids the situation where (for example) a 1-year priv would replace
+                    #   + a multi-year (or lifetime) license
+                    #   + (i.e., it always favors the license with the longest remaining duration)
+                    .data$bought, pmax(.data$duration, .data$lag_duration_run - 1, na.rm = TRUE),
                     
                     # otherwise we use the running duration
-                    lag_duration_run - 1)
+                    .data$lag_duration_run - 1
+                )
             ) %>%
             # c. drop rows that don't represent current year privileges
-            filter(duration_run >= 1)
+            filter(.data$duration_run >= 1)
     }
     
     # 4. carry over variables that need to be populated for multi-year & lifetime (e.g., res)
@@ -181,10 +183,12 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
             for (i in 2:length(yrs)) {
                 missing_vars <- lic_history[[i]] %>%
                     filter(is.na(.data[[var]])) %>%
-                    left_join(select(lic_history[[i-1]], cust_id, lastvar = .data[[var]]), 
-                              by = "cust_id") %>%
-                    mutate(!!var := lastvar) %>%
-                    select(-lastvar)
+                    left_join(
+                        select(lic_history[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
+                        by = "cust_id"
+                    ) %>%
+                    mutate(!!var := .data$lastvar) %>%
+                    select(-.data$lastvar)
                 lic_history[[i]] <- lic_history[[i]] %>%
                     filter(!is.na(.data[[var]])) %>%
                     bind_rows(missing_vars)

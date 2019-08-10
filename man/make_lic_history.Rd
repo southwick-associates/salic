@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{make_lic_history}
 \alias{make_lic_history}
-\title{Make a License History Table}
+\title{Make a License History table with 1 row per customer per year}
 \usage{
 make_lic_history(sale_ranked, yrs, carry_vars = NULL)
 }
@@ -16,13 +16,9 @@ to create license history}
 (for multi-year and lifetime licenses).}
 }
 \description{
-Output table is stored in a data frame with 1 row per customer-year
-}
-\details{
-The input data frame (sale) must have at least 3 columns
+The input data frame (sale_ranked) must have at least 3 columns
 (cust_id, year, duration) and should only have 1 record per customer per year
-(which can be insured by running \code{\link{rank_sale}}).
-
+(ensured by running \code{\link{rank_sale}} beforehand).
 Each data frame in the output data frame has at least 6 columns:
 \itemize{
 \item \emph{cust_id}: Customer ID

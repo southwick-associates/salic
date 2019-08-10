@@ -1,7 +1,7 @@
 context("License History Functions")
 library(salic)
 library(dplyr)
-data(sale, lic)
+data(sale, lic, history)
 
 test_that("rank_sale() produces expected result", {
     # compare function output to a simple dplyr pipeline
@@ -38,5 +38,15 @@ test_that("join_first_month() produces expected result", {
         slice(1L) %>%
         ungroup() %>%
         select(cust_id, year, month)
+    expect_equal(x, y)
+})
+
+test_that("make_lic_history() produces expected result", {
+    sale_unranked <- left_join(sale, lic)
+    x <- rank_sale(sale_unranked) %>%
+        join_first_month(sale_unranked) %>%
+        make_lic_history(2008:2019, carry_vars = c("month", "res")) %>%
+        select(cust_id, year, month, res)
+    y <- select(history, cust_id, year, month, res)
     expect_equal(x, y)
 })
