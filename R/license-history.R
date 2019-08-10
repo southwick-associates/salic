@@ -101,10 +101,10 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' \item \emph{duration}: Bought a license this year? (>=1: yes, ==0: no),
 #' where duration = 1 refers to annual or short-term, 2 to 2 yr, 3 to 3 yr, ...,
 #' duration = 99 is used to indicate lifetime licenses
-#' \item \emph{duration_run}: Running duration, which is necessary for multi-year
+#' \item \emph{duration_run}: Running duration, necessary for tracking multi-year
 #' and lifetime licenses
 #' \item \emph{lag_duration_run}: Previous year duration_run. A temporary value
-#' used in coding and for downstream checking
+#' used in downstream calulations & checks
 #' \item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
 #' indicates a license carried over from a previous year
 #' }
@@ -203,8 +203,9 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' Identify R3 group each year
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} and 
-#' codes R3: 1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited, 
+#' make the categorical variable R3 (1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited), 
 #' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
+#' 
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
 #' @import dplyr
@@ -229,37 +230,25 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
 identify_R3 <- function(lic_history, yrs) {
+    # setup - last year bought (to calcuate "yrs_since" for identifying recruits)
     lic_history %>%
-        arrange(cust_id, year) %>% # for correct lag ordering
-        # grouping is to insure lagged calculations are customer-specific
-        # (done in a separate step so the R3 coding below runs much faster)
-        group_by(cust_id) %>%
-        mutate(lag_year = lag(year)) %>%
+        arrange(.data$cust_id, .data$year) %>% # for correct lag ordering below
+        group_by(.data$cust_id) %>% # to ensure lagged calculations are customer-specific
+        mutate(lag_year = lag(.data$year)) %>%
         ungroup() %>%
-        mutate(
-            # make recruit designators to simplify R3 logic below
-            # "new" haven't bought before, and "old" haven't bought in 5 years
-            yrs_since = year - lag_year,
-            new_recruit = ifelse(is.na(yrs_since), TRUE, FALSE),
-            old_recruit = ifelse(yrs_since > 5 & !is.na(yrs_since), TRUE, FALSE),
-            
-            # CARRY (1): still have time left on their previous purchase
-            R3 = ifelse(lag_duration_run > 1 & !is.na(lag_duration_run), 1L,
-                        
-            # RENEW (2): bought in current and had priv in previous year
-            ifelse(bought & lag_duration_run == 1 & !is.na(lag_duration_run), 2L,
-           
-            # RECRUIT (4): coded before reactivate so that logic is simpler
-            ifelse(new_recruit | old_recruit, 4L, 
-          
-            # REACTIVATE (3): bought this year bought not in previous
-            3L))),
-
-            # set to NA for first 5 years
-            R3 = ifelse(year > yrs[5], R3, NA)
-            
-        ) %>%
-        select(-new_recruit, -old_recruit, -lag_year)
+    
+    # calculate R3
+    mutate(
+        yrs_since = .data$year - .data$lag_year,
+        R3 = case_when(
+            .data$lag_duration_run > 1 ~ 1L, # carried
+            .data$lag_duration_run == 1 ~ 2L, # renewed
+            is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
+            TRUE ~ 3L # otherwise reactivated
+        ),
+        R3 = ifelse(.data$year > yrs[5], .data$R3, NA) # 1st 5 yrs shouldn't be identified
+    ) %>%
+    select(-.data$lag_year)
 }
 
 #' Identify lapse group each year

@@ -3,6 +3,9 @@ library(salic)
 library(dplyr)
 data(sale, lic, history)
 
+# these are mostly based on previous calculations (sample data)
+# basically to allow refactoring of code with more assurance that nothing gets broken
+
 test_that("rank_sale() produces expected result", {
     # compare function output to a simple dplyr pipeline
     sale <- left_join(sale, lic, by = "lic_id")
@@ -48,5 +51,16 @@ test_that("make_lic_history() produces expected result", {
         make_lic_history(2008:2019, carry_vars = c("month", "res")) %>%
         select(cust_id, year, month, res)
     y <- select(history, cust_id, year, month, res)
+    expect_equal(x, y)
+})
+
+test_that("identify_R3() produces expected result", {
+    sale_unranked <- left_join(sale, lic)
+    x <- rank_sale(sale_unranked) %>%
+        join_first_month(sale_unranked) %>%
+        make_lic_history(2008:2019, carry_vars = c("month", "res")) %>%
+        identify_R3(2008:2019) %>%
+        select(cust_id, year, R3)
+    y <- select(history, cust_id, year, R3)
     expect_equal(x, y)
 })

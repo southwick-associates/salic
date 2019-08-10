@@ -26,10 +26,10 @@ Each data frame in the output data frame has at least 6 columns:
 \item \emph{duration}: Bought a license this year? (>=1: yes, ==0: no),
 where duration = 1 refers to annual or short-term, 2 to 2 yr, 3 to 3 yr, ...,
 duration = 99 is used to indicate lifetime licenses
-\item \emph{duration_run}: Running duration, which is necessary for multi-year
+\item \emph{duration_run}: Running duration, necessary for tracking multi-year
 and lifetime licenses
 \item \emph{lag_duration_run}: Previous year duration_run. A temporary value
-used in coding and for downstream checking
+used in downstream calulations & checks
 \item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
 indicates a license carried over from a previous year
 }
