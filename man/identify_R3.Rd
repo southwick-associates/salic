@@ -4,7 +4,8 @@
 \alias{identify_R3}
 \title{Identify R3 group each year}
 \usage{
-identify_R3(lic_history, yrs, summary = FALSE, check_vars = FALSE)
+identify_R3(lic_history, yrs, show_summary = FALSE,
+  show_check_vars = FALSE)
 }
 \arguments{
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
@@ -12,15 +13,15 @@ identify_R3(lic_history, yrs, summary = FALSE, check_vars = FALSE)
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
 
-\item{summary}{logical: if TRUE, include a textual summary for checking (by running 
+\item{show_summary}{logical: if TRUE, include a tabular summary for checking (by running 
 \code{\link{check_identify_R3}})}
 
-\item{check_vars}{logical: if TRUE, include output variables used in summary 
+\item{show_check_vars}{logical: if TRUE, include output variables used in summary 
 (lag_duration_run, yrs_since)}
 }
 \description{
-This is intended to be called following \code{\link{make_lic_history}} and 
-make the categorical variable R3 (1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited), 
+Intended to be called following \code{\link{make_lic_history}}, creates the
+categorical variable, R3 (1=carried, 2=renewed, 3=reactivated, 4=recruited), 
 where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 }
 \examples{
@@ -29,7 +30,7 @@ data(history)
 
 x <- history \%>\%
     select(-R3) \%>\%
-    identify_R3(2008:2019, summary = TRUE)
+    identify_R3(2008:2019, show_summary = TRUE)
 
 # calculate recruitment rate
 group_by(x, year, R3) \%>\% 

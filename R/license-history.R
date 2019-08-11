@@ -201,15 +201,15 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 
 #' Identify R3 group each year
 #'
-#' This is intended to be called following \code{\link{make_lic_history}} and 
-#' make the categorical variable R3 (1 = carried, 2 = renewed, 3 = reactivated, 4 = recruited), 
+#' Intended to be called following \code{\link{make_lic_history}}, creates the
+#' categorical variable, R3 (1=carried, 2=renewed, 3=reactivated, 4=recruited), 
 #' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 #' 
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
-#' @param summary logical: if TRUE, include a textual summary for checking (by running 
+#' @param show_summary logical: if TRUE, include a tabular summary for checking (by running 
 #' \code{\link{check_identify_R3}})
-#' @param check_vars logical: if TRUE, include output variables used in summary 
+#' @param show_check_vars logical: if TRUE, include output variables used in summary 
 #' (lag_duration_run, yrs_since)
 #' @import dplyr
 #' @family license history functions
@@ -220,18 +220,18 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' 
 #' x <- history %>%
 #'     select(-R3) %>%
-#'     identify_R3(2008:2019, summary = TRUE)
+#'     identify_R3(2008:2019, show_summary = TRUE)
 #' 
 #' # calculate recruitment rate
 #' group_by(x, year, R3) %>% 
 #'     summarise(n = n()) %>% 
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
-identify_R3 <- function(lic_history, yrs, summary = FALSE, check_vars = FALSE) {
+identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
     # setup - last year held (to calcuate "yrs_since" for identifying recruits)
-    out <- lic_history %>%
-        arrange(.data$cust_id, .data$year) %>% # for correct lag ordering below
-        group_by(.data$cust_id) %>% # to ensure lagged calculations are customer-specific
+    lic_history <- lic_history %>%
+        arrange(.data$cust_id, .data$year) %>%
+        group_by(.data$cust_id) %>%
         mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
         ungroup() %>%
     
@@ -247,9 +247,15 @@ identify_R3 <- function(lic_history, yrs, summary = FALSE, check_vars = FALSE) {
         # 1st 5 yrs shouldn't be identified
         R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
     )
-    if (summary) check_identify_R3(out, yrs) %>% data.frame() %>% print()
-    if (!check_vars) out <- select(out, -.data$lag_duration_run, -.data$yrs_since)
-    select(out, -.data$lag_year)
+    # wrap up
+    if (show_summary) {
+        check_identify_R3(lic_history, yrs) %>% data.frame() %>% print()
+    }
+    if (show_check_vars) {
+        select(lic_history, -.data$lag_year)
+    } else {
+        select(lic_history, -.data$lag_year, -.data$lag_duration_run, -.data$yrs_since)
+    }
 }
 
 #' Identify lapse group each year
@@ -325,6 +331,7 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 }
 
 ### START HERE - simply & specify it's use as an internal function ###
+# TODO: probably drop warnings/errors & reomve tidyr dependency
 
 #' Check the output of \code{\link{identify_R3}}
 #'
@@ -338,7 +345,7 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' data(history)
 #' 
 #' select(history, -R3) %>%
-#'     identify_R3(2008:2019, check_vars = TRUE) %>%
+#'     identify_R3(2008:2019, show_check_vars = TRUE) %>%
 #'     check_identify_R3(2008:2019) %>%
 #'     data.frame()
 check_identify_R3 <- function(lic_history, yrs) {

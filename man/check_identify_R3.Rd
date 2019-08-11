@@ -20,7 +20,7 @@ library(dplyr)
 data(history)
 
 select(history, -R3) \%>\%
-    identify_R3(2008:2019, check_vars = TRUE) \%>\%
+    identify_R3(2008:2019, show_check_vars = TRUE) \%>\%
     check_identify_R3(2008:2019) \%>\%
     data.frame()
 }
