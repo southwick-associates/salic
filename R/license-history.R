@@ -209,7 +209,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @inheritParams make_lic_history
 #' @param summary logical: if TRUE, include a textual summary for checking (by running 
 #' \code{\link{check_identify_R3}})
-#' @param check_vars logical: if TRUE, output variables used in summary 
+#' @param check_vars logical: if TRUE, include output variables used in summary 
 #' (lag_duration_run, yrs_since)
 #' @import dplyr
 #' @family license history functions
@@ -324,6 +324,8 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
         select(-.data$n)
 }
 
+### START HERE - simply & specify it's use as an internal function ###
+
 #' Check the output of \code{\link{identify_R3}}
 #'
 #' A test to insure R3 was correctly coded
@@ -332,8 +334,13 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' @family license history functions
 #' @export
 #' @examples
-#' # See analysis function example:
-#' ?identify_R3
+#' library(dplyr)
+#' data(history)
+#' 
+#' select(history, -R3) %>%
+#'     identify_R3(2008:2019, check_vars = TRUE) %>%
+#'     check_identify_R3(2008:2019) %>%
+#'     data.frame()
 check_identify_R3 <- function(lic_history, yrs) {
     if (!"R3" %in% colnames(lic_history)) {
         warning("No R3 variable in lic_history", call. = FALSE)

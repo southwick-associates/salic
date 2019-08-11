@@ -15,7 +15,7 @@ to create license history}
 \item{summary}{logical: if TRUE, include a textual summary for checking (by running 
 \code{\link{check_identify_R3}})}
 
-\item{check_vars}{logical: if TRUE, output variables used in summary 
+\item{check_vars}{logical: if TRUE, include output variables used in summary 
 (lag_duration_run, yrs_since)}
 }
 \description{
