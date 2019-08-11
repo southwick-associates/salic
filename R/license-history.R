@@ -230,7 +230,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
 identify_R3 <- function(lic_history, yrs) {
-    # setup - last year bought (to calcuate "yrs_since" for identifying recruits)
+    # setup - last year held (to calcuate "yrs_since" for identifying recruits)
     lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lag ordering below
         group_by(.data$cust_id) %>% # to ensure lagged calculations are customer-specific
@@ -246,7 +246,8 @@ identify_R3 <- function(lic_history, yrs) {
             is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
             TRUE ~ 3L # otherwise reactivated
         ),
-        R3 = ifelse(.data$year > yrs[5], .data$R3, NA) # 1st 5 yrs shouldn't be identified
+        # 1st 5 yrs shouldn't be identified
+        R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
     ) %>%
     select(-.data$lag_year)
 }
@@ -279,18 +280,21 @@ identify_R3 <- function(lic_history, yrs) {
 #'     summarise(mean(lapse)) %>%
 #'     mutate(year = year + 1)
 identify_lapse <- function(lic_history, yrs) {
+    # setup - next year held to easily identify lapse
     lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
         group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
-        mutate(lead_year = lead(.data$year) ) %>%
+        mutate(lead_year = lead(.data$year)) %>%
         ungroup() %>%
-        
-        # TODO - use case_when() for this instead
+
+        # calculate lapse
         mutate(
-            # if didn't buy next year: lapsed, otherwise: renewed
-            lapse = ifelse(lead_year == (year + 1) & !is.na(lead_year), 0L, 1L),
-            # set to NA for final year (or any following)
-            lapse = ifelse(year >= max(yrs), NA, lapse)
+            lapse = case_when(
+                .data$lead_year == (.data$year + 1) ~ 0L, # renewed
+                TRUE ~ 1L # lapsed
+            ),
+            # ensure NA in final year
+            lapse = ifelse(.data$year >= max(yrs), NA, .data$lapse) 
         )
 }
 

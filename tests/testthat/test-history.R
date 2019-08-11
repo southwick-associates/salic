@@ -63,7 +63,10 @@ test_that("identify_R3() produces expected result", {
     expect_equal(x, y)
 })
 
-### START HERE ###
 test_that("identify_lapse() produces expected result", {
-    
+    x <- history_calc %>%
+        identify_lapse(2008:2018) %>%
+        select(cust_id, year, lapse)
+    y <- select(history, cust_id, year, lapse)
+    expect_equal(x, y)
 })
