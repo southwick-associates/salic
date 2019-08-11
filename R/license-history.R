@@ -126,7 +126,7 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' 
 #' # check a sample of several customers
 #' check_history_samp(history)
-make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
+make_lic_history_old <- function(sale_ranked, yrs, carry_vars = NULL) {
     
     # 1. initialize a list to store tracking table
     # looping over a list is (seemingly) simpler than iterating over data frame rows
@@ -199,10 +199,15 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     bind_rows(lic_history)[c("cust_id", "year", "duration_run", carry_vars)]
 }
 
-make_lichist <- function(sale_ranked, yrs, carry_vars = NULL) {
+make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
         split(sale_ranked$year)
     
+    # TODO: 2 functions: carry_duration(), carry_vars()
+    # - probably both take and return a list
+    
+    # TODO - could even make a carry_duration() function, might be overkill
+    # but it would potentially make for a better documented workflow
     # populate multi-year running values by iterating over year
     for (i in 2L:length(yrs)) {
         # carry forward previous year
@@ -218,7 +223,7 @@ make_lichist <- function(sale_ranked, yrs, carry_vars = NULL) {
                 year = yrs[i]
             )
     }
-    # TODO -  make a helper function fill_missings(), or something
+    # TODO -  make a helper function carry_vars()
     # this code is difficult to grok, so need a change it one way or the other
     # making a function out of it should be an improvement
     if (!is.null(carry_vars)) {
