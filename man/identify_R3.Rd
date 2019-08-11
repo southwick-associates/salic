@@ -13,11 +13,10 @@ identify_R3(lic_history, yrs, show_summary = FALSE,
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
 
-\item{show_summary}{logical: if TRUE, include a tabular summary for checking (by running 
-\code{\link{check_identify_R3}})}
+\item{show_summary}{logical: if TRUE, print a tabular summary that shows R3 category
+by the number of years since a license was held.}
 
-\item{show_check_vars}{logical: if TRUE, include output variables used in summary 
-(lag_duration_run, yrs_since)}
+\item{show_check_vars}{logical: if TRUE, include output variables used in summary}
 }
 \description{
 Intended to be called following \code{\link{make_lic_history}}, creates the
@@ -32,7 +31,7 @@ x <- history \%>\%
     select(-R3) \%>\%
     identify_R3(2008:2019, show_summary = TRUE)
 
-# calculate recruitment rate
+# calculate \% of license holders who are recruits
 group_by(x, year, R3) \%>\% 
     summarise(n = n()) \%>\% 
     mutate(pct = n / sum(n)) \%>\%

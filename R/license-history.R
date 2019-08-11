@@ -207,10 +207,9 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' 
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
-#' @param show_summary logical: if TRUE, include a tabular summary for checking (by running 
-#' \code{\link{check_identify_R3}})
-#' @param show_check_vars logical: if TRUE, include output variables used in summary 
-#' (lag_duration_run, yrs_since)
+#' @param show_summary logical: if TRUE, print a tabular summary that shows R3 category
+#' by the number of years since a license was held.
+#' @param show_check_vars logical: if TRUE, include output variables used in summary
 #' @import dplyr
 #' @family license history functions
 #' @export
@@ -222,7 +221,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     select(-R3) %>%
 #'     identify_R3(2008:2019, show_summary = TRUE)
 #' 
-#' # calculate recruitment rate
+#' # calculate % of license holders who are recruits
 #' group_by(x, year, R3) %>% 
 #'     summarise(n = n()) %>% 
 #'     mutate(pct = n / sum(n)) %>%
@@ -264,6 +263,8 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' and codes lapse (0 = renews next year, 1 = lapses next year).
 #' 
 #' @inheritParams identify_R3
+#' @param show_summary logical: if TRUE, include a tabular summary that shows lapse 
+#' identification based on how many years until the next license is held.
 #' @import dplyr
 #' @family license history functions
 #' @export
@@ -271,15 +272,18 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' library(dplyr)
 #' data(history)
 #' 
-#' yrs <- 2008:2019
+#' history_yrs <- 2008:2019
+#' lapse_yrs <- 2008:2018 # must exclude incomplete 2019
+#' 
 #' x <- history %>%
 #'     select(-lapse) %>%
-#'     # 2019 is incomplete (1st 6 months only) & must be excluded from the function call
-#'     identify_lapse(yrs[-length(yrs)])
+#'     identify_lapse(lapse_yrs, show_summary = TRUE) 
 #' 
-#' # calculate churn rate
+#' # calculate annual churn rate
 #' group_by(x, year) %>% 
 #'     summarise(mean(lapse)) %>%
+#'     # Note: this year's churn is based on lapse summary from the previous year
+#'     # since the lapse variable identifies whether a customer lapses next year
 #'     mutate(year = year + 1)
 identify_lapse <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
     # setup - next year a license is held (to easily identify lapse)
@@ -322,7 +326,6 @@ identify_lapse <- function(lic_history, yrs, show_summary = FALSE, show_check_va
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
-#' @keywords internal
 #' @export
 #' @examples
 #' data(history)
@@ -368,32 +371,41 @@ check_identify_R3 <- function(lic_history, yrs) {
         data.frame()
 }
 
+# TODO: update docs like check_identify_R3
 
-#' Check the output of \code{\link{identify_lapse}}
+#' Internal Function: Check lapse identification
 #'
-#' A test to insure lapse was correctly coded
+#' Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
+#' Produces a count summary of customers by lapse and lead_year.
+#' 
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
+#' @keywords internal
 #' @export
 #' @examples
-#' # See analysis function example:
-#' ?identify_lapse
+#' library(dplyr)
+#' data(history)
+#' 
+#' select(history, -lapse) %>%
+#'     filter(year %in% 2008:2018) %>%
+#'     identify_lapse(2008:2018, show_check_vars = TRUE) %>%
+#'     check_identify_lapse()
 check_identify_lapse <- function(lic_history) {
-    # error - don't run if tidyr isn't installed
-    if (!requireNamespace("tidyr", quietly = TRUE)) {
-        stop("tidyr needed for this function to work. Please install it.",
-             call. = FALSE)
+    if (!"lead_year" %in% names(lic_history)) {
+        warning("lead_year variable needed for check_identify_lapse ",
+                "(see ?identify_lapse", call. = FALSE)
+        return(invisible())
     }
-    lic_history %>%
-        mutate(
-            yrs_till_next = ifelse(is.na(lead_year), "Never",  
-                                   ifelse(lead_year - year == 1, "1", ">1"))
-        ) %>%
-        count(lapse, year, yrs_till_next) %>%
-        tidyr::spread(year, n)
-}
-
-check_identify_lapse2 <- function(lic_history) {
-    
+    lapse_summary <- lic_history %>%
+        mutate(yrs_till_next = case_when(
+            is.na(.data$lapse) ~ "C. Next time held: unknown",
+            .data$lead_year - .data$year == 1 ~ "A. Next time held: 1yr (i.e., renewed)",
+            TRUE ~ "B. Next time held: >1yr/never (i.e., lapsed)"
+        )) %>%
+        count(.data$lapse, .data$year, .data$yrs_till_next) %>%
+        data.frame()
+    lapse_summary %>%
+        select(-.data$yrs_till_next) %>%
+        split(lapse_summary$yrs_till_next)
 }

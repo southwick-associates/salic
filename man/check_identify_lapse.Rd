@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{check_identify_lapse}
 \alias{check_identify_lapse}
-\title{Check the output of \code{\link{identify_lapse}}}
+\title{Internal Function: Check lapse identification}
 \usage{
 check_identify_lapse(lic_history)
 }
@@ -10,11 +10,17 @@ check_identify_lapse(lic_history)
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
 }
 \description{
-A test to insure lapse was correctly coded
+Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
+Produces a count summary of customers by lapse and lead_year.
 }
 \examples{
-# See analysis function example:
-?identify_lapse
+library(dplyr)
+data(history)
+
+select(history, -lapse) \%>\%
+    filter(year \%in\% 2008:2018) \%>\%
+    identify_lapse(2008:2018, show_check_vars = TRUE) \%>\%
+    check_identify_lapse()
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},
@@ -24,3 +30,4 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}
+\keyword{internal}

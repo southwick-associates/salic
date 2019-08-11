@@ -19,6 +19,5 @@ Suggests:
     knitr,
     lubridate (>= 1.7.4),
     rmarkdown,
-    testthat,
-    tidyr (>= 0.8.1)
+    testthat
 VignetteBuilder: knitr
