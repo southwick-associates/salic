@@ -17,11 +17,11 @@ check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 }
 \description{
 Look at a sample of customers from license history table to check the 
-year over year dynamics
+year over year dynamics.
 }
 \examples{
-# See analysis function example:
-?make_lic_history
+data(history)
+check_history_samp(history, n_samp = 5)
 }
 \seealso{
 Other license history functions: \code{\link{check_identify_R3}},
@@ -31,3 +31,4 @@ Other license history functions: \code{\link{check_identify_R3}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}
+\keyword{internal}

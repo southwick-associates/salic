@@ -308,8 +308,8 @@ identify_lapse <- function(lic_history, yrs) {
 
 #' Sample the output of \code{\link{make_lic_history}}
 #'
-#' Look at a sample of customers from license history table to check the 
-#' year over year dynamics
+#' View a sample of customers from license history table to check the 
+#' year over year dynamics (outputs a list split by customer ID).
 #' 
 #' @param n_samp numeric: number of customers to view
 #' @param buy_min numeric: minimum number of license purchases for customers to include
@@ -317,17 +317,20 @@ identify_lapse <- function(lic_history, yrs) {
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
+#' @keywords internal
 #' @export
 #' @examples
-#' # See analysis function example:
-#' ?make_lic_history
+#' data(history)
+#' check_history_samp(history, n_samp = 5)
 check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
-    lic_history %>%
+    samp <- lic_history %>%
         count(.data$cust_id) %>%
         filter(.data$n >= buy_min, .data$n <= buy_max) %>%
         sample_n(n_samp) %>%
         left_join(lic_history, by = "cust_id") %>%
-        select(-.data$n)
+        select(-.data$n) %>%
+        data.frame()
+    split(samp, samp$cust_id)
 }
 
 #' Internal Function: Check R3 Identification

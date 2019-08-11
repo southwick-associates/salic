@@ -20,8 +20,8 @@ Functions are (almost) completely backward compatible with previous 1.x versions
 
 - (maybe) certain variables have been dropped from the output of license history funtions. The only purpose of these variables was for use in downstream checks; their calculation now is part of the relevant checking functions:
     + make_lic_history() >> drops ...
-    + identify_R3()
-    + identify_lapse()
+    + check_identify_R3() will no longer work in old workflows (but will produce a warning rather than error to allow code to run)
+    + identify_lapse() (same as check_identify_R3)
 - salic no longer includes functionality to setup new projects with template code. Corresponding functions (and template code) have been moved to saproj:
     + new_dashboard()
     + update_dashboard()
