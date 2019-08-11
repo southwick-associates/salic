@@ -27,7 +27,7 @@ data_foreign_key(sale, cust, "cust_id")
 }
 \seealso{
 Other functions to check data format: \code{\link{data_check_table}},
-  \code{\link{data_check}}, \code{\link{data_primary_key}},
+  \code{\link{data_check}}, \code{\link{data_internal}},
   \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}

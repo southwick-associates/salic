@@ -39,12 +39,8 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 \description{
 Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 Table-specific versions are convenience functions that call data_check_table() 
-with appropriate defaults.
-\itemize{
-  \item \code{\link{data_primary_key}}: checks that primary keys are unique and non-missing
-  \item \code{\link{data_required_vars}}: checks that all required variables are present
-  \item \code{\link{data_allowed_values}}: checks that variables only contain allowed values
-}
+with appropriate defaults. Note that data_check_table() is itself a wrapper for several
+internal functions (see \code{\link{data_internal}}).
 }
 \examples{
 library(dplyr)
@@ -67,7 +63,7 @@ data_check_sale(sale)
 \seealso{
 Other functions to check data format: \code{\link{data_check}},
   \code{\link{data_foreign_key}},
-  \code{\link{data_primary_key}},
+  \code{\link{data_internal}},
   \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}

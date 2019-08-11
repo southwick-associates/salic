@@ -5,12 +5,13 @@
 #' Internal Functions: Individual Data Checks
 #' 
 #' These single check functions are intended to be called from \code{\link{data_check_table}}. 
-#' Each prints a warning message on a failed check.
+#' Each prints a warning message on a failed check. Note that data_allowed_values()
+#' is a wrapper for \code{\link{variable_allowed_values}}.
 #' 
 #' @inheritParams data_check_table
 #' @family functions to check data format
 #' @keywords internal
-#' @export
+#' @name data_internal
 #' @examples
 #' library(dplyr)
 #' data(lic)
@@ -30,6 +31,10 @@
 #' # includes values that aren't allowed
 #' allowed_values <- list(type = c("hunt", "fish"), duration = 1)
 #' data_allowed_values(lic, "lic", allowed_values)
+NULL
+
+#' @rdname data_internal
+#' @export
 data_primary_key <- function(df, df_name, primary_key) {
     if (is.na(primary_key) || is.null(primary_key)) {
         return(invisible())
@@ -49,7 +54,7 @@ data_primary_key <- function(df, df_name, primary_key) {
     if (any(is.na(df[[primary_key]]))) warning(msg, call. = FALSE)
 }
 
-#' @rdname data_primary_key
+#' @rdname data_internal
 #' @export
 data_required_vars <- function(df, df_name, required_vars) {
     not_included <- dplyr::setdiff(required_vars, colnames(df))
@@ -60,7 +65,7 @@ data_required_vars <- function(df, df_name, required_vars) {
     if (length(not_included) > 0) warning(msg, call. = FALSE)
 }
 
-#' @rdname data_primary_key
+#' @rdname data_internal
 #' @export
 data_allowed_values <- function(df, df_name, allowed_values) {
     vars <- names(allowed_values)
@@ -131,12 +136,8 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' 
 #' Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 #' Table-specific versions are convenience functions that call data_check_table() 
-#' with appropriate defaults.
-#' \itemize{
-#'   \item \code{\link{data_primary_key}}: checks that primary keys are unique and non-missing
-#'   \item \code{\link{data_required_vars}}: checks that all required variables are present
-#'   \item \code{\link{data_allowed_values}}: checks that variables only contain allowed values
-#' }
+#' with appropriate defaults. Note that data_check_table() is itself a wrapper for several
+#' internal functions (see \code{\link{data_internal}}).
 #'  
 #' @param df data frame: table to check
 #' @param df_name character: name of relevant data table ("cust", "lic", or "sale")

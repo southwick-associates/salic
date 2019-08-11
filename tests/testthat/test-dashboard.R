@@ -1,10 +1,10 @@
 context("Calculating dashboard metrics")
 library(salic)
 library(dplyr)
+
 data(history)
 
 test_that("est_part() returns simple count", {
-    
     # overall
     x <- est_part(history, suppress_warning = TRUE, outvar = "var")
     y <- dplyr::count(history, year)
@@ -27,7 +27,6 @@ test_that("scaleup_part() output sum matches segment_total", {
 })
 
 test_that("est_churn returns simple mean", {
-
     # overall
     x <- est_churn(history, suppress_warning = TRUE, outvar = "var")
     y <- group_by(history, year) %>% 

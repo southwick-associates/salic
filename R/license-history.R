@@ -371,8 +371,6 @@ check_identify_R3 <- function(lic_history, yrs) {
         data.frame()
 }
 
-# TODO: update docs like check_identify_R3
-
 #' Internal Function: Check lapse identification
 #'
 #' Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
