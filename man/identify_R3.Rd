@@ -4,13 +4,19 @@
 \alias{identify_R3}
 \title{Identify R3 group each year}
 \usage{
-identify_R3(lic_history, yrs)
+identify_R3(lic_history, yrs, summary = FALSE, check_vars = FALSE)
 }
 \arguments{
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
 
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
+
+\item{summary}{logical: if TRUE, include a textual summary for checking (by running 
+\code{\link{check_identify_R3}})}
+
+\item{check_vars}{logical: if TRUE, output variables used in summary 
+(lag_duration_run, yrs_since)}
 }
 \description{
 This is intended to be called following \code{\link{make_lic_history}} and 
@@ -19,20 +25,15 @@ where "retained" consists of carried + renewed (hence R3: retain, reactivate, re
 }
 \examples{
 library(dplyr)
-data(lic, sale)
-sale_unranked <- left_join(sale, lic)
-sale <- rank_sale(sale_unranked) \%>\%
-    join_first_month(sale_unranked)
-    
-yrs <- 2008:2019
-history <- sale \%>\%
-    make_lic_history(yrs) \%>\%
-    identify_R3(yrs)
-check_identify_R3(history, yrs)
+data(history)
+
+x <- history \%>\%
+    select(-R3) \%>\%
+    identify_R3(2008:2019, summary = TRUE)
 
 # calculate recruitment rate
-group_by(history, year, R3) \%>\% 
-summarise(n = n()) \%>\% 
+group_by(x, year, R3) \%>\% 
+    summarise(n = n()) \%>\% 
     mutate(pct = n / sum(n)) \%>\%
     filter(R3 == 4, year != 2019)
 }

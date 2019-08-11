@@ -10,9 +10,11 @@ This release corresponded to making salic easily available for state agencies an
     + dashboard functions (est_part, etc.)
     + others...
     
-### Backwards Compatibility
+### Breaking Changes
 
-Functions are (almost) completely backward compatible with previous 1.x versions.
+Functions are (almost) completely backward compatible with previous 1.x versions. The exceptions occur with how some checking works in building license history (as a result of reducing output columns):
+- check_identify_R3() should now be called as part of identify_R3(summary = TRUE)
+- check_identify_lapse()
 
 #### A. Changes that Do Impact Function behavior
 
