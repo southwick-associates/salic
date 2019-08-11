@@ -228,28 +228,28 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
 identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
-    # setup - last year held (to calcuate "yrs_since" for identifying recruits)
+    # setup - last year held to calcuate "yrs_since" (for identifying recruits)
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>%
         group_by(.data$cust_id) %>%
         mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
         ungroup() %>%
     
-    # calculate R3
-    mutate(
-        yrs_since = .data$year - .data$lag_year,
-        R3 = case_when(
-            is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
-            .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
-            .data$yrs_since == 1 ~ 2L, # renewed
-            TRUE ~ 3L # otherwise reactivated
-        ),
-        # 1st 5 yrs shouldn't be identified
-        R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
-    )
+        # calculate
+        mutate(
+            yrs_since = .data$year - .data$lag_year,
+            R3 = case_when(
+                is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
+                .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
+                .data$yrs_since == 1 ~ 2L, # renewed
+                TRUE ~ 3L # otherwise reactivated
+            ),
+            # 1st 5 yrs shouldn't be identified
+            R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
+        )
     # wrap up
     if (show_summary) {
-        check_identify_R3(lic_history, yrs) %>% data.frame() %>% print()
+        check_identify_R3(lic_history, yrs) %>% print()
     }
     if (show_check_vars) {
         select(lic_history, -.data$lag_year)
@@ -261,7 +261,7 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' Identify lapse group each year
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} 
-#' and codes lapse: 0 = renews next year, 1 = lapses next year.
+#' and codes lapse (0 = renews next year, 1 = lapses next year).
 #' 
 #' @inheritParams identify_R3
 #' @import dplyr
@@ -269,25 +269,21 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale)
-#' sale_unranked <- left_join(sale, lic)
-#' sale <- rank_sale(sale_unranked) %>%
-#'     join_first_month(sale_unranked)
+#' data(history)
 #' 
 #' yrs <- 2008:2019
-#' history <- sale %>%
-#'     make_lic_history(yrs) %>%
-#'     # 2019 is incomplete (1st 6 months) & must be excluded from the function call
+#' x <- history %>%
+#'     select(-lapse) %>%
+#'     # 2019 is incomplete (1st 6 months only) & must be excluded from the function call
 #'     identify_lapse(yrs[-length(yrs)])
-#' check_identify_lapse(history)
 #' 
 #' # calculate churn rate
-#' group_by(history, year) %>% 
+#' group_by(x, year) %>% 
 #'     summarise(mean(lapse)) %>%
 #'     mutate(year = year + 1)
-identify_lapse <- function(lic_history, yrs) {
-    # setup - next year held to easily identify lapse
-    lic_history %>%
+identify_lapse <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
+    # setup - next year a license is held (to easily identify lapse)
+    lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
         group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
         mutate(lead_year = lead(.data$year)) %>%
@@ -302,6 +298,15 @@ identify_lapse <- function(lic_history, yrs) {
             # ensure NA in final year
             lapse = ifelse(.data$year >= max(yrs), NA, .data$lapse) 
         )
+    # wrap up
+    if (show_summary) {
+        check_identify_lapse(lic_history) %>% print()
+    }
+    if (show_check_vars) {
+        lic_history
+    } else {
+        select(lic_history, -.data$lead_year)
+    }
 }
 
 # Checking & Summarizing --------------------------------------------------
@@ -387,4 +392,8 @@ check_identify_lapse <- function(lic_history) {
         ) %>%
         count(lapse, year, yrs_till_next) %>%
         tidyr::spread(year, n)
+}
+
+check_identify_lapse2 <- function(lic_history) {
+    
 }

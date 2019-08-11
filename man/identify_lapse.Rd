@@ -4,34 +4,37 @@
 \alias{identify_lapse}
 \title{Identify lapse group each year}
 \usage{
-identify_lapse(lic_history, yrs)
+identify_lapse(lic_history, yrs, show_summary = FALSE,
+  show_check_vars = FALSE)
 }
 \arguments{
 \item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
 
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
+
+\item{show_summary}{logical: if TRUE, include a tabular summary for checking (by running 
+\code{\link{check_identify_R3}})}
+
+\item{show_check_vars}{logical: if TRUE, include output variables used in summary 
+(lag_duration_run, yrs_since)}
 }
 \description{
 This is intended to be called following \code{\link{make_lic_history}} 
-and codes lapse: 0 = renews next year, 1 = lapses next year.
+and codes lapse (0 = renews next year, 1 = lapses next year).
 }
 \examples{
 library(dplyr)
-data(lic, sale)
-sale_unranked <- left_join(sale, lic)
-sale <- rank_sale(sale_unranked) \%>\%
-    join_first_month(sale_unranked)
+data(history)
 
 yrs <- 2008:2019
-history <- sale \%>\%
-    make_lic_history(yrs) \%>\%
-    # 2019 is incomplete (1st 6 months) & must be excluded from the function call
-    identify_lapse(yrs[-length(yrs)])
-check_identify_lapse(history)
+x <- history \%>\%
+    select(-lapse) \%>\%
+    # 2019 is incomplete (1st 6 months only) & must be excluded from the function call
+    identify_lapse(yrs[-length(yrs)], show_summary = TRUE)
 
 # calculate churn rate
-group_by(history, year) \%>\% 
+group_by(x, year) \%>\% 
     summarise(mean(lapse)) \%>\%
     mutate(year = year + 1)
 }
