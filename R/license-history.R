@@ -330,15 +330,15 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
         select(-.data$n)
 }
 
-### START HERE - simply & specify it's use as an internal function ###
-# TODO: probably drop warnings/errors & reomve tidyr dependency
-
-#' Check the output of \code{\link{identify_R3}}
+#' Internal Function: Check R3 Identification
 #'
-#' A test to insure R3 was correctly coded
+#' Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).
+#' Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
+#' 
 #' @inheritParams identify_R3
 #' @import dplyr
 #' @family license history functions
+#' @keywords internal
 #' @export
 #' @examples
 #' library(dplyr)
@@ -346,34 +346,20 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' 
 #' select(history, -R3) %>%
 #'     identify_R3(2008:2019, show_check_vars = TRUE) %>%
-#'     check_identify_R3(2008:2019) %>%
-#'     data.frame()
+#'     check_identify_R3(2008:2019)
 check_identify_R3 <- function(lic_history, yrs) {
-    if (!"R3" %in% colnames(lic_history)) {
-        warning("No R3 variable in lic_history", call. = FALSE)
+    if (!"yrs_since" %in% names(lic_history)) {
+        warning("yrs_since variable needed for check_identify_R3 ",
+                "(see ?identify_R3", call. = FALSE)
         return(invisible())
     }
-    if (all(is.na(lic_history$R3))) {
-        warning("R3 is NA (missing) for all input records", call. = FALSE)
-        return(invisible())
-    }
-    
-    # error - don't run if tidyr isn't installed
-    if (!requireNamespace("tidyr", quietly = TRUE)) {
-        stop("tidyr needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if ("yrs_since" %in% names(lic_history)) {
-        lic_history %>%
-            filter(year > yrs[5]) %>%
-            mutate(
-                R3 = dplyr::recode(R3, `1` = "1-Carry", `2` = "2-Renew", 
-                                   `3` = "3-Reactivate", `4` = "4-Recruit")
-            ) %>%
-            count(R3, yrs_since, lag_duration_run) %>% 
-            tidyr::spread(R3, n)
-    }
+    lic_history %>%
+        filter(.data$year > yrs[5]) %>%
+        mutate(R3_label = factor_R3(.data$R3)) %>%
+        count(.data$R3, .data$R3_label, .data$yrs_since, .data$lag_duration_run) %>%
+        data.frame()
 }
+
 
 #' Check the output of \code{\link{identify_lapse}}
 #'

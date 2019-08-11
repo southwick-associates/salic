@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{check_identify_R3}
 \alias{check_identify_R3}
-\title{Check the output of \code{\link{identify_R3}}}
+\title{Internal Function: Check R3 Identification}
 \usage{
 check_identify_R3(lic_history, yrs)
 }
@@ -13,7 +13,8 @@ check_identify_R3(lic_history, yrs)
 to create license history}
 }
 \description{
-A test to insure R3 was correctly coded
+Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).
+Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
 }
 \examples{
 library(dplyr)
@@ -21,8 +22,7 @@ data(history)
 
 select(history, -R3) \%>\%
     identify_R3(2008:2019, show_check_vars = TRUE) \%>\%
-    check_identify_R3(2008:2019) \%>\%
-    data.frame()
+    check_identify_R3(2008:2019)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},
@@ -32,3 +32,4 @@ Other license history functions: \code{\link{check_history_samp}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}
+\keyword{internal}
