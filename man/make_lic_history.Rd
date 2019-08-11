@@ -16,17 +16,21 @@ to create license history}
 (for multi-year and lifetime licenses).}
 }
 \description{
-The input data frame (sale_ranked) must have at least 3 columns
-(cust_id, year, duration) and should only have 1 record per customer per year
-(ensured by running \code{\link{rank_sale}} beforehand).
+The license history table accounts for multi-year/lifetime licenses directly by including
+a row for every year a license is held. The input data frame (sale_ranked) must 
+have at least 3 columns (cust_id, year, duration) and should only have 1 record 
+per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
+}
+\details{
 The output data frame includes the following variables:
 \itemize{
 \item \emph{cust_id}
 \item \emph{year}
-\item \emph{duration_run}: Running duration, for tracking multi-year
-and lifetime licenses
-\item \emph{carry_vars}: One or more variables that should also be included
-(typically carry_vars = c("month", "res"))
+\item \emph{duration_run}: A duration variable that accounts for multi-year/lifetimes, 
+also used in downstream R3 calculations.
+\item \emph{carry_vars}: One or more optional variables to include, 
+based on the corresponding argument (typically carry_vars = c("month", "res")).
+For multi-year/lifetimes, carry_vars inherit values from the previous year.
 }
 }
 \examples{

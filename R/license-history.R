@@ -91,17 +91,20 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 
 #' Make a License History table with 1 row per customer per year
 #'
-#' The input data frame (sale_ranked) must have at least 3 columns
-#' (cust_id, year, duration) and should only have 1 record per customer per year
-#' (ensured by running \code{\link{rank_sale}} beforehand).
+#' The license history table accounts for multi-year/lifetime licenses directly by including
+#' a row for every year a license is held. The input data frame (sale_ranked) must 
+#' have at least 3 columns (cust_id, year, duration) and should only have 1 record 
+#' per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
+#' 
 #' The output data frame includes the following variables:
 #' \itemize{
 #' \item \emph{cust_id}
 #' \item \emph{year}
-#' \item \emph{duration_run}: Running duration, for tracking multi-year
-#' and lifetime licenses
-#' \item \emph{carry_vars}: One or more variables that should also be included
-#' (typically carry_vars = c("month", "res"))
+#' \item \emph{duration_run}: A duration variable that accounts for multi-year/lifetimes, 
+#' also used in downstream R3 calculations.
+#' \item \emph{carry_vars}: One or more optional variables to include, 
+#' based on the corresponding argument (typically carry_vars = c("month", "res")).
+#' For multi-year/lifetimes, carry_vars inherit values from the previous year.
 #' }
 #' 
 #' @param sale_ranked data frame: Sales table from which license history will be made
@@ -204,30 +207,29 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' 
 #' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
 #' @inheritParams make_lic_history
+#' @param summary logical: if TRUE, include a textual summary for checking (by running 
+#' \code{\link{check_identify_R3}})
+#' @param check_vars logical: if TRUE, output variables used in summary 
+#' (lag_duration_run, yrs_since)
 #' @import dplyr
 #' @family license history functions
 #' @export
 #' @examples
 #' library(dplyr)
-#' data(lic, sale)
-#' sale_unranked <- left_join(sale, lic)
-#' sale <- rank_sale(sale_unranked) %>%
-#'     join_first_month(sale_unranked)
-#'     
-#' yrs <- 2008:2019
-#' history <- sale %>%
-#'     make_lic_history(yrs) %>%
-#'     identify_R3(yrs)
-#' check_identify_R3(history, yrs)
+#' data(history)
+#' 
+#' x <- history %>%
+#'     select(-R3) %>%
+#'     identify_R3(2008:2019, summary = TRUE)
 #' 
 #' # calculate recruitment rate
-#' group_by(history, year, R3) %>% 
-#' summarise(n = n()) %>% 
+#' group_by(x, year, R3) %>% 
+#'     summarise(n = n()) %>% 
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
-identify_R3 <- function(lic_history, yrs) {
+identify_R3 <- function(lic_history, yrs, summary = FALSE, check_vars = FALSE) {
     # setup - last year held (to calcuate "yrs_since" for identifying recruits)
-    lic_history %>%
+    out <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lag ordering below
         group_by(.data$cust_id) %>% # to ensure lagged calculations are customer-specific
         mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
@@ -244,8 +246,10 @@ identify_R3 <- function(lic_history, yrs) {
         ),
         # 1st 5 yrs shouldn't be identified
         R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
-    ) # %>%
-    # select(-.data$lag_year)
+    )
+    if (summary) check_identify_R3(out, yrs) %>% data.frame() %>% print()
+    if (!check_vars) out <- select(out, -.data$lag_duration_run, -.data$yrs_since)
+    select(out, -.data$lag_year)
 }
 
 #' Identify lapse group each year
@@ -331,8 +335,14 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' # See analysis function example:
 #' ?identify_R3
 check_identify_R3 <- function(lic_history, yrs) {
-    # this function only produces an output if R3 has been identified
-    # (which it might not have been if there aren't at least 5 years of data)
+    if (!"R3" %in% colnames(lic_history)) {
+        warning("No R3 variable in lic_history", call. = FALSE)
+        return(invisible())
+    }
+    if (all(is.na(lic_history$R3))) {
+        warning("R3 is NA (missing) for all input records", call. = FALSE)
+        return(invisible())
+    }
     
     # error - don't run if tidyr isn't installed
     if (!requireNamespace("tidyr", quietly = TRUE)) {
