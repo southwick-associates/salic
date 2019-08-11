@@ -16,8 +16,13 @@ to create license history}
 A test to insure R3 was correctly coded
 }
 \examples{
-# See analysis function example:
-?identify_R3
+library(dplyr)
+data(history)
+
+select(history, -R3) \%>\%
+    identify_R3(2008:2019, check_vars = TRUE) \%>\%
+    check_identify_R3(2008:2019) \%>\%
+    data.frame()
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},
