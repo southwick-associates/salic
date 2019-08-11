@@ -199,6 +199,54 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     bind_rows(lic_history)[c("cust_id", "year", "duration_run", carry_vars)]
 }
 
+make_lichist <- function(sale_ranked, yrs, carry_vars = NULL) {
+    sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+        split(sale_ranked$year)
+    
+    # populate multi-year running values by iterating over year
+    for (i in 2L:length(yrs)) {
+        # carry forward previous year
+        sale_ranked[[i]] <- sale_ranked[[i-1]] %>%
+            filter(duration != 1) %>%
+            mutate(lag_duration = duration - 1) %>%
+            select(cust_id, lag_duration) %>%
+            
+            # join to current year & pick highest duration
+            full_join(sale_ranked[[i]], by = "cust_id") %>%
+            mutate(
+                duration = pmax(duration, lag_duration, na.rm = TRUE),
+                year = yrs[i]
+            )
+    }
+    # TODO -  make a helper function fill_missings(), or something
+    # this code is difficult to grok, so need a change it one way or the other
+    # making a function out of it should be an improvement
+    if (!is.null(carry_vars)) {
+        for (var in carry_vars) {
+            # get most recent value for missing var
+            for (i in 2:length(yrs)) {
+                missing_vars <- sale_ranked[[i]] %>%
+                    filter(is.na(.data[[var]])) %>%
+                    left_join(
+                        select(sale_ranked[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
+                        by = "cust_id"
+                    ) %>%
+                    mutate(!!var := .data$lastvar) %>%
+                    select(-.data$lastvar)
+                sale_ranked[[i]] <- sale_ranked[[i]] %>%
+                    filter(!is.na(.data[[var]])) %>%
+                    bind_rows(missing_vars)
+            }
+        }
+    }
+    # wrap up
+    sale_ranked %>%
+        bind_rows() %>%
+        rename(duration_run = duration) %>%
+        select(-lag_duration)
+}
+
+
 #' Identify R3 group each year
 #'
 #' Intended to be called following \code{\link{make_lic_history}}, creates the
