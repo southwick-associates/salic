@@ -19,19 +19,14 @@ to create license history}
 The input data frame (sale_ranked) must have at least 3 columns
 (cust_id, year, duration) and should only have 1 record per customer per year
 (ensured by running \code{\link{rank_sale}} beforehand).
-Each data frame in the output data frame has at least 6 columns:
+The output data frame includes the following variables:
 \itemize{
-\item \emph{cust_id}: Customer ID
-\item \emph{year}: Privilege year
-\item \emph{duration}: Bought a license this year? (>=1: yes, ==0: no),
-where duration = 1 refers to annual or short-term, 2 to 2 yr, 3 to 3 yr, ...,
-duration = 99 is used to indicate lifetime licenses
-\item \emph{duration_run}: Running duration, necessary for tracking multi-year
+\item \emph{cust_id}
+\item \emph{year}
+\item \emph{duration_run}: Running duration, for tracking multi-year
 and lifetime licenses
-\item \emph{lag_duration_run}: Previous year duration_run. A temporary value
-used in downstream calulations & checks
-\item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
-indicates a license carried over from a previous year
+\item \emph{carry_vars}: One or more variables that should also be included
+(typically carry_vars = c("month", "res"))
 }
 }
 \examples{
@@ -40,7 +35,8 @@ data(lic, sale)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
-history <- make_lic_history(sale_ranked, 2007:2018)
+history <- sale_ranked \%>\%
+    make_lic_history(2007:2018, carry_vars = c("month", "res"))
 
 # check a sample of several customers
 check_history_samp(history)

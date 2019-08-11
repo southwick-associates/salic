@@ -94,19 +94,14 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' The input data frame (sale_ranked) must have at least 3 columns
 #' (cust_id, year, duration) and should only have 1 record per customer per year
 #' (ensured by running \code{\link{rank_sale}} beforehand).
-#' Each data frame in the output data frame has at least 6 columns:
+#' The output data frame includes the following variables:
 #' \itemize{
-#' \item \emph{cust_id}: Customer ID
-#' \item \emph{year}: Privilege year
-#' \item \emph{duration}: Bought a license this year? (>=1: yes, ==0: no),
-#' where duration = 1 refers to annual or short-term, 2 to 2 yr, 3 to 3 yr, ...,
-#' duration = 99 is used to indicate lifetime licenses
-#' \item \emph{duration_run}: Running duration, necessary for tracking multi-year
+#' \item \emph{cust_id}
+#' \item \emph{year}
+#' \item \emph{duration_run}: Running duration, for tracking multi-year
 #' and lifetime licenses
-#' \item \emph{lag_duration_run}: Previous year duration_run. A temporary value
-#' used in downstream calulations & checks
-#' \item \emph{bought}: Bought a license this year? (TRUE, FALSE). If FALSE, that 
-#' indicates a license carried over from a previous year
+#' \item \emph{carry_vars}: One or more variables that should also be included
+#' (typically carry_vars = c("month", "res"))
 #' }
 #' 
 #' @param sale_ranked data frame: Sales table from which license history will be made
@@ -123,7 +118,8 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' sale_unranked <- left_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
-#' history <- make_lic_history(sale_ranked, 2007:2018)
+#' history <- sale_ranked %>%
+#'     make_lic_history(2007:2018, carry_vars = c("month", "res"))
 #' 
 #' # check a sample of several customers
 #' check_history_samp(history)
@@ -197,7 +193,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     }
     
     # 5. Combine into data frame
-    bind_rows(lic_history)
+    bind_rows(lic_history)[c("cust_id", "year", "duration_run", carry_vars)]
 }
 
 #' Identify R3 group each year
@@ -234,22 +230,22 @@ identify_R3 <- function(lic_history, yrs) {
     lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lag ordering below
         group_by(.data$cust_id) %>% # to ensure lagged calculations are customer-specific
-        mutate(lag_year = lag(.data$year)) %>%
+        mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
         ungroup() %>%
     
     # calculate R3
     mutate(
         yrs_since = .data$year - .data$lag_year,
         R3 = case_when(
-            .data$lag_duration_run > 1 ~ 1L, # carried
-            .data$lag_duration_run == 1 ~ 2L, # renewed
             is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
+            .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
+            .data$yrs_since == 1 ~ 2L, # renewed
             TRUE ~ 3L # otherwise reactivated
         ),
         # 1st 5 yrs shouldn't be identified
         R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
-    ) %>%
-    select(-.data$lag_year)
+    ) # %>%
+    # select(-.data$lag_year)
 }
 
 #' Identify lapse group each year
@@ -298,7 +294,6 @@ identify_lapse <- function(lic_history, yrs) {
         )
 }
 
-
 # Checking & Summarizing --------------------------------------------------
 
 #' Sample the output of \code{\link{make_lic_history}}
@@ -318,11 +313,11 @@ identify_lapse <- function(lic_history, yrs) {
 #' ?make_lic_history
 check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
     lic_history %>%
-        count(cust_id) %>%
-        filter(n >= buy_min, n <= buy_max) %>%
+        count(.data$cust_id) %>%
+        filter(.data$n >= buy_min, .data$n <= buy_max) %>%
         sample_n(n_samp) %>%
         left_join(lic_history, by = "cust_id") %>%
-        select(-n, -lag_duration_run)
+        select(-.data$n)
 }
 
 #' Check the output of \code{\link{identify_R3}}
