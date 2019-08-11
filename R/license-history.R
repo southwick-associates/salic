@@ -325,6 +325,7 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 }
 
 ### START HERE - simply & specify it's use as an internal function ###
+# TODO - probably reduce the warnings, see if you can break tidyr dependency
 
 #' Check the output of \code{\link{identify_R3}}
 #'
