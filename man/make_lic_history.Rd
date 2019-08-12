@@ -32,6 +32,8 @@ also used in downstream R3 calculations.
 based on the corresponding argument (typically carry_vars = c("month", "res")).
 For multi-year/lifetimes, carry_vars inherit values from the previous year.
 }
+Development Note: This function is largely a wrapper for \code{\link{carry_duration}} 
+and \code{\link{carry_variables}}
 }
 \examples{
 library(dplyr)
@@ -47,6 +49,7 @@ check_history_samp(history)
 }
 \seealso{
 Other license history functions: \code{\link{carry_duration}},
+  \code{\link{carry_variables}},
   \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},

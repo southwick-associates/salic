@@ -1,16 +1,16 @@
 # functions for preparing license data from states
 
+# TODO (version 2.1): Tidy up old code and remove global variable dependencies
+
 # certain functions reference global variables (e.g., named variables in data frames)
 # - these occur in a number of places in salic (mostly validation functions)
 # - R CMD check doesn't like this: declaring them in globalVariables() is needed
 # - https://github.com/r-lib/devtools/issues/1714
 if(getRversion() >= "2.15.1") utils::globalVariables(c(
-    "R3", "age", "age_year", "agecat", "birth_year", "bought", "change_cust",
+    "age", "age_year", "agecat", "birth_year", "change_cust",
     "change_revenue", "change_sales", "customers", "dot", "dot2", "duration", 
-    "duration_run", "issue_month", "issue_year", "lag_duration_run", "lag_year",
-    "lapse", "lastvar", "lead_year", "new_recruit", "old_recruit", 
-    "sales", "var_old", "yr_diff", "yrs_since", "yrs_till_next", 
-    ":=", "old", "cust_id", "month", "year"
+    "issue_month", "issue_year",  "lastvar",  "sales", "var_old", "yr_diff",  
+    ":=", "old", "cust_id", "month", "year", "lapse"
 ))
 
 

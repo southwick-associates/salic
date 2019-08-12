@@ -37,6 +37,7 @@ left_join(
 }
 \seealso{
 Other license history functions: \code{\link{carry_duration}},
+  \code{\link{carry_variables}},
   \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},

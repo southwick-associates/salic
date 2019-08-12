@@ -2,6 +2,7 @@
 
 export(calc_churn)
 export(carry_duration)
+export(carry_variables)
 export(check_dups)
 export(check_history_samp)
 export(check_identify_R3)

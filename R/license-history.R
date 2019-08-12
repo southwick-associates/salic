@@ -106,6 +106,8 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' based on the corresponding argument (typically carry_vars = c("month", "res")).
 #' For multi-year/lifetimes, carry_vars inherit values from the previous year.
 #' }
+#' Development Note: This function is largely a wrapper for \code{\link{carry_duration}} 
+#' and \code{\link{carry_variables}}
 #' 
 #' @param sale_ranked data frame: Sales table from which license history will be made
 #' @param yrs numeric: Years in sales data (column 'year') from which
@@ -127,38 +129,64 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' # check a sample of several customers
 #' check_history_samp(history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
-    sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+    sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
         split(sale_ranked$year) %>%
-        carry_duration(yrs)
-    
-    # TODO -  make a helper function carry_vars()
-    # this code is difficult to grok, so need a change it one way or the other
-    # making a function out of it should be an improvement
-    if (!is.null(carry_vars)) {
-        for (var in carry_vars) {
-            # get most recent value for missing var
-            for (i in 2:length(yrs)) {
-                missing_vars <- sale_ranked[[i]] %>%
-                    filter(is.na(.data[[var]])) %>%
-                    left_join(
-                        select(sale_ranked[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
-                        by = "cust_id"
-                    ) %>%
-                    mutate(!!var := .data$lastvar) %>%
-                    select(-.data$lastvar)
-                sale_ranked[[i]] <- sale_ranked[[i]] %>%
-                    filter(!is.na(.data[[var]])) %>%
-                    bind_rows(missing_vars)
-            }
-        }
-    }
-    # wrap up
-    sale_ranked %>% bind_rows() %>% rename(duration_run = duration)
+        carry_duration(yrs) %>%
+        carry_variables(yrs, carry_vars) %>%
+        bind_rows() %>% 
+        rename(duration_run = duration)
 }
 
-### START HERE ###
-carry_vars <- function() {
-    
+#' Internal Function: Carry specified variables forward
+#' 
+#' This function is intended to be called from \code{\link{make_lic_history}}.
+#' 
+#' @inheritParams make_lic_history
+#' @inheritParams carry_duration
+#' @import dplyr
+#' @family license history functions
+#' @keywords internal
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, lic)
+#' 
+#' yrs <- 2008:2019
+#' carry_vars <- c("month", "res")
+#' 
+#' sale_unranked <- left_join(lic, sale)
+#' sale_ranked <- rank_sale(sale_unranked) 
+#' sale_split <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+#'     split(sale_ranked$year) %>%
+#'     carry_duration(yrs)
+#'     
+#' carry_variables(sale_split, yrs, c("month", "res"))
+carry_variables <- function(sale_split, yrs, carry_vars) {
+    if (is.null(carry_vars)) {
+        return(sale_split)
+    }
+    if (any(!carry_vars %in% colnames(sale_split[[1]]))) {
+        stop("All carry_vars (", paste(carry_vars, sep = ", "),
+             ") needed for make_lic_history()", call. = FALSE)
+    }
+    # replace missings (of var) with value from previous year (if available)
+    carry_one_variable <- function(sale_split, yrs, var) {
+        for (i in 2L:length(yrs)) {
+            sale_split[[i]] <- filter(sale_split[[i]], is.na(.data[[var]])) %>%
+                left_join(
+                    select(sale_split[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
+                    by = "cust_id"
+                ) %>%
+                mutate(!! var := .data$lastvar) %>%
+                select(-.data$lastvar) %>%
+                bind_rows(filter(sale_split[[i]], !is.na(.data[[var]])))
+        }
+        sale_split
+    }
+    for (i in carry_vars) {
+        sale_split <- carry_one_variable(sale_split, yrs, i)
+    }
+    sale_split
 }
 
 #' Internal Function: Carry multi-year/lifetime durations forward
@@ -180,8 +208,7 @@ carry_vars <- function() {
 #' sale_split <- select(sale_ranked, cust_id, year, duration) %>%
 #'     split(sale_ranked$year)
 #'     
-#' yrs <- 2008:2019
-#' carry_duration(sale_split, yrs)
+#' carry_duration(sale_split, 2008:2019)
 carry_duration <- function(sale_split, yrs) {
     if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
         stop("All 3 variables (cust_id, year, duration) needed ",
