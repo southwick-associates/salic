@@ -42,7 +42,7 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
     
     sale %>%
         # to ensure highest value of rank_var - sort ascending, pick last
-        arrange(!!! grp_var, !!! rank_var) %>%
+        arrange(!!! rank_var) %>%
         group_by(!!! grp_var) %>%
         slice(n()) %>%
         ungroup()
@@ -79,14 +79,16 @@ join_first_month <- function(sale_ranked, sale_unranked) {
     if (!"month" %in% colnames(sale_unranked)) {
         stop("month variable must be included in sale_unranked", call. = FALSE)
     }
-    first_month <- sale_unranked %>%
+    sale_unranked %>%
         arrange(.data$month) %>%
         group_by(.data$cust_id, .data$year) %>%
         slice(1L) %>%
         ungroup() %>%
-        select(.data$cust_id, .data$year, .data$month)
-    sale_ranked$month <- NULL
-    left_join(sale_ranked, first_month, by = c("cust_id", "year"))
+        select(.data$cust_id, .data$year, .data$month) %>%
+        left_join(
+            select(sale_ranked, -.data$month),
+            by = c("cust_id", "year")
+        )
 }
 
 #' Make a License History table with 1 row per customer per year
@@ -129,8 +131,9 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' # check a sample of several customers
 #' check_history_samp(history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
-    sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
-        split(sale_ranked$year) %>%
+    x <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+        filter(.data$year %in% yrs)
+    split(x, x$year) %>%
         carry_duration(yrs) %>%
         carry_variables(yrs, carry_vars) %>%
         bind_rows() %>% 

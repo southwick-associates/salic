@@ -126,8 +126,8 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
     missing_keys <- dplyr::anti_join(df_foreign, df_primary, by = key)
     
     msg <- paste0(
-        primary_name, ": missing 1 or more ", key, 
-        " values that are present in the ", foreign_name,  " table"
+        primary_name, ": missing ", length(unique(missing_keys[[key]])), " ", 
+        key, " values that are present in the ", foreign_name,  " table"
     )
     if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
 }
