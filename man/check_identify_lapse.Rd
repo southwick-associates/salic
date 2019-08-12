@@ -23,7 +23,8 @@ select(history, -lapse) \%>\%
     check_identify_lapse()
 }
 \seealso{
-Other license history functions: \code{\link{check_history_samp}},
+Other license history functions: \code{\link{carry_duration}},
+  \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{identify_R3}}, \code{\link{identify_lapse}},
   \code{\link{join_first_month}},
