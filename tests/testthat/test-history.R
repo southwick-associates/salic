@@ -50,7 +50,25 @@ test_that("join_first_month() produces expected result", {
 })
 
 test_that("carry_duration() produces expected result", {
+    yrs <- 2008:2019
+    format_same <- function(x) {
+        select(x, cust_id, year) %>% arrange(cust_id, year) %>% data.frame()
+    }
     
+    # carry forward using an alternative method
+    x <- rename(sale_ranked, ref_year = year) %>%
+        merge(data.frame(year = yrs)) %>% # a bit hacky
+        mutate(duration = ref_year - year + duration) %>%
+        filter(duration > 0, year > ref_year) %>%
+        bind_rows(sale_ranked) %>%
+        distinct(cust_id, year)
+    
+    # compare to salic-estimated
+    y <- filter(sale_ranked, year %in% yrs)
+    y <- split(y, y$year) %>% 
+        carry_duration(yrs) %>% 
+        bind_rows()
+    expect_equal(format_same(x), format_same(y))
 })
 
 test_that("carry_variables() produces expected result", {
