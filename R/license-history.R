@@ -156,11 +156,16 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
     sale_ranked %>% bind_rows() %>% rename(duration_run = duration)
 }
 
+### START HERE ###
+carry_vars <- function() {
+    
+}
+
 #' Internal Function: Carry multi-year/lifetime durations forward
 #' 
 #' This function is intended to be called from \code{\link{make_lic_history}}.
 #' 
-#' @param sale_ranked list: ranked sale table split by year
+#' @param sale_split list: ranked sale table split by year
 #' @inheritParams make_lic_history
 #' @import dplyr
 #' @family license history functions
@@ -172,32 +177,32 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' 
 #' sale_unranked <- left_join(lic, sale)
 #' sale_ranked <- rank_sale(sale_unranked) 
-#' sale_ranked <- select(sale_ranked, cust_id, year, duration) %>%
+#' sale_split <- select(sale_ranked, cust_id, year, duration) %>%
 #'     split(sale_ranked$year)
 #'     
 #' yrs <- 2008:2019
-#' carry_duration(sale_ranked, yrs)
-carry_duration <- function(sale_ranked, yrs) {
-    if (any(!c("cust_id", "year", "duration") %in% colnames(sale_ranked[[1]]))) {
+#' carry_duration(sale_split, yrs)
+carry_duration <- function(sale_split, yrs) {
+    if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
         stop("All 3 variables (cust_id, year, duration) needed ",
              "for make_lic_history()", call. = FALSE)
     }
     for (i in 2L:length(yrs)) {
         # carry forward previous year
-        sale_ranked[[i]] <- sale_ranked[[i-1]] %>%
+        sale_split[[i]] <- sale_split[[i-1]] %>%
             filter(.data$duration != 1) %>%
             mutate(lag_duration = .data$duration - 1) %>%
             select(.data$cust_id, .data$lag_duration) %>%
             
             # join to current year & pick highest duration
-            full_join(sale_ranked[[i]], by = "cust_id") %>%
+            full_join(sale_split[[i]], by = "cust_id") %>%
             mutate(
                 duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE),
                 year = yrs[i]
             ) %>%
             select(-.data$lag_duration)
     }
-    sale_ranked
+    sale_split
 }
 
 make_lic_history_old <- function(sale_ranked, yrs, carry_vars = NULL) {

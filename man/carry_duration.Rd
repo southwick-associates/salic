@@ -4,10 +4,10 @@
 \alias{carry_duration}
 \title{Internal Function: Carry multi-year/lifetime durations forward}
 \usage{
-carry_duration(sale_ranked, yrs)
+carry_duration(sale_split, yrs)
 }
 \arguments{
-\item{sale_ranked}{list: ranked sale table split by year}
+\item{sale_split}{list: ranked sale table split by year}
 
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
@@ -21,11 +21,11 @@ data(sale, lic)
 
 sale_unranked <- left_join(lic, sale)
 sale_ranked <- rank_sale(sale_unranked) 
-sale_ranked <- select(sale_ranked, cust_id, year, duration) \%>\%
+sale_split <- select(sale_ranked, cust_id, year, duration) \%>\%
     split(sale_ranked$year)
     
 yrs <- 2008:2019
-carry_duration(sale_ranked, yrs)
+carry_duration(sale_split, yrs)
 }
 \seealso{
 Other license history functions: \code{\link{check_history_samp}},
