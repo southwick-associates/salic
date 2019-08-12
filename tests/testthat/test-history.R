@@ -48,32 +48,6 @@ test_that("join_first_month() produces expected result", {
         select(cust_id, year, month)
     expect_equal(x, y)
 })
-
-test_that("carry_duration() produces expected result", {
-    yrs <- 2008:2019
-    format_same <- function(x) {
-        select(x, cust_id, year) %>% arrange(cust_id, year) %>% data.frame()
-    }
-    
-    # carry forward using an alternative method
-    x <- rename(sale_ranked, ref_year = year) %>%
-        merge(data.frame(year = yrs)) %>% # a bit hacky
-        mutate(duration = ref_year - year + duration) %>%
-        filter(duration > 0, year > ref_year) %>%
-        bind_rows(sale_ranked) %>%
-        distinct(cust_id, year)
-    
-    # compare to salic-estimated
-    y <- filter(sale_ranked, year %in% yrs)
-    y <- split(y, y$year) %>% 
-        carry_duration(yrs) %>% 
-        bind_rows()
-    expect_equal(format_same(x), format_same(y))
-})
-
-test_that("carry_variables() produces expected result", {
-    
-})
     
 test_that("make_lic_history() produces expected result", {
     x <- select(history_calc, cust_id, year, month, res)
@@ -95,4 +69,46 @@ test_that("identify_lapse() produces expected result", {
         select(cust_id, year, lapse)
     y <- select(history, cust_id, year, lapse)
     expect_equal(x, y)
+})
+
+# Carry Forward Funcs -----------------------------------------------------
+# these are closer to unit tests for make_lic_history
+
+test_that("carry_duration() produces expected result", {
+    yrs <- 2010:2015
+    sale_ranked2 <- select(sale_ranked, cust_id, year, duration, month, res) %>%
+        filter(year %in% yrs)
+    format_same <- function(x) {
+        select(x, cust_id, year) %>% arrange(cust_id, year) %>% data.frame()
+    }
+    # salic-estimated
+    x <- split(sale_ranked2, sale_ranked2$year) %>% 
+        carry_duration(yrs) %>% 
+        bind_rows()
+    
+    # carry forward using an alternative (less efficient) method
+    # this implementation feels a bit hacky
+    y <- rename(sale_ranked2, ref_year = year) %>%
+        merge(data.frame(year = yrs)) %>%
+        mutate(duration = ref_year - year + duration) %>%
+        filter(duration > 0, year > ref_year) %>%
+        bind_rows(sale_ranked2) %>%
+        distinct(cust_id, year) # resolve purchase/carry overlaps
+    expect_equal(format_same(x), format_same(y))
+})
+
+test_that("carry_variables() produces expected result", {
+    yrs <- 2008:2019
+    format_same <- function(x) {
+        select(x, cust_id, year, month, res) %>% 
+            arrange(cust_id, year) %>% 
+            data.frame()
+    }
+    x <- sale_ranked %>%
+        join_first_month(sale_unranked) %>%
+        split(sale_ranked$year) %>% 
+        carry_duration(yrs) %>%
+        carry_variables(yrs, c("month", "res")) %>%
+        bind_rows()
+    expect_equal(format_same(x), format_same(history))
 })
