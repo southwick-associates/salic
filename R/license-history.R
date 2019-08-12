@@ -184,7 +184,8 @@ carry_duration <- function(sale_split, yrs) {
             # join to current year & pick highest duration
             full_join(sale_split[[i]], by = "cust_id") %>%
             mutate(
-                duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE),
+                duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE) %>%
+                    as.integer(),
                 year = yrs[i]
             ) %>%
             select(-.data$lag_duration)

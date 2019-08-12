@@ -52,18 +52,16 @@ NULL
 #' 
 #' This is a table that corresponds to the "all_sports" permission for the included
 #' license sample data; containing 1 row per customer per year a license was held.
-#' Only the variables needed for dashboard production were included (i.e., certain 
-#' variables potentially useful for validation, such as duration_run, were removed).
 #'
 #' @docType data
 #' @keywords datasets
 #' @name history
-#' @format A data frame with 8 variables
+#' @format A data frame with 9 variables
 #' \describe{
 #' \item{cust_id}{Customer ID (integer) (composite key)}
 #' \item{year}{License Year (integer) (yyyy) (composite key)}
 #' \item{duration_run}{Running Duration in years (integer)}
-#' \item{month}{Earliest Transaction Month (integer) (1=Jan, 2=Feb, ..., 12=Dec)}
+#' \item{month}{Earliest Transaction Month (integer) (1=Jan, 2=Feb, ...)}
 #' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 #' \item{sex}{Gender (integer) (1=Male, 2=Female)}
 #' \item{birth_year}{Year of Birth (integer) (yyyy)}
