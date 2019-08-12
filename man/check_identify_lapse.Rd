@@ -7,7 +7,7 @@
 check_identify_lapse(lic_history)
 }
 \arguments{
-\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
 }
 \description{
 Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).

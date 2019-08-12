@@ -4,14 +4,14 @@
 \alias{identify_R3}
 \title{Identify R3 group each year}
 \usage{
-identify_R3(lic_history, yrs, show_summary = FALSE,
-  show_check_vars = FALSE)
+identify_R3(lic_history, yrs = sort(unique(lic_history$year)),
+  show_summary = FALSE, show_check_vars = FALSE)
 }
 \arguments{
-\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
 
-\item{yrs}{numeric: Years in sales data (column 'year') from which
-to create license history}
+\item{yrs}{numeric: years used for identifying R3 (note that the first 5 years 
+will all have missing values for R3 output)}
 
 \item{show_summary}{logical: if TRUE, print a tabular summary that shows R3 category
 by the number of years since a license was held.}
@@ -27,9 +27,8 @@ where "retained" consists of carried + renewed (hence R3: retain, reactivate, re
 library(dplyr)
 data(history)
 
-x <- history \%>\%
-    select(-R3) \%>\%
-    identify_R3(2008:2019, show_summary = TRUE)
+x <- select(history, -R3) \%>\%
+    identify_R3(show_summary = TRUE)
 
 # calculate \% of license holders who are recruits
 group_by(x, year, R3) \%>\% 

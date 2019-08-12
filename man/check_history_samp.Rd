@@ -7,7 +7,7 @@
 check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 }
 \arguments{
-\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
 
 \item{n_samp}{numeric: number of customers to view}
 

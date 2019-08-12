@@ -250,8 +250,9 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
 #' categorical variable, R3 (1=carried, 2=renewed, 3=reactivated, 4=recruited), 
 #' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
 #' 
-#' @param lic_history license history data frame produced with \code{\link{make_lic_history}} 
-#' @inheritParams make_lic_history
+#' @param lic_history data frame: output of \code{\link{make_lic_history}} 
+#' @param yrs numeric: years used for identifying R3 (note that the first 5 years 
+#' will all have missing values for R3 output)
 #' @param show_summary logical: if TRUE, print a tabular summary that shows R3 category
 #' by the number of years since a license was held.
 #' @param show_check_vars logical: if TRUE, include output variables used in summary
@@ -262,26 +263,28 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
 #' library(dplyr)
 #' data(history)
 #' 
-#' x <- history %>%
-#'     select(-R3) %>%
-#'     identify_R3(2008:2019, show_summary = TRUE)
+#' x <- select(history, -R3) %>%
+#'     identify_R3(show_summary = TRUE)
 #' 
 #' # calculate % of license holders who are recruits
 #' group_by(x, year, R3) %>% 
 #'     summarise(n = n()) %>% 
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
-identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
-    # setup - last year held to calcuate "yrs_since" (for identifying recruits)
+identify_R3 <- function(
+    lic_history, yrs = sort(unique(lic_history$year)),  
+    show_summary = FALSE, show_check_vars = FALSE
+) {
+    # setup - calculate yrs_since to determine R3 category
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>%
         group_by(.data$cust_id) %>%
         mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
         ungroup() %>%
+        mutate(yrs_since = .data$year - .data$lag_year) %>%
     
-        # calculate
+        # calculate R3
         mutate(
-            yrs_since = .data$year - .data$lag_year,
             R3 = case_when(
                 is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
                 .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
@@ -291,7 +294,6 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
             # 1st 5 yrs shouldn't be identified
             R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
         )
-    # wrap up
     if (show_summary) {
         check_identify_R3(lic_history, yrs) %>% print()
     }
@@ -308,6 +310,8 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' and codes lapse (0 = renews next year, 1 = lapses next year).
 #' 
 #' @inheritParams identify_R3
+#' @param yrs numeric: years used for identifying lapse (note that the last year will
+#' have all missing values for lapse output)
 #' @param show_summary logical: if TRUE, include a tabular summary that shows lapse 
 #' identification based on how many years until the next license is held.
 #' @import dplyr
@@ -317,21 +321,22 @@ identify_R3 <- function(lic_history, yrs, show_summary = FALSE, show_check_vars 
 #' library(dplyr)
 #' data(history)
 #' 
-#' history_yrs <- 2008:2019
-#' lapse_yrs <- 2008:2018 # must exclude incomplete 2019
+#' # excluding partial year 2019 since churn is only estimated for full-year results
+#' history <- filter(history, year != 2019)
 #' 
-#' x <- history %>%
-#'     select(-lapse) %>%
-#'     identify_lapse(lapse_yrs, show_summary = TRUE) 
+#' x <- select(history, -lapse) %>%
+#'     identify_lapse(show_summary = TRUE) 
 #' 
 #' # calculate annual churn rate
+#' # (note that a given year's churn is based on lapse summary from the previous year)
 #' group_by(x, year) %>% 
 #'     summarise(mean(lapse)) %>%
-#'     # Note: this year's churn is based on lapse summary from the previous year
-#'     # since the lapse variable identifies whether a customer lapses next year
 #'     mutate(year = year + 1)
-identify_lapse <- function(lic_history, yrs, show_summary = FALSE, show_check_vars = FALSE) {
-    # setup - next year a license is held (to easily identify lapse)
+identify_lapse <- function(
+    lic_history, yrs = sort(unique(lic_history$year)), 
+    show_summary = FALSE, show_check_vars = FALSE
+) {
+    # setup - identify next year a license is held
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
         group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
@@ -347,7 +352,6 @@ identify_lapse <- function(lic_history, yrs, show_summary = FALSE, show_check_va
             # ensure NA in final year
             lapse = ifelse(.data$year >= max(yrs), NA, .data$lapse) 
         )
-    # wrap up
     if (show_summary) {
         check_identify_lapse(lic_history) %>% print()
     }

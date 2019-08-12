@@ -7,10 +7,10 @@
 check_identify_R3(lic_history, yrs)
 }
 \arguments{
-\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
 
-\item{yrs}{numeric: Years in sales data (column 'year') from which
-to create license history}
+\item{yrs}{numeric: years used for identifying R3 (note that the first 5 years 
+will all have missing values for R3 output)}
 }
 \description{
 Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).

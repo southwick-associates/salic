@@ -4,14 +4,14 @@
 \alias{identify_lapse}
 \title{Identify lapse group each year}
 \usage{
-identify_lapse(lic_history, yrs, show_summary = FALSE,
-  show_check_vars = FALSE)
+identify_lapse(lic_history, yrs = sort(unique(lic_history$year)),
+  show_summary = FALSE, show_check_vars = FALSE)
 }
 \arguments{
-\item{lic_history}{license history data frame produced with \code{\link{make_lic_history}}}
+\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
 
-\item{yrs}{numeric: Years in sales data (column 'year') from which
-to create license history}
+\item{yrs}{numeric: years used for identifying lapse (note that the last year will
+have all missing values for lapse output)}
 
 \item{show_summary}{logical: if TRUE, include a tabular summary that shows lapse 
 identification based on how many years until the next license is held.}
@@ -26,18 +26,16 @@ and codes lapse (0 = renews next year, 1 = lapses next year).
 library(dplyr)
 data(history)
 
-history_yrs <- 2008:2019
-lapse_yrs <- 2008:2018 # must exclude incomplete 2019
+# excluding partial year 2019 since churn is only estimated for full-year results
+history <- filter(history, year != 2019)
 
-x <- history \%>\%
-    select(-lapse) \%>\%
-    identify_lapse(lapse_yrs, show_summary = TRUE) 
+x <- select(history, -lapse) \%>\%
+    identify_lapse(show_summary = TRUE) 
 
 # calculate annual churn rate
+# (note that a given year's churn is based on lapse summary from the previous year)
 group_by(x, year) \%>\% 
     summarise(mean(lapse)) \%>\%
-    # Note: this year's churn is based on lapse summary from the previous year
-    # since the lapse variable identifies whether a customer lapses next year
     mutate(year = year + 1)
 }
 \seealso{
