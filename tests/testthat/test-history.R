@@ -49,6 +49,14 @@ test_that("join_first_month() produces expected result", {
     expect_equal(x, y)
 })
 
+test_that("carry_duration() produces expected result", {
+    
+})
+
+test_that("carry_variables() produces expected result", {
+    
+})
+    
 test_that("make_lic_history() produces expected result", {
     x <- select(history_calc, cust_id, year, month, res)
     y <- select(history, cust_id, year, month, res)

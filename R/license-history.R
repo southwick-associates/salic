@@ -140,6 +140,49 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
         rename(duration_run = duration)
 }
 
+#' Internal Function: Carry multi-year/lifetime durations forward
+#' 
+#' This function is intended to be called from \code{\link{make_lic_history}}.
+#' 
+#' @param sale_split list: ranked sale table split by year
+#' @inheritParams make_lic_history
+#' @import dplyr
+#' @family license history functions
+#' @keywords internal
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, lic)
+#' 
+#' sale_unranked <- left_join(lic, sale)
+#' sale_ranked <- rank_sale(sale_unranked) 
+#' sale_split <- select(sale_ranked, cust_id, year, duration) %>%
+#'     split(sale_ranked$year)
+#'     
+#' carry_duration(sale_split, 2008:2019)
+carry_duration <- function(sale_split, yrs) {
+    if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
+        stop("All 3 variables (cust_id, year, duration) needed ",
+             "for make_lic_history()", call. = FALSE)
+    }
+    for (i in 2L:length(yrs)) {
+        # carry forward previous year
+        sale_split[[i]] <- sale_split[[i-1]] %>%
+            filter(.data$duration != 1) %>%
+            mutate(lag_duration = .data$duration - 1) %>%
+            select(.data$cust_id, .data$lag_duration) %>%
+            
+            # join to current year & pick highest duration
+            full_join(sale_split[[i]], by = "cust_id") %>%
+            mutate(
+                duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE),
+                year = yrs[i]
+            ) %>%
+            select(-.data$lag_duration)
+    }
+    sale_split
+}
+
 #' Internal Function: Carry specified variables forward
 #' 
 #' This function is intended to be called from \code{\link{make_lic_history}}.
@@ -191,123 +234,6 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
     }
     sale_split
 }
-
-#' Internal Function: Carry multi-year/lifetime durations forward
-#' 
-#' This function is intended to be called from \code{\link{make_lic_history}}.
-#' 
-#' @param sale_split list: ranked sale table split by year
-#' @inheritParams make_lic_history
-#' @import dplyr
-#' @family license history functions
-#' @keywords internal
-#' @export
-#' @examples
-#' library(dplyr)
-#' data(sale, lic)
-#' 
-#' sale_unranked <- left_join(lic, sale)
-#' sale_ranked <- rank_sale(sale_unranked) 
-#' sale_split <- select(sale_ranked, cust_id, year, duration) %>%
-#'     split(sale_ranked$year)
-#'     
-#' carry_duration(sale_split, 2008:2019)
-carry_duration <- function(sale_split, yrs) {
-    if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
-        stop("All 3 variables (cust_id, year, duration) needed ",
-             "for make_lic_history()", call. = FALSE)
-    }
-    for (i in 2L:length(yrs)) {
-        # carry forward previous year
-        sale_split[[i]] <- sale_split[[i-1]] %>%
-            filter(.data$duration != 1) %>%
-            mutate(lag_duration = .data$duration - 1) %>%
-            select(.data$cust_id, .data$lag_duration) %>%
-            
-            # join to current year & pick highest duration
-            full_join(sale_split[[i]], by = "cust_id") %>%
-            mutate(
-                duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE),
-                year = yrs[i]
-            ) %>%
-            select(-.data$lag_duration)
-    }
-    sale_split
-}
-
-make_lic_history_old <- function(sale_ranked, yrs, carry_vars = NULL) {
-    
-    # 1. initialize a list to store tracking table
-    # looping over a list is (seemingly) simpler than iterating over data frame rows
-    lic_history <- list()
-    
-    # 2. Initialize running duration for first year
-    lic_history[[1]] <- sale_ranked %>%
-        filter(.data$year == yrs[1]) %>%
-        mutate(
-            bought = TRUE, # bought a license this year
-            duration_run = .data$duration # years remaining on privilege
-        )
-    
-    # 3. Calculate running duration for subsequent years
-    for (i in 2:length(yrs)) {
-        lic_history[[i]] <- sale_ranked %>%
-            filter(.data$year == yrs[i]) %>%
-            
-            # a. join current year (i) to previous year (i-1) to get lag_duration_run
-            full_join(
-                select(lic_history[[i-1]], .data$cust_id, lag_duration_run = .data$duration_run), 
-                by = "cust_id"
-            ) %>%
-            
-            # b. create current year variables
-            # TODO - maybe create a separate function for this
-            mutate(
-                year = yrs[i],
-                bought = ifelse(!is.na(.data$duration), TRUE, FALSE),
-                
-                duration_run = ifelse(
-                    # duration_run coding depends on "bought" condition
-                    # - if (bought in current year) we use current year's value
-                    # - UNLESS it's smaller than the running duration (lag_duration_run - 1)
-                    #   + this avoids the situation where (for example) a 1-year priv would replace
-                    #   + a multi-year (or lifetime) license
-                    #   + (i.e., it always favors the license with the longest remaining duration)
-                    .data$bought, pmax(.data$duration, .data$lag_duration_run - 1, na.rm = TRUE),
-                    
-                    # otherwise we use the running duration
-                    .data$lag_duration_run - 1
-                )
-            ) %>%
-            # c. drop rows that don't represent current year privileges
-            filter(.data$duration_run >= 1)
-    }
-    
-    # 4. carry over variables that need to be populated for multi-year & lifetime (e.g., res)
-    # uses dplyr-based tidyeval: http://dplyr.tidyverse.org/articles/programming.html
-    if (!is.null(carry_vars)) {
-        for (var in carry_vars) {
-            # get most recent value for missing var
-            for (i in 2:length(yrs)) {
-                missing_vars <- lic_history[[i]] %>%
-                    filter(is.na(.data[[var]])) %>%
-                    left_join(
-                        select(lic_history[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
-                        by = "cust_id"
-                    ) %>%
-                    mutate(!!var := .data$lastvar) %>%
-                    select(-.data$lastvar)
-                lic_history[[i]] <- lic_history[[i]] %>%
-                    filter(!is.na(.data[[var]])) %>%
-                    bind_rows(missing_vars)
-            }
-        }
-    }
-    
-    # 5. Combine into data frame
-    bind_rows(lic_history)[c("cust_id", "year", "duration_run", carry_vars)]
-}
-
 
 #' Identify R3 group each year
 #'
