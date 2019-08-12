@@ -42,7 +42,7 @@ sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked) \%>\%
     join_first_month(sale_unranked)
 history <- sale_ranked \%>\%
-    make_lic_history(2007:2018, carry_vars = c("month", "res"))
+    make_lic_history(2008:2019, carry_vars = c("month", "res"))
 
 # check a sample of several customers
 check_history_samp(history)

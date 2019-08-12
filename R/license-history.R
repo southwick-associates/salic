@@ -126,11 +126,20 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' sale_ranked <- rank_sale(sale_unranked) %>%
 #'     join_first_month(sale_unranked)
 #' history <- sale_ranked %>%
-#'     make_lic_history(2007:2018, carry_vars = c("month", "res"))
+#'     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 #' 
 #' # check a sample of several customers
 #' check_history_samp(history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
+    if (any(!yrs %in% unique(sale_ranked$year))) {
+        yrs_specified <- yrs 
+        yrs <- dplyr::intersect(yrs, unique(sale_ranked$year))
+        warning(
+            "Certain yrs in make_lic_history() are missing from sale_ranked:\n", 
+            "- Years specified: ", paste(yrs_specified, collapse = ", "), "\n",
+            "- Years used:      ", paste(yrs, collapse = ", "), call. = FALSE
+        )
+    }
     x <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
         filter(.data$year %in% yrs)
     split(x, x$year) %>%
@@ -212,7 +221,7 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
         return(sale_split)
     }
     if (any(!carry_vars %in% colnames(sale_split[[1]]))) {
-        stop("All carry_vars (", paste(carry_vars, sep = ", "),
+        stop("All carry_vars (", paste(carry_vars, collapse = ", "),
              ") needed for make_lic_history()", call. = FALSE)
     }
     # replace missings (of var) with value from previous year (if available)
