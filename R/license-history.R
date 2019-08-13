@@ -283,6 +283,7 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
 #' @param show_summary logical: if TRUE, print a tabular summary that shows R3 category
 #' by the number of years since a license was held.
 #' @param show_check_vars logical: if TRUE, include output variables used in summary
+#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @import dplyr
 #' @family license history functions
 #' @export
@@ -299,6 +300,37 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
 #'     mutate(pct = n / sum(n)) %>%
 #'     filter(R3 == 4, year != 2019)
 identify_R3 <- function(
+    lic_history, yrs = sort(unique(lic_history$year)),
+    show_summary = FALSE, show_check_vars = FALSE
+) {
+    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
+    
+    y <- data.table(lic_history)
+    cols <- c("year", "duration_run")
+    anscols <- paste("lag", cols, sep = "_")
+    y <- y[order(year), (anscols) := shift(.SD, 1), by = cust_id, .SDcols = cols]
+    
+    lic_history <- data.frame(y) %>%
+        mutate(
+            yrs_since = .data$year - .data$lag_year,
+            R3 = case_when(
+                .data$year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
+                is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
+                .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
+                .data$yrs_since == 1 ~ 2L, # renewed
+                TRUE ~ 3L # otherwise reactivated
+            )
+        ) 
+    if (show_summary) {
+        check_identify_R3(lic_history, yrs) %>% print()
+    }
+    if (!show_check_vars) {
+        lic_history <- select(lic_history, -.data$lag_duration_run, -.data$yrs_since)
+    }
+    select(lic_history, -.data$lag_year)
+}
+
+identify_R3_old <- function(
     lic_history, yrs = sort(unique(lic_history$year)),  
     show_summary = FALSE, show_check_vars = FALSE
 ) {
@@ -327,6 +359,8 @@ identify_R3 <- function(
     }
     select(lic_history, -.data$lag_year)
 }
+
+
 
 #' Identify lapse group each year
 #'

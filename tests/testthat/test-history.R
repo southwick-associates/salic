@@ -58,8 +58,9 @@ test_that("make_lic_history() produces expected result", {
 test_that("identify_R3() produces expected result", {
     x <- history_calc %>%
         identify_R3(2008:2019) %>%
-        select(cust_id, year, R3)
-    y <- select(history, cust_id, year, R3)
+        select(cust_id, year, R3) %>%
+        arrange(cust_id, year)
+    y <- select(history, cust_id, year, R3) %>% data.frame()
     expect_equal(x, y)
 })
 
