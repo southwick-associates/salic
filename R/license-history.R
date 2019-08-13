@@ -91,6 +91,40 @@ join_first_month <- function(sale_ranked, sale_unranked) {
         )
 }
 
+#' Internal Function: Check years range & sort
+#' 
+#' Prints a warning any of the specified years aren't included in the dataset and 
+#' returns a vector of availabe years, sorted ascending. The sort ensures correct 
+#' ordering in subsequent license history calculations, which include iterations
+#' by year that would produce incorrect results if not sorted.
+#' 
+#' This function is intended to be called from \code{\link{make_lic_history}},
+#' \code{\link{identify_R3}}, or \code{\link{identify_lapse}}.
+#' 
+#' @param df data frame: table that contains "year" variable
+#' @param func_name character: name of function to print in warning
+#' @inheritParams make_lic_history
+#' @family license history functions
+#' @keywords internal
+#' @export
+#' @examples
+#' data(sale)
+#' prep_yrs(c(2010, 2008, 2015), sale, "my_function")
+#' prep_yrs(c(2007, 2015, 2010), sale, "my_function") # print a warning
+prep_yrs <- function(yrs, df, func_name) {
+    yrs <- sort(yrs)
+    if (any(!yrs %in% unique(df$year))) {
+        yrs_specified <- yrs 
+        yrs <- dplyr::intersect(yrs, unique(df$year))
+        warning(
+            "Certain yrs in ", func_name, " are missing from the input table:\n", 
+            "- Years specified: ", paste(yrs_specified, collapse = ", "), "\n",
+            "- Years used:      ", paste(yrs, collapse = ", "), call. = FALSE
+        )
+    }
+    yrs
+}
+
 #' Make a License History table with 1 row per customer per year
 #'
 #' The license history table accounts for multi-year/lifetime licenses directly by including
@@ -131,15 +165,7 @@ join_first_month <- function(sale_ranked, sale_unranked) {
 #' # check a sample of several customers
 #' check_history_samp(history)
 make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
-    if (any(!yrs %in% unique(sale_ranked$year))) {
-        yrs_specified <- yrs 
-        yrs <- dplyr::intersect(yrs, unique(sale_ranked$year))
-        warning(
-            "Certain yrs in make_lic_history() are missing from sale_ranked:\n", 
-            "- Years specified: ", paste(yrs_specified, collapse = ", "), "\n",
-            "- Years used:      ", paste(yrs, collapse = ", "), call. = FALSE
-        )
-    }
+    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     x <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
         filter(.data$year %in% yrs)
     split(x, x$year) %>%
@@ -276,6 +302,8 @@ identify_R3 <- function(
     lic_history, yrs = sort(unique(lic_history$year)),  
     show_summary = FALSE, show_check_vars = FALSE
 ) {
+    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
+    
     # setup - calculate yrs_since to determine R3 category
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>%
@@ -337,6 +365,8 @@ identify_lapse <- function(
     lic_history, yrs = sort(unique(lic_history$year)), 
     show_summary = FALSE, show_check_vars = FALSE
 ) {
+    yrs <- prep_yrs(yrs, lic_history, "identify_lapse()")
+    
     # setup - identify next year a license is held
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
