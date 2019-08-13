@@ -304,33 +304,48 @@ identify_R3 <- function(
 ) {
     yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
     
-    # setup - calculate yrs_since to determine R3 category
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>%
         group_by(.data$cust_id) %>%
         mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
         ungroup() %>%
-        mutate(yrs_since = .data$year - .data$lag_year) %>%
-    
-        # calculate R3
         mutate(
+            yrs_since = .data$year - .data$lag_year,
             R3 = case_when(
+                .data$year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
                 is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
                 .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
                 .data$yrs_since == 1 ~ 2L, # renewed
                 TRUE ~ 3L # otherwise reactivated
-            ),
-            # 1st 5 yrs shouldn't be identified
-            R3 = ifelse(.data$year > yrs[5], .data$R3, NA) 
+            )
         )
     if (show_summary) {
         check_identify_R3(lic_history, yrs) %>% print()
     }
-    if (show_check_vars) {
-        select(lic_history, -.data$lag_year)
-    } else {
-        select(lic_history, -.data$lag_year, -.data$lag_duration_run, -.data$yrs_since)
+    if (!show_check_vars) {
+        lic_history <- select(lic_history, -.data$lag_duration_run, -.data$yrs_since)
     }
+    select(lic_history, -.data$lag_year)
+}
+
+identify_R32 <- function(lic_history, yrs) {
+    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
+    
+    lic_history <- lic_history %>%
+        arrange(.data$cust_id, .data$year) %>%
+        group_by(.data$cust_id) %>%
+        mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
+        ungroup()
+}
+
+identify_R33 <- function(lic_history, yrs) {
+    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
+    
+    lic_history <- lic_history %>%
+        arrange(.data$cust_id, .data$year) %>%
+        group_by(.data$cust_id) %>%
+        # mutate(lag_year = lag(.data$year)) %>%
+        ungroup()
 }
 
 #' Identify lapse group each year
@@ -375,34 +390,27 @@ identify_lapse <- function(
     if (last_change < -20) {
         warning(
             "There is a large drop in the final year specified: ", last_change, 
-            "%\n- Please ensure all years are complete for lapse identification.", 
+            "%\n- Please ensure all specified yrs are complete for lapse identification.", 
             call. = FALSE
         )
     }
-    # setup - identify next year a license is held
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
         group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
         mutate(lead_year = lead(.data$year)) %>%
         ungroup() %>%
-
-        # calculate lapse
-        mutate(
-            lapse = case_when(
-                .data$lead_year == (.data$year + 1) ~ 0L, # renewed
-                TRUE ~ 1L # lapsed
-            ),
-            # ensure NA in final year
-            lapse = ifelse(.data$year >= max(yrs), NA, .data$lapse) 
-        )
+        mutate(lapse = case_when( 
+            .data$year >= max(yrs) ~ NA_integer_, 
+            .data$lead_year == (.data$year + 1) ~ 0L, # renewed 
+            TRUE ~ 1L # lapsed 
+        ))
     if (show_summary) {
         check_identify_lapse(lic_history) %>% print()
     }
-    if (show_check_vars) {
-        lic_history
-    } else {
-        select(lic_history, -.data$lead_year)
+    if (!show_check_vars) {
+        lic_history <- select(lic_history, -.data$lead_year)
     }
+    lic_history
 }
 
 # Checking & Summarizing --------------------------------------------------
