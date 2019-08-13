@@ -367,6 +367,17 @@ identify_lapse <- function(
 ) {
     yrs <- prep_yrs(yrs, lic_history, "identify_lapse()")
     
+    # issue warning if low final year
+    cnt <- count(lic_history, .data$year) %>%
+        mutate(pct_change = (.data$n - lag(.data$n)) / lag(.data$n) * 100)
+    last_change <- cnt$pct_change[length(yrs)] %>% round(1)
+    if (last_change < -20) {
+        warning(
+            "There is a large drop in the final year: ", last_change, "%\n",
+            "Please ensure all years are complete for lapse identification.", 
+            call. = FALSE
+        )
+    }
     # setup - identify next year a license is held
     lic_history <- lic_history %>%
         arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
