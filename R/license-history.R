@@ -328,26 +328,6 @@ identify_R3 <- function(
     select(lic_history, -.data$lag_year)
 }
 
-identify_R32 <- function(lic_history, yrs) {
-    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
-    
-    lic_history <- lic_history %>%
-        arrange(.data$cust_id, .data$year) %>%
-        group_by(.data$cust_id) %>%
-        mutate(lag_year = lag(.data$year), lag_duration_run = lag(.data$duration_run)) %>%
-        ungroup()
-}
-
-identify_R33 <- function(lic_history, yrs) {
-    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
-    
-    lic_history <- lic_history %>%
-        arrange(.data$cust_id, .data$year) %>%
-        group_by(.data$cust_id) %>%
-        # mutate(lag_year = lag(.data$year)) %>%
-        ungroup()
-}
-
 #' Identify lapse group each year
 #'
 #' This is intended to be called following \code{\link{make_lic_history}} 
