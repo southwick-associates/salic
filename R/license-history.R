@@ -369,12 +369,13 @@ identify_lapse <- function(
     
     # issue warning if low final year
     cnt <- count(lic_history, .data$year) %>%
+        filter(.data$year %in% yrs) %>%
         mutate(pct_change = (.data$n - lag(.data$n)) / lag(.data$n) * 100)
     last_change <- cnt$pct_change[length(yrs)] %>% round(1)
     if (last_change < -20) {
         warning(
-            "There is a large drop in the final year: ", last_change, "%\n",
-            "Please ensure all years are complete for lapse identification.", 
+            "There is a large drop in the final year specified: ", last_change, 
+            "%\n- Please ensure all years are complete for lapse identification.", 
             call. = FALSE
         )
     }
