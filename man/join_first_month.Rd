@@ -15,11 +15,10 @@ join_first_month(sale_ranked, sale_unranked, grp_var = c("cust_id",
 \item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
-This function is only intended to be run following \code{\link{rank_sale}};
-necessary since the sale ranking only keeps one row per cust_id-year,
-(determined by highest duration value). This step ensures the earliest 
-month value gets recorded in the license history table; enabling a simple
-month filter of license history to display mid-year vs. full-year results.
+This function is only intended to be run as part of (or following) 
+\code{\link{rank_sale}}; ensures the earliest 
+month value gets recorded in the license history table (useful for mid-year
+results).
 }
 \examples{
 library(dplyr)

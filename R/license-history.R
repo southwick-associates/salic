@@ -4,15 +4,18 @@
 
 #' Filter sales to 1 row per customer per year.
 #'
-#' The filter is based on one or more variables (rank_var); the row with the maximum 
-#' value(s) of rank_var is selected. The default (and intended purpose) is to 
-#' pick the maximum "duration" value per customer-year. This is a preliminary step
-#' to \code{\link{make_lic_history}} which ensures that multi-year & lifetime sales
-#' are always accounted for.
+#' Intended to run before \code{\link{make_lic_history}} to ensure that 
+#' multi-year/lifetime sales are accounted for.  
+#' The default (and intended purpose) is to pick the maximum "duration" value 
+#' per customer-year. Optionally, it will also pick the minimum value of month 
+#' (useful in mid-year dashboards) if first_month = TRUE. 
 #' 
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
 #' @param grp_var character: name of variable(s) used for grouping
+#' @param first_month logical: If TRUE, also runs \code{\link{join_first_month}}
+#' to ensure the output contains the earliest month by grp_var 
+#' (useful for mid-year dashboards)
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @import dplyr
 #' @importFrom utils tail
@@ -21,9 +24,9 @@
 #' @examples
 #' library(dplyr)
 #' data(lic, sale)
+#' 
 #' sale_unranked <- left_join(sale, lic)
-#' sale_ranked <- rank_sale(sale_unranked) %>%
-#'     join_first_month(sale_unranked)
+#' sale_ranked <- rank_sale(sale_unranked)
 #'     
 #' # check sale ranking - highest duration will always be picked
 #' left_join(
@@ -32,7 +35,18 @@
 #'     by = "duration",
 #'     suffix = c(".ranked", ".unranked")
 #' )
-rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
+#' 
+#' # with earliest month included
+#' sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
+#' left_join(
+#'     count(sale_ranked, month), 
+#'     distinct(sale_unranked, cust_id, year, month) %>% count(month), 
+#'     by = "month",
+#'     suffix = c(".ranked", ".unranked")
+#' )
+rank_sale <- function(
+    sale, rank_var = "duration", grp_var = c("cust_id", "year"), first_month = FALSE
+) {
     if (!all(rank_var %in% colnames(sale))) {
         stop("All rank_var variable(s) (", paste(rank_var, collapse = ", "),
              ") must be included in sale", call. = FALSE)
@@ -40,16 +54,20 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
     dt <- data.table(sale)
     setorderv(dt, rank_var) # order ascending
     dt <- dt[, tail(.SD, 1), by = grp_var] # pick last
-    as_tibble(dt)
+    out <- as_tibble(dt)
+    
+    if (first_month) {
+        if ("month" %in% colnames(sale)) out <- join_first_month(out, sale, grp_var)
+    }
+    out
 }
 
 #' Join earliest sale month by customer-year to ranked sale table.
 #'
-#' This function is only intended to be run following \code{\link{rank_sale}};
-#' necessary since the sale ranking only keeps one row per cust_id-year,
-#' (determined by highest duration value). This step ensures the earliest 
-#' month value gets recorded in the license history table; enabling a simple
-#' month filter of license history to display mid-year vs. full-year results.
+#' This function is only intended to be run as part of (or following) 
+#' \code{\link{rank_sale}}; ensures the earliest 
+#' month value gets recorded in the license history table (useful for mid-year
+#' results).
 #' 
 #' @param sale_ranked data frame: Input ranked sales data
 #' @param sale_unranked data frame: Input unranked sales data
@@ -375,43 +393,6 @@ identify_lapse <- function(
     dt[order(year), (anscols) := shift(.SD, 1, type = "lead"), by = cust_id, .SDcols = cols]
     
    lic_history <- as_tibble(dt) %>%
-        mutate(lapse = case_when( 
-            .data$year >= max(yrs) ~ NA_integer_, 
-            .data$lead_year == (.data$year + 1) ~ 0L, # renewed 
-            TRUE ~ 1L # lapsed 
-        ))
-    if (show_summary) {
-        check_identify_lapse(lic_history) %>% print()
-    }
-    if (!show_check_vars) {
-        lic_history <- select(lic_history, -.data$lead_year)
-    }
-    lic_history
-}
-
-identify_lapse_old <- function(
-    lic_history, yrs = sort(unique(lic_history$year)), 
-    show_summary = FALSE, show_check_vars = FALSE
-) {
-    yrs <- prep_yrs(yrs, lic_history, "identify_lapse()")
-    
-    # issue warning if low final year
-    cnt <- count(lic_history, .data$year) %>%
-        filter(.data$year %in% yrs) %>%
-        mutate(pct_change = (.data$n - lag(.data$n)) / lag(.data$n) * 100)
-    last_change <- cnt$pct_change[length(yrs)] %>% round(1)
-    if (last_change < -20) {
-        warning(
-            "There is a large drop in the final year specified: ", last_change, 
-            "%\n- Please ensure all specified yrs are complete for lapse identification.", 
-            call. = FALSE
-        )
-    }
-    lic_history <- lic_history %>%
-        arrange(.data$cust_id, .data$year) %>% # for correct lead ordering
-        group_by(.data$cust_id) %>% # to ensure lead calculations are customer-specific
-        mutate(lead_year = lead(.data$year)) %>%
-        ungroup() %>%
         mutate(lapse = case_when( 
             .data$year >= max(yrs) ~ NA_integer_, 
             .data$lead_year == (.data$year + 1) ~ 0L, # renewed 

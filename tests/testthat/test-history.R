@@ -47,6 +47,11 @@ test_that("join_first_month() produces expected result", {
         ungroup() %>%
         select(cust_id, year, month)
     expect_equal(x, y)
+    
+    # from rank_sale
+    x <- rank_sale(sale_unranked, first_month = TRUE) %>%
+        select(cust_id, year, month)
+    expect_equal(x, y)
 })
     
 test_that("make_lic_history() produces expected result", {

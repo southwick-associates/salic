@@ -4,7 +4,8 @@
 \alias{rank_sale}
 \title{Filter sales to 1 row per customer per year.}
 \usage{
-rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
+rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"),
+  first_month = FALSE)
 }
 \arguments{
 \item{sale}{data frame: Input sales data}
@@ -12,26 +13,39 @@ rank_sale(sale, rank_var = "duration", grp_var = c("cust_id", "year"))
 \item{rank_var}{character: name of variable(s) to use for ranking}
 
 \item{grp_var}{character: name of variable(s) used for grouping}
+
+\item{first_month}{logical: If TRUE, also runs \code{\link{join_first_month}}
+to ensure the output contains the earliest month by grp_var 
+(useful for mid-year dashboards)}
 }
 \description{
-The filter is based on one or more variables (rank_var); the row with the maximum 
-value(s) of rank_var is selected. The default (and intended purpose) is to 
-pick the maximum "duration" value per customer-year. This is a preliminary step
-to \code{\link{make_lic_history}} which ensures that multi-year & lifetime sales
-are always accounted for.
+Intended to run before \code{\link{make_lic_history}} to ensure that 
+multi-year/lifetime sales are accounted for.  
+The default (and intended purpose) is to pick the maximum "duration" value 
+per customer-year. Optionally, it will also pick the minimum value of month 
+(useful in mid-year dashboards) if first_month = TRUE.
 }
 \examples{
 library(dplyr)
 data(lic, sale)
+
 sale_unranked <- left_join(sale, lic)
-sale_ranked <- rank_sale(sale_unranked) \%>\%
-    join_first_month(sale_unranked)
+sale_ranked <- rank_sale(sale_unranked)
     
 # check sale ranking - highest duration will always be picked
 left_join(
     count(sale_ranked, duration), 
     distinct(sale_unranked, cust_id, year, duration) \%>\% count(duration), 
     by = "duration",
+    suffix = c(".ranked", ".unranked")
+)
+
+# with earliest month included
+sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
+left_join(
+    count(sale_ranked, month), 
+    distinct(sale_unranked, cust_id, year, month) \%>\% count(month), 
+    by = "month",
     suffix = c(".ranked", ".unranked")
 )
 }
