@@ -35,7 +35,8 @@ Other license history functions: \code{\link{carry_duration}},
   \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
+  \code{\link{data_join}}, \code{\link{identify_R3}},
+  \code{\link{identify_lapse}},
   \code{\link{join_first_month}},
   \code{\link{make_lic_history}}, \code{\link{rank_sale}}
 }

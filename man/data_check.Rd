@@ -7,11 +7,11 @@
 data_check(cust, lic, sale)
 }
 \arguments{
-\item{cust}{data frame: customer table}
+\item{cust}{data frame: customer table (key = "cust_id")}
 
-\item{lic}{data frame: license types table}
+\item{lic}{data frame: license types table (key = "lic_id")}
 
-\item{sale}{data frame: transactions table}
+\item{sale}{data frame: transactions table (foreign keys = "lic_id", "cust_id")}
 }
 \description{
 Produces warnings if any checks fail (stays silent on success).
@@ -22,8 +22,8 @@ data tables. Rules are designed to ensure:
   \item primary keys are unique and non-missing
   \item all required variables are present
   \item variables only contain prescribed values
-  \item foreign keys are present in relevant primary key table (i.e., all cust_ids
-  in "sale" can be found in "cust")
+  \item foreign keys are present in relevant primary key table (e.g., all
+  sale$cust_id can be found in cust$cust_id)
 }
 }
 \examples{

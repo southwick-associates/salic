@@ -224,13 +224,13 @@ data_check_sale <- function(
 #'   \item primary keys are unique and non-missing
 #'   \item all required variables are present
 #'   \item variables only contain prescribed values
-#'   \item foreign keys are present in relevant primary key table (i.e., all cust_ids
-#'   in "sale" can be found in "cust")
+#'   \item foreign keys are present in relevant primary key table (e.g., all
+#'   sale$cust_id can be found in cust$cust_id)
 #' }
 #' 
-#' @param cust data frame: customer table
-#' @param lic data frame: license types table
-#' @param sale data frame: transactions table
+#' @param cust data frame: customer table (key = "cust_id")
+#' @param lic data frame: license types table (key = "lic_id")
+#' @param sale data frame: transactions table (foreign keys = "lic_id", "cust_id")
 #' @family functions to check data format
 #' @import dplyr
 #' @export
