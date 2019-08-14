@@ -252,7 +252,7 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
              ") needed for make_lic_history()", call. = FALSE)
     }
     # replace missings (of var) with value from previous year (if available)
-    carry_one_variable <- function(sale_split, yrs, var) {
+    for (var in carry_vars) {
         for (i in 2L:length(yrs)) {
             sale_split[[i]] <- filter(sale_split[[i]], is.na(.data[[var]])) %>%
                 left_join(
@@ -263,10 +263,6 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
                 select(-.data$lastvar) %>%
                 bind_rows(filter(sale_split[[i]], !is.na(.data[[var]])))
         }
-        sale_split
-    }
-    for (i in carry_vars) {
-        sale_split <- carry_one_variable(sale_split, yrs, i)
     }
     sale_split
 }
