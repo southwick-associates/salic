@@ -13,7 +13,9 @@
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
 #' @param grp_var character: name of variable(s) used for grouping
+#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @import dplyr
+#' @importFrom utils tail
 #' @family license history functions
 #' @export
 #' @examples
@@ -32,20 +34,13 @@
 #' )
 rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year")) {
     if (!all(rank_var %in% colnames(sale))) {
-        stop("All rank_var variable(s) (", paste(rank_var, collapse = ", "), 
+        stop("All rank_var variable(s) (", paste(rank_var, collapse = ", "),
              ") must be included in sale", call. = FALSE)
     }
-    # programming with dplyr, string input (which is a bit unusual):
-    # - https://github.com/tidyverse/dplyr/issues/2662
-    grp_var <- syms(grp_var)
-    rank_var <- syms(rank_var)
-    
-    sale %>%
-        # to ensure highest value of rank_var - sort ascending, pick last
-        arrange(!!! rank_var) %>%
-        group_by(!!! grp_var) %>%
-        slice(n()) %>%
-        ungroup()
+    dt <- data.table(sale)
+    setorderv(dt, rank_var) # order ascending
+    dt <- dt[, tail(.SD, 1), by = grp_var] # pick last
+    as_tibble(dt)
 }
 
 #' Join earliest sale month by customer-year to ranked sale table.
@@ -190,11 +185,11 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' data(sale, lic)
 #' 
 #' sale_unranked <- left_join(lic, sale)
-#' sale_ranked <- rank_sale(sale_unranked) 
-#' sale_split <- select(sale_ranked, cust_id, year, duration) %>%
-#'     split(sale_ranked$year)
-#'     
-#' carry_duration(sale_split, 2008:2019)
+#' sale_ranked <- rank_sale(sale_unranked) %>%
+#'     select(cust_id, year, duration)
+#' 
+#' split(sale_ranked, sale_ranked$year) %>%     
+#'     carry_duration(2008:2019)
 carry_duration <- function(sale_split, yrs) {
     if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
         stop("All 3 variables (cust_id, year, duration) needed ",
@@ -233,16 +228,12 @@ carry_duration <- function(sale_split, yrs) {
 #' library(dplyr)
 #' data(sale, lic)
 #' 
-#' yrs <- 2008:2019
-#' carry_vars <- c("month", "res")
-#' 
 #' sale_unranked <- left_join(lic, sale)
-#' sale_ranked <- rank_sale(sale_unranked) 
-#' sale_split <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
-#'     split(sale_ranked$year) %>%
-#'     carry_duration(yrs)
-#'     
-#' carry_variables(sale_split, yrs, c("month", "res"))
+#' sale_ranked <- rank_sale(sale_unranked)
+#' 
+#' split(sale_ranked, sale_ranked$year) %>%     
+#'     carry_duration(2008:2019) %>%
+#'     carry_variables(2008:2019, c("month", "res"))
 carry_variables <- function(sale_split, yrs, carry_vars) {
     if (is.null(carry_vars)) {
         return(sale_split)
@@ -521,7 +512,7 @@ check_identify_lapse <- function(lic_history) {
         )) %>%
         count(.data$lapse, .data$year, .data$yrs_till_next) %>%
         data.frame()
-    lapse_summary %>%
+    lapse_summary <- lapse_summary %>%
         select(-.data$yrs_till_next) %>%
-        split(lapse_summary$yrs_till_next)
+    split(lapse_summary, lapse_summary$yrs_till_next)
 }

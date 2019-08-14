@@ -22,16 +22,12 @@ This function is intended to be called from \code{\link{make_lic_history}}.
 library(dplyr)
 data(sale, lic)
 
-yrs <- 2008:2019
-carry_vars <- c("month", "res")
-
 sale_unranked <- left_join(lic, sale)
-sale_ranked <- rank_sale(sale_unranked) 
-sale_split <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] \%>\%
-    split(sale_ranked$year) \%>\%
-    carry_duration(yrs)
-    
-carry_variables(sale_split, yrs, c("month", "res"))
+sale_ranked <- rank_sale(sale_unranked)
+
+split(sale_ranked, sale_ranked$year) \%>\%     
+    carry_duration(2008:2019) \%>\%
+    carry_variables(2008:2019, c("month", "res"))
 }
 \seealso{
 Other license history functions: \code{\link{carry_duration}},

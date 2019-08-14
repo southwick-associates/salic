@@ -100,13 +100,13 @@ test_that("carry_duration() produces expected result", {
 test_that("carry_variables() produces expected result", {
     yrs <- 2008:2019
     format_same <- function(x) {
-        select(x, cust_id, year, month, res) %>% 
-            arrange(cust_id, year) %>% 
+        select(x, cust_id, year, month, res) %>%
+            arrange(cust_id, year) %>%
             data.frame()
     }
-    x <- sale_ranked %>%
-        join_first_month(sale_unranked) %>%
-        split(sale_ranked$year) %>% 
+    z <- sale_ranked %>%
+        join_first_month(sale_unranked)
+    x <- split(z, z$year) %>%
         carry_duration(yrs) %>%
         carry_variables(yrs, c("month", "res")) %>%
         bind_rows()

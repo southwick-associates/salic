@@ -20,11 +20,11 @@ library(dplyr)
 data(sale, lic)
 
 sale_unranked <- left_join(lic, sale)
-sale_ranked <- rank_sale(sale_unranked) 
-sale_split <- select(sale_ranked, cust_id, year, duration) \%>\%
-    split(sale_ranked$year)
-    
-carry_duration(sale_split, 2008:2019)
+sale_ranked <- rank_sale(sale_unranked) \%>\%
+    select(cust_id, year, duration)
+
+split(sale_ranked, sale_ranked$year) \%>\%     
+    carry_duration(2008:2019)
 }
 \seealso{
 Other license history functions: \code{\link{carry_variables}},
