@@ -53,7 +53,10 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #' 
 #' @param sale_ranked data frame: Input ranked sales data
 #' @param sale_unranked data frame: Input unranked sales data
+#' @inheritParams rank_sale
 #' @import dplyr
+#' @rawNamespace import(data.table, except = c(first, between, last))
+#' @importFrom utils head
 #' @family license history functions
 #' @export
 #' @examples
@@ -70,20 +73,21 @@ rank_sale <- function(sale, rank_var = "duration", grp_var = c("cust_id", "year"
 #'     by = "month",
 #'     suffix = c(".ranked", ".unranked")
 #' )
-join_first_month <- function(sale_ranked, sale_unranked) {
+join_first_month <- function(sale_ranked, sale_unranked, grp_var = c("cust_id", "year")) {
     if (!"month" %in% colnames(sale_unranked)) {
         stop("month variable must be included in sale_unranked", call. = FALSE)
     }
-    sale_unranked %>%
-        arrange(.data$month) %>%
-        group_by(.data$cust_id, .data$year) %>%
-        slice(1L) %>%
-        ungroup() %>%
-        select(.data$cust_id, .data$year, .data$month) %>%
+    dt <- data.table(sale_unranked)
+    setorderv(dt, "month") # order ascending
+    dt <- dt[, head(.SD, 1), by = grp_var] # pick first
+    
+    as_tibble(dt) %>%
+        select(!!! enquos(grp_var), .data$month) %>%
         left_join(
             select(sale_ranked, -.data$month),
-            by = c("cust_id", "year")
-        )
+            by = grp_var
+        ) %>%
+        arrange(cust_id, year)
 }
 
 #' Internal Function: Check years range & sort
@@ -512,7 +516,7 @@ check_identify_lapse <- function(lic_history) {
         )) %>%
         count(.data$lapse, .data$year, .data$yrs_till_next) %>%
         data.frame()
-    lapse_summary <- lapse_summary %>%
+    lapse_summary %>%
         select(-.data$yrs_till_next) %>%
-    split(lapse_summary, lapse_summary$yrs_till_next)
+        split(lapse_summary$yrs_till_next)
 }

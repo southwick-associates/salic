@@ -4,12 +4,15 @@
 \alias{join_first_month}
 \title{Join earliest sale month by customer-year to ranked sale table.}
 \usage{
-join_first_month(sale_ranked, sale_unranked)
+join_first_month(sale_ranked, sale_unranked, grp_var = c("cust_id",
+  "year"))
 }
 \arguments{
 \item{sale_ranked}{data frame: Input ranked sales data}
 
 \item{sale_unranked}{data frame: Input unranked sales data}
+
+\item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
 This function is only intended to be run following \code{\link{rank_sale}};
