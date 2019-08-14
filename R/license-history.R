@@ -65,8 +65,10 @@ rank_sale <- function(
     sale, rank_var = "duration", grp_var = c("cust_id", "year"), first_month = FALSE
 ) {
     if (!all(rank_var %in% colnames(sale))) {
-        stop("All rank_var variable(s) (", paste(rank_var, collapse = ", "),
-             ") must be included in sale", call. = FALSE)
+        stop(
+            "All rank_var variable(s) (", paste(rank_var, collapse = ", "), 
+            ") must be included in sale", call. = FALSE
+        )
     }
     dt <- data.table(sale)
     setorderv(dt, rank_var) # order ascending
@@ -231,8 +233,10 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #'     carry_duration(2008:2019)
 carry_duration <- function(sale_split, yrs) {
     if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
-        stop("All 3 variables (cust_id, year, duration) needed ",
-             "for make_lic_history()", call. = FALSE)
+        stop(
+            "All 3 variables (cust_id, year, duration) needed ", 
+            "for make_lic_history()", call. = FALSE
+        ) 
     }
     for (i in 2L:length(yrs)) {
         # carry forward previous year
@@ -278,8 +282,10 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
         return(sale_split)
     }
     if (any(!carry_vars %in% colnames(sale_split[[1]]))) {
-        stop("All carry_vars (", paste(carry_vars, collapse = ", "),
-             ") needed for make_lic_history()", call. = FALSE)
+        stop(
+            "All carry_vars (", paste(carry_vars, collapse = ", "), 
+            ") needed for make_lic_history()", call. = FALSE
+        )
     }
     # replace missings (of var) with value from previous year (if available)
     for (var in carry_vars) {
@@ -330,7 +336,13 @@ identify_R3 <- function(
     show_summary = FALSE, show_check_vars = FALSE
 ) {
     yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
-    
+    if (length(yrs) <= 5) {
+        warning(
+            "No R3 identification performed: only ", length(yrs), 
+            " yrs specified (requires 6 or more)", call. = FALSE
+        )
+        return(lic_history)
+    }
     # get lag year for R3 identification
     dt <- data.table(lic_history)
     cols <- c("year", "duration_run")
@@ -396,6 +408,7 @@ identify_lapse <- function(
         filter(.data$year %in% yrs) %>%
         mutate(pct_change = (.data$n - lag(.data$n)) / lag(.data$n) * 100)
     last_change <- cnt$pct_change[length(yrs)] %>% round(1)
+    
     if (last_change < -20) {
         warning(
             "There is a large drop in the final year specified: ", last_change, 
@@ -471,8 +484,10 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #'     check_identify_R3(2008:2019)
 check_identify_R3 <- function(lic_history, yrs) {
     if (!"yrs_since" %in% names(lic_history)) {
-        warning("yrs_since variable needed for check_identify_R3 ",
-                "(see ?identify_R3", call. = FALSE)
+        warning(
+            "yrs_since variable needed for check_identify_R3 ", 
+            "(see ?identify_R3", call. = FALSE
+        )
         return(invisible())
     }
     lic_history %>%
@@ -502,8 +517,10 @@ check_identify_R3 <- function(lic_history, yrs) {
 #'     check_identify_lapse()
 check_identify_lapse <- function(lic_history) {
     if (!"lead_year" %in% names(lic_history)) {
-        warning("lead_year variable needed for check_identify_lapse ",
-                "(see ?identify_lapse", call. = FALSE)
+        warning(
+            "lead_year variable needed for check_identify_lapse ", 
+            "(see ?identify_lapse", call. = FALSE
+        )
         return(invisible())
     }
     lapse_summary <- lic_history %>%
