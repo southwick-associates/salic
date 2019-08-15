@@ -12,6 +12,26 @@ sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 history_calc <- sale_ranked %>%
     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 
+
+# New History Functions ---------------------------------------------------
+
+test_that("make_history() produces expected result", {
+    format_result <- function(x) {
+        select(x, cust_id, year, duration_run) %>%
+            arrange(cust_id, year)
+    }
+    x <- make_history(sale_ranked, 2008:2019) %>% format_result()
+    y <- format_result(history)
+    
+    # start here, getting different number of rows
+    # presumably the lapply filter, find out why
+    expect_equal(x, y)
+})
+
+# Previous Functions ------------------------------------------------------
+
+
+
 test_that("rank_sale() produces expected result", {
     # compare function output to a simple dplyr pipeline
     x <- rank_sale(sale_unranked, rank_var = "duration", 

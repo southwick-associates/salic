@@ -1,6 +1,6 @@
 # license history functions
 
-# Making Tables -----------------------------------------------------------
+# Preparing Sale ----------------------------------------------------------
 
 #' Filter sales to 1 row per customer per year.
 #'
@@ -147,6 +147,8 @@ prep_yrs <- function(yrs, df, func_name) {
     yrs
 }
 
+# Making History -----------------------------------------------------------
+
 #' Make a License History table with 1 row per customer per year
 #'
 #' The license history table accounts for multi-year/lifetime licenses directly by including
@@ -194,6 +196,62 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
         carry_variables(yrs, carry_vars) %>%
         bind_rows() %>% 
         rename(duration_run = duration)
+}
+
+#' New license history function (in progress)
+#'
+#' Get a faster function for making license history
+#' 
+#' @param sale_ranked data frame: Sales table from which license history will be made
+#' @param yrs numeric: Years in sales data (column 'year') from which
+#' to create license history
+#' @param carry_vars character: additional variables to carry over from previous year
+#' (for multi-year and lifetime licenses).
+#' @import dplyr
+#' @family license history functions
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, lic)
+#' sale <- left_join(sale, lic) %>% rank_sale()
+#' history <- make_history(sale, 2008:2019)
+make_history <- function(sale_ranked, yrs) {
+    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
+    sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+        filter(.data$year %in% yrs)
+    x <- split(sale_ranked, sale_ranked$year)
+    
+    x[[1L]]$duration_run <- NA
+    for (i in 2L:length(yrs)) {
+        x[[i]] <- select(x[[i-1]], cust_id, duration_lag = duration) %>%
+            full_join(x[[i]], by = "cust_id") %>%
+            forward_duration()
+    }
+    lapply(x, function(x) filter(x, !is.na(duration_run), duration_run != 0)) %>%
+        bind_rows() %>%
+        select(-duration_lag)
+}
+
+#' Internal Functions for make_history()
+#'
+#' @family license history functions
+#' @export
+#' @keywords internal
+#' @name history_internal
+#' @examples
+#' # example
+NULL
+
+#' @rdname history_internal
+#' @export
+forward_duration <- function(df, x = "duration", x_lag = "duration_lag") {
+    if (any(!c("duration_lag", "duration") %in% colnames(df))) {
+        stop("Need duration & duration_lag for forward_duration()", call. = FALSE)
+    }
+    df %>% mutate(
+        duration_run = pmax(duration, duration_lag - 1, na.rm = TRUE),
+        duration_run = as.integer(duration_run)
+    )
 }
 
 #' Internal Function: Carry multi-year/lifetime durations forward
