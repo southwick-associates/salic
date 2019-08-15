@@ -26,7 +26,7 @@ test_that("make_history() produces expected result", {
     expect_equal(x, y)
 })
 
-test_that("forward_duration() produces expected result", {
+test_that("make_history() produced expected duration_run", {
     yrs <- 2008:2019
     x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
     
@@ -38,13 +38,13 @@ test_that("forward_duration() produces expected result", {
     expect_true(all(
         (xj$duration_run == xj$duration_run_lag - 1) | xj$year == yrs[1]
     ))
-    
-    
+})
+
+test_that("make_history() produced expected last_year", {
+    # not sure how to check this yet  
 })
     
 # Previous Functions ------------------------------------------------------
-
-
 
 test_that("rank_sale() produces expected result", {
     # compare function output to a simple dplyr pipeline

@@ -221,37 +221,47 @@ make_history <- function(
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
         filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration) # initialize vars
+        mutate(duration_run = duration, last_year = year)
     x <- split(sale_ranked, sale_ranked$year) # for iteration by year
     
     for (i in 2:length(yrs)) {
         x[[i]] <- full_join(
             x[[i]], 
-            select(x[[i-1]], cust_id, duration_run, year),  
+            select(x[[i-1]], cust_id, duration_run, last_year),  
             by = "cust_id", suffix = c("", "_lag")
-        ) %>%
-            forward_duration() %>%
-            mutate(year = yrs[i])
+        ) %>% mutate(
+            duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
+            last_year = ifelse(is.na(year), last_year_lag, year),
+            year = yrs[i]
+        )
     }
     x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
-        bind_rows()
+        bind_rows() %>%
+        mutate(duration_run = as.integer(duration_run))
     if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
     x
 }
 
-#' Internal Functions for make_history()
-#'
-#' @family license history functions
+#' @rdname history_internal
 #' @export
-#' @keywords internal
-#' @name history_internal
-#' @examples
-#' # example
-NULL
+forward_year <- function(df) {
+    df %>% mutate(
+        last_year = ifelse(is.na(year), last_year_lag, year)
+    )
+}
+
+#' @rdname history_internal
+#' @export
+forward_vars <- function(df) {
+    df %>% mutate(
+        
+    )
+}
 
 #' @rdname history_internal
 #' @export
 forward_duration <- function(df) {
+    # TODO: probably makes more sense to put errors/warnings like these in make_history()
     if (any(!c("duration_run", "duration_run_lag") %in% colnames(df))) {
         stop("Need duration_run & duration_run_lag for forward_duration()", call. = FALSE)
     }
@@ -260,6 +270,26 @@ forward_duration <- function(df) {
         duration_run = as.integer(duration_run)
     )
 }
+
+#' Internal Functions for make_history()
+#' 
+#' \code{\link{make_history}} will run these in sequence:
+#' \itemize{
+#'   \item forward_duration: update "duration_run" variable
+#'   \item forward_year: actually, probably don't need this!
+#'   \item forward_vars: update carry_vars variable(s)
+#' }
+#'
+#' @param df data frame: single year running history
+#' @family license history functions
+#' @export
+#' @keywords internal
+#' @name history_internal
+#' @examples
+#' # example
+NULL
+
+
 
 #' Internal Function: Carry multi-year/lifetime durations forward
 #' 
