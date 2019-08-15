@@ -218,22 +218,33 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, show_diagnostics = FALSE
 ) {
+    slct_cols <- c("cust_id", "year", "duration", carry_vars)
+    missing_cols <- setdiff(slct_cols, colnames(sale_ranked))
+    if (length(missing_cols) > 0) {
+        stop(
+            "Missing required columns from make_history:\n", 
+            "- (", paste(missing_cols, collapse = ", "), ") needed", 
+            call. = FALSE
+        )
+    }
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
-    sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
+    sale_ranked <- sale_ranked[slct_cols] %>%
         filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration, last_year = year)
+        mutate(duration_run = duration, last_year = year) # initialize intermediates
     x <- split(sale_ranked, sale_ranked$year) # for iteration by year
     
     for (i in 2:length(yrs)) {
-        x[[i]] <- full_join(
-            x[[i]], 
-            select(x[[i-1]], cust_id, duration_run, last_year),  
-            by = "cust_id", suffix = c("", "_lag")
-        ) %>% mutate(
-            duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
-            last_year = ifelse(is.na(year), last_year_lag, year),
-            year = yrs[i]
-        )
+        x[[i]] <- x[[i]] %>%
+            full_join( 
+                select(x[[i-1]], cust_id, duration_run, last_year, carry_vars),   
+                by = "cust_id", suffix = c("", "_lag")
+            ) %>%
+            mutate( 
+                duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE), 
+                last_year = ifelse(is.na(year) & , last_year_lag, year), 
+                year = yrs[i]
+            ) %>%
+            forward_vars(carry_vars)
     }
     x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
@@ -244,31 +255,27 @@ make_history <- function(
 
 #' @rdname history_internal
 #' @export
-forward_year <- function(df) {
-    df %>% mutate(
-        last_year = ifelse(is.na(year), last_year_lag, year)
-    )
-}
-
-#' @rdname history_internal
-#' @export
-forward_vars <- function(df) {
-    df %>% mutate(
-        
-    )
-}
-
-#' @rdname history_internal
-#' @export
-forward_duration <- function(df) {
-    # TODO: probably makes more sense to put errors/warnings like these in make_history()
-    if (any(!c("duration_run", "duration_run_lag") %in% colnames(df))) {
-        stop("Need duration_run & duration_run_lag for forward_duration()", call. = FALSE)
+forward_vars <- function(df, carry_vars = NULL) {
+    if (is.null(carry_vars)) {
+        return(df)
     }
-    df %>% mutate(
-        duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
-        duration_run = as.integer(duration_run)
-    )
+    
+    # start here, this isn't coming out correct
+    # probably review previous function to get a memory refresh
+    forward_one <- function(df, var) {
+        var_lag <- sym(paste0(var, "_lag"))
+        var <- sym(var)
+        # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
+        mutate(df, !! var := case_when(
+            !is.na(!! var) ~ !! var,
+            last_year_lag == (last_year - 1) ~ !! var_lag,
+            TRUE ~ !! var
+        ))
+    }
+    for (i in carry_vars) {
+        df <- forward_one(df, i)
+    }
+    df
 }
 
 #' Internal Functions for make_history()

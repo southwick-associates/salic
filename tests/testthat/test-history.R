@@ -17,12 +17,13 @@ history_calc <- sale_ranked %>%
 # New History Functions ---------------------------------------------------
 
 test_that("make_history() produces expected result", {
+    carry_vars <- c("res", "month")
     format_result <- function(x) {
-        select(x, cust_id, year, duration_run) %>%
+        select(x, cust_id, year, duration_run, res, month) %>%
             arrange(cust_id, year)
     }
-    x <- make_history(sale_ranked, 2008:2019) %>% format_result()
-    y <- make_lic_history(sale_ranked, 2008:2019) %>% format_result()
+    x <- make_history(sale_ranked, 2008:2019, carry_vars) %>% format_result()
+    y <- make_lic_history(sale_ranked, 2008:2019, carry_vars) %>% format_result()
     expect_equal(x, y)
 })
 
