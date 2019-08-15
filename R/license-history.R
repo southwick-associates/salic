@@ -215,21 +215,28 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' data(sale, lic)
 #' sale <- left_join(sale, lic) %>% rank_sale()
 #' history <- make_history(sale, 2008:2019)
-make_history <- function(sale_ranked, yrs) {
+make_history <- function(
+    sale_ranked, yrs, carry_vars = NULL, show_diagnostics = FALSE
+) {
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     sale_ranked <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
-        filter(.data$year %in% yrs)
-    x <- split(sale_ranked, sale_ranked$year)
+        filter(.data$year %in% yrs) %>%
+        mutate(duration_run = duration) # initialize vars
+    x <- split(sale_ranked, sale_ranked$year) # for iteration by year
     
-    x[[1L]]$duration_run <- NA
-    for (i in 2L:length(yrs)) {
-        x[[i]] <- select(x[[i-1]], cust_id, duration_lag = duration) %>%
-            full_join(x[[i]], by = "cust_id") %>%
-            forward_duration()
+    for (i in 2:length(yrs)) {
+        x[[i]] <- full_join(
+            x[[i]], 
+            select(x[[i-1]], cust_id, duration_run, year),  
+            by = "cust_id", suffix = c("", "_lag")
+        ) %>%
+            forward_duration() %>%
+            mutate(year = yrs[i])
     }
-    lapply(x, function(x) filter(x, !is.na(duration_run), duration_run != 0)) %>%
-        bind_rows() %>%
-        select(-duration_lag)
+    x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
+        bind_rows()
+    if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
+    x
 }
 
 #' Internal Functions for make_history()
@@ -244,12 +251,12 @@ NULL
 
 #' @rdname history_internal
 #' @export
-forward_duration <- function(df, x = "duration", x_lag = "duration_lag") {
-    if (any(!c("duration_lag", "duration") %in% colnames(df))) {
-        stop("Need duration & duration_lag for forward_duration()", call. = FALSE)
+forward_duration <- function(df) {
+    if (any(!c("duration_run", "duration_run_lag") %in% colnames(df))) {
+        stop("Need duration_run & duration_run_lag for forward_duration()", call. = FALSE)
     }
     df %>% mutate(
-        duration_run = pmax(duration, duration_lag - 1, na.rm = TRUE),
+        duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
         duration_run = as.integer(duration_run)
     )
 }

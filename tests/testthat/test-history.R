@@ -9,6 +9,7 @@ library(dplyr)
 data(sale, lic, history)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
+
 history_calc <- sale_ranked %>%
     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 
@@ -21,13 +22,26 @@ test_that("make_history() produces expected result", {
             arrange(cust_id, year)
     }
     x <- make_history(sale_ranked, 2008:2019) %>% format_result()
-    y <- format_result(history)
-    
-    # start here, getting different number of rows
-    # presumably the lapply filter, find out why
+    y <- make_lic_history(sale_ranked, 2008:2019) %>% format_result()
     expect_equal(x, y)
 })
 
+test_that("forward_duration() produces expected result", {
+    yrs <- 2008:2019
+    x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
+    
+    # running duration not less than current year duration
+    expect_true(all((x$duration_run >= x$duration) | is.na(x$duration)))
+    
+    # those not bought in current year: determined by duration_lag
+    xj <- filter(x, is.na(duration))
+    expect_true(all(
+        (xj$duration_run == xj$duration_run_lag - 1) | xj$year == yrs[1]
+    ))
+    
+    
+})
+    
 # Previous Functions ------------------------------------------------------
 
 
