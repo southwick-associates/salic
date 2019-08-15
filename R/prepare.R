@@ -10,7 +10,7 @@ if(getRversion() >= "2.15.1") utils::globalVariables(c(
     "age", "age_year", "agecat", "birth_year", "change_cust",
     "change_revenue", "change_sales", "customers", "dot", "dot2", "duration", 
     "issue_month", "issue_year",  "lastvar",  "sales", "var_old", "yr_diff",  
-    ":=", "old", "cust_id", "month", "year", "lapse"
+    ":=", "old", "cust_id", "month", "year", "lapse", "."
 ))
 
 

@@ -53,38 +53,43 @@ rank_sale <- function(
             ") must be included in sale", call. = FALSE
         )
     }
-    dt <- data.table(sale)
-    setorderv(dt, rank_var) # order ascending
-    dt <- dt[, tail(.SD, 1), by = grp_var] # pick last
-    out <- as_tibble(dt)
+    setDT(sale)
+    setorderv(sale, rank_var) # order ascending
+    ranked <- sale
+    ranked <- ranked[, tail(.SD, 1), by = grp_var] # pick last
     
     if (first_month) {
-        if ("month" %in% colnames(sale)) out <- join_first_month(out, sale, grp_var)
+        if (!"month" %in% colnames(sale)) return(sale)
+        ranked <- join_first_month(ranked, sale, grp_var)
     }
-    out
+    as_tibble(ranked)
 }
 
-#' Join earliest sale month by customer-year to ranked sale table.
+#' Internal Function: Join earliest sale month by customer-year
 #'
-#' This function is only intended to be run as part of (or following) 
-#' \code{\link{rank_sale}}; ensures the earliest 
-#' month value gets recorded in the license history table (useful for mid-year
-#' results).
+#' This function is only intended to be run as part of
+#' \code{\link{rank_sale}}; ensures the earliest month value gets recorded in 
+#' the license history table (useful for mid-year results).
 #' 
-#' @param sale_ranked data frame: Input ranked sales data
-#' @param sale_unranked data frame: Input unranked sales data
+#' @param sale_ranked data.table: Input ranked sales data
+#' @param sale_unranked data.table: Input unranked sales data
 #' @inheritParams rank_sale
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @importFrom utils head
 #' @family license history functions
+#' @keywords internal
 #' @export
 #' @examples
 #' library(dplyr)
 #' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
-#' sale_ranked <- rank_sale(sale_unranked) %>%
-#'     join_first_month(sale_unranked)
+#' sale_ranked <- rank_sale(sale_unranked)
+#' 
+#' data.table::setDT(sale_unranked)
+#' data.table::setDT(sale_ranked)
+#' sale_ranked <- join_first_month(sale_ranked, sale_unranked) %>%
+#'     as_tibble()
 #' 
 #' # check month ranking - earliest month will always be picked
 #' left_join(
@@ -93,21 +98,19 @@ rank_sale <- function(
 #'     by = "month",
 #'     suffix = c(".ranked", ".unranked")
 #' )
-join_first_month <- function(sale_ranked, sale_unranked, grp_var = c("cust_id", "year")) {
+join_first_month <- function(
+    sale_ranked, sale_unranked, grp_var = c("cust_id", "year")
+) {
     if (!"month" %in% colnames(sale_unranked)) {
         stop("month variable must be included in sale_unranked", call. = FALSE)
     }
-    dt <- data.table(sale_unranked)
-    setorderv(dt, "month") # order ascending
-    dt <- dt[, head(.SD, 1), by = grp_var] # pick first
+    setorderv(sale_unranked, "month") # order ascending
+    sale_unranked <- sale_unranked[, .(month = head(month, 1)), by = grp_var]
     
-    as_tibble(dt) %>%
-        select(!!! enquos(grp_var), .data$month) %>%
-        left_join(
-            select(sale_ranked, -.data$month),
-            by = grp_var
-        ) %>%
-        arrange(cust_id, year)
+    sale_ranked[, month := NULL]
+    setkeyv(sale_ranked, grp_var)
+    setkeyv(sale_unranked, grp_var)
+    sale_ranked[sale_unranked, nomatch = 0]
 }
 
 #' Internal Function: Check years range & sort
@@ -176,8 +179,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' library(dplyr)
 #' data(lic, sale)
 #' sale_unranked <- left_join(sale, lic)
-#' sale_ranked <- rank_sale(sale_unranked) %>%
-#'     join_first_month(sale_unranked)
+#' sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 #' history <- sale_ranked %>%
 #'     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 #' 

@@ -39,8 +39,7 @@ and \code{\link{carry_variables}}
 library(dplyr)
 data(lic, sale)
 sale_unranked <- left_join(sale, lic)
-sale_ranked <- rank_sale(sale_unranked) \%>\%
-    join_first_month(sale_unranked)
+sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 history <- sale_ranked \%>\%
     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 

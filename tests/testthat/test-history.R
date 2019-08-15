@@ -8,9 +8,8 @@ library(dplyr)
 # shared data & calculations
 data(sale, lic, history)
 sale_unranked <- left_join(sale, lic)
-sale_ranked <- rank_sale(sale_unranked)
+sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 history_calc <- sale_ranked %>%
-    join_first_month(sale_unranked) %>%
     make_lic_history(2008:2019, carry_vars = c("month", "res"))
 
 test_that("rank_sale() produces expected result", {
@@ -39,7 +38,9 @@ test_that("rank_sale() produces expected result", {
 })
 
 test_that("join_first_month() produces expected result", {
-    x <- join_first_month(sale_ranked, sale_unranked) %>%
+    x <- rank_sale(sale_unranked)
+    x <- join_first_month(data.table::setDT(x), data.table::setDT(sale_unranked)) %>%
+        as_tibble() %>%
         select(cust_id, year, month)
     y <- group_by(sale_unranked, cust_id, year) %>%
         arrange(month) %>%
@@ -48,7 +49,6 @@ test_that("join_first_month() produces expected result", {
         select(cust_id, year, month)
     expect_equal(x, y)
     
-    # from rank_sale
     x <- rank_sale(sale_unranked, first_month = TRUE) %>%
         select(cust_id, year, month)
     expect_equal(x, y)
@@ -109,9 +109,8 @@ test_that("carry_variables() produces expected result", {
             arrange(cust_id, year) %>%
             data.frame()
     }
-    z <- sale_ranked %>%
-        join_first_month(sale_unranked)
-    x <- split(z, z$year) %>%
+    z <- sale_ranked
+    x <- split(sale_ranked, sale_ranked$year) %>%
         carry_duration(yrs) %>%
         carry_variables(yrs, c("month", "res")) %>%
         bind_rows()

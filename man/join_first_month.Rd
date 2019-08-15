@@ -2,30 +2,33 @@
 % Please edit documentation in R/license-history.R
 \name{join_first_month}
 \alias{join_first_month}
-\title{Join earliest sale month by customer-year to ranked sale table.}
+\title{Internal Function: Join earliest sale month by customer-year}
 \usage{
 join_first_month(sale_ranked, sale_unranked, grp_var = c("cust_id",
   "year"))
 }
 \arguments{
-\item{sale_ranked}{data frame: Input ranked sales data}
+\item{sale_ranked}{data.table: Input ranked sales data}
 
-\item{sale_unranked}{data frame: Input unranked sales data}
+\item{sale_unranked}{data.table: Input unranked sales data}
 
 \item{grp_var}{character: name of variable(s) used for grouping}
 }
 \description{
-This function is only intended to be run as part of (or following) 
-\code{\link{rank_sale}}; ensures the earliest 
-month value gets recorded in the license history table (useful for mid-year
-results).
+This function is only intended to be run as part of
+\code{\link{rank_sale}}; ensures the earliest month value gets recorded in 
+the license history table (useful for mid-year results).
 }
 \examples{
 library(dplyr)
 data(lic, sale)
 sale_unranked <- left_join(sale, lic)
-sale_ranked <- rank_sale(sale_unranked) \%>\%
-    join_first_month(sale_unranked)
+sale_ranked <- rank_sale(sale_unranked)
+
+data.table::setDT(sale_unranked)
+data.table::setDT(sale_ranked)
+sale_ranked <- join_first_month(sale_ranked, sale_unranked) \%>\%
+    as_tibble()
 
 # check month ranking - earliest month will always be picked
 left_join(
@@ -46,3 +49,4 @@ Other license history functions: \code{\link{carry_duration}},
   \code{\link{rank_sale}}
 }
 \concept{license history functions}
+\keyword{internal}
