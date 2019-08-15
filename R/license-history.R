@@ -2,23 +2,6 @@
 
 # Making Tables -----------------------------------------------------------
 
-#' Join all license data (cust, lic, sale)
-#'
-#' A convenience fuction to perform inner joins across the 3 tables.
-#' 
-#' @inheritParams data_check
-#' @family license history functions
-#' @export
-#' @examples
-#' data(cust, lic, sale)
-#' sale <- data_join(cust, lic, sale)
-#' dplyr::glimpse(sale)
-data_join <- function(cust, lic, sale) {
-    lic %>%
-        dplyr::inner_join(sale, by = "lic_id") %>%
-        dplyr::inner_join(cust, by = "cust_id")
-}
-
 #' Filter sales to 1 row per customer per year.
 #'
 #' Intended to run before \code{\link{make_lic_history}} to ensure that 
