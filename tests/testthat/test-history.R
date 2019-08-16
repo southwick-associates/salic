@@ -28,6 +28,20 @@ history_calc <- sale_ranked %>%
 #     expect_equal(x, y)
 # })
 
+test_that("make_history() produces expected carry_vars", {
+    format_result <- function(x) {
+        select(x, cust_id, year, res, month) %>% arrange(cust_id, year)
+    }
+    carry_vars <- c("res", "month")
+    x <- make_history(sale_ranked, yrs, carry_vars, show_diagnostics = TRUE)
+    
+    # values from current year purchases shouldn't be overwritten 
+    # (unless they are missing, and only for a carried over license)
+    x1 <- filter(x, !is.na(duration)) %>% format_result()
+    y1 <- format_result(sale_ranked)
+    expect_equal(x1, y1)
+})
+
 test_that("make_history() produced expected duration_run", {
     x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
     
@@ -41,7 +55,7 @@ test_that("make_history() produced expected duration_run", {
     ))
 })
 
-test_that("make_history() produced expected year", {
+test_that("make_history() produced expected year_last", {
     # make sure a lagged year (in history) matches year_last    
     x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
     y <- select(x, -year_last) %>%

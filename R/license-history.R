@@ -245,7 +245,8 @@ make_history <- function(
                 duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE), 
                 year = yrs[i],
                 year_last = ifelse(duration_run_lag >= 1, year - 1, year_last)
-            )
+            ) %>%
+            forward_vars(carry_vars)
     }
     x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
@@ -254,28 +255,28 @@ make_history <- function(
     x
 }
 
-# forward_vars <- function(df, carry_vars = NULL) {
-#     if (is.null(carry_vars)) {
-#         return(df)
-#     }
-#     
-#     # start here, this isn't coming out correct
-#     # probably review previous function to get a memory refresh
-#     forward_one <- function(df, var) {
-#         var_lag <- sym(paste0(var, "_lag"))
-#         var <- sym(var)
-#         # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
-#         mutate(df, !! var := case_when(
-#             !is.na(!! var) ~ !! var,
-#             last_year_lag == (last_year - 1) ~ !! var_lag,
-#             TRUE ~ !! var
-#         ))
-#     }
-#     for (i in carry_vars) {
-#         df <- forward_one(df, i)
-#     }
-#     df
-# }
+forward_vars <- function(df, carry_vars = NULL) {
+    if (is.null(carry_vars)) {
+        return(df)
+    }
+
+    # start here, this isn't coming out correct
+    # probably review previous function to get a memory refresh
+    forward_one <- function(df, var) {
+        var_lag <- sym(paste0(var, "_lag"))
+        var <- sym(var)
+        # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
+        mutate(df, !! var := case_when(
+            !is.na(!! var) | duration_run_lag <= 1 ~ !! var,
+            TRUE ~ !! var_lag
+        )) %>%
+            select(- !! var_lag)
+    }
+    for (i in carry_vars) {
+        df <- forward_one(df, i)
+    }
+    df
+}
 
 #' Internal Functions for make_history()
 #' 
