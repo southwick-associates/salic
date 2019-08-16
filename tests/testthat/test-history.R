@@ -6,6 +6,7 @@ library(dplyr)
 # basically to allow refactoring of code with more assurance that nothing gets broken
 
 # shared data & calculations
+yrs <- 2008:2019
 data(sale, lic, history)
 sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
@@ -16,19 +17,18 @@ history_calc <- sale_ranked %>%
 
 # New History Functions ---------------------------------------------------
 
-test_that("make_history() produces expected result", {
-    carry_vars <- c("res", "month")
-    format_result <- function(x) {
-        select(x, cust_id, year, duration_run, res, month) %>%
-            arrange(cust_id, year)
-    }
-    x <- make_history(sale_ranked, 2008:2019, carry_vars) %>% format_result()
-    y <- make_lic_history(sale_ranked, 2008:2019, carry_vars) %>% format_result()
-    expect_equal(x, y)
-})
+# test_that("make_history() produces expected result", {
+#     carry_vars <- c("res", "month")
+#     format_result <- function(x) {
+#         select(x, cust_id, year, duration_run, res, month) %>%
+#             arrange(cust_id, year)
+#     }
+#     x <- make_history(sale_ranked, yrs, carry_vars) %>% format_result()
+#     y <- make_lic_history(sale_ranked, yrs, carry_vars) %>% format_result()
+#     expect_equal(x, y)
+# })
 
 test_that("make_history() produced expected duration_run", {
-    yrs <- 2008:2019
     x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
     
     # running duration not less than current year duration
@@ -41,8 +41,14 @@ test_that("make_history() produced expected duration_run", {
     ))
 })
 
-test_that("make_history() produced expected last_year", {
-    # not sure how to check this yet  
+test_that("make_history() produced expected year", {
+    # make sure a lagged year (in history) matches year_last    
+    x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
+    y <- select(x, -year_last) %>%
+        arrange(year) %>%
+        group_by(cust_id) %>%
+        mutate(year_last = lag(year)) %>%
+        ungroup() 
 })
     
 # Previous Functions ------------------------------------------------------

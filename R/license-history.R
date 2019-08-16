@@ -230,53 +230,52 @@ make_history <- function(
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     sale_ranked <- sale_ranked[slct_cols] %>%
         filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration, last_year = year) # initialize intermediates
+        mutate(duration_run = duration) # initialize intermediates
     x <- split(sale_ranked, sale_ranked$year) # for iteration by year
+    
+    x[[1]] <- mutate(x[[1]], year_last = NA_integer_)
     
     for (i in 2:length(yrs)) {
         x[[i]] <- x[[i]] %>%
             full_join( 
-                select(x[[i-1]], cust_id, duration_run, last_year, carry_vars),   
+                select(x[[i-1]], cust_id, duration_run, year_last, carry_vars),   
                 by = "cust_id", suffix = c("", "_lag")
             ) %>%
             mutate( 
                 duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE), 
-                last_year = ifelse(is.na(year) & , last_year_lag, year), 
-                year = yrs[i]
-            ) %>%
-            forward_vars(carry_vars)
+                year = yrs[i],
+                year_last = ifelse(duration_run_lag >= 1, year - 1, year_last)
+            )
     }
     x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
-        mutate(duration_run = as.integer(duration_run))
+        mutate_at(vars(duration_run, year_last), "as.integer")
     if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
     x
 }
 
-#' @rdname history_internal
-#' @export
-forward_vars <- function(df, carry_vars = NULL) {
-    if (is.null(carry_vars)) {
-        return(df)
-    }
-    
-    # start here, this isn't coming out correct
-    # probably review previous function to get a memory refresh
-    forward_one <- function(df, var) {
-        var_lag <- sym(paste0(var, "_lag"))
-        var <- sym(var)
-        # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
-        mutate(df, !! var := case_when(
-            !is.na(!! var) ~ !! var,
-            last_year_lag == (last_year - 1) ~ !! var_lag,
-            TRUE ~ !! var
-        ))
-    }
-    for (i in carry_vars) {
-        df <- forward_one(df, i)
-    }
-    df
-}
+# forward_vars <- function(df, carry_vars = NULL) {
+#     if (is.null(carry_vars)) {
+#         return(df)
+#     }
+#     
+#     # start here, this isn't coming out correct
+#     # probably review previous function to get a memory refresh
+#     forward_one <- function(df, var) {
+#         var_lag <- sym(paste0(var, "_lag"))
+#         var <- sym(var)
+#         # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
+#         mutate(df, !! var := case_when(
+#             !is.na(!! var) ~ !! var,
+#             last_year_lag == (last_year - 1) ~ !! var_lag,
+#             TRUE ~ !! var
+#         ))
+#     }
+#     for (i in carry_vars) {
+#         df <- forward_one(df, i)
+#     }
+#     df
+# }
 
 #' Internal Functions for make_history()
 #' 
