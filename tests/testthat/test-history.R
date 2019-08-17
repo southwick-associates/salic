@@ -78,6 +78,8 @@ test_that("make_history() produced expected lapse", {
     expect_equal(format_result(x), format_result(y))
 })
 
+# probably want a better test here
+# could just base on a group-lead, that should cover things well
 test_that("make_history() lapse == 0 holds license in following year", {
     history <- make_history(sale_ranked, 2008:2018)
     no_lapse <- mutate(history, year = year + 1) %>%
