@@ -9,7 +9,8 @@ sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 
 history_calc <- sale_ranked %>%
-    make_history(yrs, carry_vars = c("month", "res"), show_diagnostics = TRUE) %>%
+    make_history(yrs, carry_vars = c("month", "res"), show_diagnostics = TRUE,
+                 yrs_lapse = 2008:2018) %>%
     arrange(cust_id, year)
 
 # forward_vars() ----------------------------------------------------------
@@ -66,13 +67,13 @@ test_that("make_history() produced expected year_last", {
 
 test_that("make_history() produces expected lapse", {
     format_result <- function(x) select(x, cust_id, year, lapse)
-    x <- history <- make_history(sale_ranked, 2008:2018)
+    x <- history <- make_history(sale_ranked, 2008:2019, yrs_lapse = 2008:2018)
     y <- arrange(x, year) %>%
         group_by(cust_id) %>%
         mutate(duration_lead = lead(duration_run), lead_year = lead(year)) %>%
         ungroup() %>%
         mutate(lapse = case_when(
-            year == 2018 ~ NA_integer_,
+            year %in% 2018:2019 ~ NA_integer_,
             duration_lead >= 1 & lead_year == (year +1) ~ 0L,
             TRUE ~ 1L
         ))
@@ -119,19 +120,28 @@ test_that("make_history() R3 - bought last year is carried/renewed", {
 
 # make_history() ----------------------------------------------------------
 
-test_that("make_history() produces expected result", {
-    carry_vars <- c("res", "month")
-    format_result <- function(x) {
-        select(x, cust_id, year, duration_run, res, month) %>%
-            arrange(cust_id, year)
-    }
-    # might do a compare to example data here as a catch-all
-    # maybe not needed since individual units are covered
+# Not real unit tests, just checking for consistency with sample data
+
+test_that("make_history() produces expected duration_run result", {
+    expect_equal(history_calc$duration_run, history$duration_run)
+})
+
+test_that("make_history() produces expected lapse result", {
+    expect_equal(history_calc$lapse, history$lapse)
+})
+test_that("make_history() produces expected R3 result", {
+    expect_equal(history_calc$R3, history$R3)
+})
+test_that("make_history() produces expected month result", {
+    expect_equal(history_calc$month, history$month)
+})
+test_that("make_history() produces expected res result", {
+    expect_equal(history_calc$res, history$res)
 })
 
 # rank_sale() ------------------------------------------------------
 
-test_that("rank_sale() produces expected result", {
+test_that("rank_sale(rank_var = 'duration') produces expected result", {
     # compare function output to a simple dplyr pipeline
     x <- rank_sale(sale_unranked, rank_var = "duration", 
                    grp_var = c("cust_id", "year")) %>%
@@ -143,7 +153,9 @@ test_that("rank_sale() produces expected result", {
         ungroup() %>%
         select(cust_id, year, duration)
     expect_equal(x, y)
-    
+})
+
+test_that("rank_sale(rank_var = c('duration', 'res') produces expected result", {
     # 2 rank_var variables
     x <- rank_sale(sale_unranked, rank_var = c("duration", "res"),
                    grp_var = c("cust_id", "year")) %>%
@@ -154,20 +166,27 @@ test_that("rank_sale() produces expected result", {
         slice(1L) %>%
         ungroup() %>%
         select(cust_id, year, duration, res)
+    expect_equal(x, y)
 })
 
-test_that("join_first_month() produces expected result", {
+# rank_sale() first_month -------------------------------------------------
+
+# comparing to simple calculation
+y <- group_by(sale_unranked, cust_id, year) %>%
+    arrange(month) %>%
+    slice(1L) %>%
+    ungroup() %>%
+    select(cust_id, year, month)
+
+test_that("join_first_month() produces expected month result", {
     x <- rank_sale(sale_unranked)
     x <- join_first_month(data.table::setDT(x), data.table::setDT(sale_unranked)) %>%
         as_tibble() %>%
         select(cust_id, year, month)
-    y <- group_by(sale_unranked, cust_id, year) %>%
-        arrange(month) %>%
-        slice(1L) %>%
-        ungroup() %>%
-        select(cust_id, year, month)
     expect_equal(x, y)
-    
+})
+
+test_that("rank_sale(first_month = TRUE) produces expected month result", {
     x <- rank_sale(sale_unranked, first_month = TRUE) %>%
         select(cust_id, year, month)
     expect_equal(x, y)

@@ -171,7 +171,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' 
 #' carry_vars = c("res", "month")
 #' history <- sale_ranked %>%
-#'    make_history(sale_ranked, 2008:2018, carry_vars, show_diagnostics = TRUE)
+#'    make_history(2008:2018, carry_vars, show_diagnostics = TRUE)
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, 
     include_R3 = TRUE, show_diagnostics = FALSE
@@ -255,7 +255,11 @@ make_lapse <- function(df_last, df, yrs_lapse) {
     
     df_last %>%
         left_join(df, by = "cust_id") %>% 
-        mutate(lapse = ifelse(is.na(.data$lapse), 1L, .data$lapse))
+        mutate(
+            lapse = ifelse(is.na(.data$lapse), 1L, .data$lapse),
+            lapse = ifelse(.data$year >= yrs_lapse[length(yrs_lapse)], 
+                           NA_integer_, .data$lapse)
+        )
 }
 
 #' @rdname history_internal

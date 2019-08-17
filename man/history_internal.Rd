@@ -21,6 +21,8 @@ make_R3(df, include_R3, yrs)
 
 \item{df_last}{data frame: previous year table}
 
+\item{current_year}{numeric: year of current year table}
+
 \item{carry_vars}{character: additional variables to carry over from previous year
 (for multi-year and lifetime licenses).}
 
