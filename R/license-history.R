@@ -213,29 +213,25 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @examples
 #' library(dplyr)
 #' data(sale, lic)
-#' sale <- left_join(sale, lic) %>% rank_sale()
-#' history <- make_history(sale, 2008:2019)
+#' sale_ranked <- left_join(sale, lic) %>% rank_sale()
+#' history <- make_history(sale_ranked, 2008:2019)
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, show_diagnostics = FALSE
 ) {
     slct_cols <- c("cust_id", "year", "duration", carry_vars)
-    missing_cols <- setdiff(slct_cols, colnames(sale_ranked))
-    if (length(missing_cols) > 0) {
-        stop(
-            "Missing required columns from make_history:\n", 
-            "- (", paste(missing_cols, collapse = ", "), ") needed", 
-            call. = FALSE
-        )
-    }
+    data_required_vars(sale_ranked, "make_history()", slct_cols, 
+                       stop_error = TRUE)
+    
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     sale_ranked <- sale_ranked[slct_cols] %>%
         filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration) # initialize intermediates
+        mutate(duration_run = duration) # initialize running duration
     x <- split(sale_ranked, sale_ranked$year) # for iteration by year
     
-    x[[1]] <- mutate(x[[1]], year_last = NA_integer_)
+    x[[1]] <- mutate(x[[1]], year_last = NA_integer_) # initialize year 1
     
     for (i in 2:length(yrs)) {
+        # current year: 
         x[[i]] <- x[[i]] %>%
             full_join( 
                 select(x[[i-1]], cust_id, duration_run, year_last, carry_vars),   
@@ -259,9 +255,6 @@ forward_vars <- function(df, carry_vars = NULL) {
     if (is.null(carry_vars)) {
         return(df)
     }
-
-    # start here, this isn't coming out correct
-    # probably review previous function to get a memory refresh
     forward_one <- function(df, var) {
         var_lag <- sym(paste0(var, "_lag"))
         var <- sym(var)
@@ -277,26 +270,6 @@ forward_vars <- function(df, carry_vars = NULL) {
     }
     df
 }
-
-#' Internal Functions for make_history()
-#' 
-#' \code{\link{make_history}} will run these in sequence:
-#' \itemize{
-#'   \item forward_duration: update "duration_run" variable
-#'   \item forward_year: actually, probably don't need this!
-#'   \item forward_vars: update carry_vars variable(s)
-#' }
-#'
-#' @param df data frame: single year running history
-#' @family license history functions
-#' @export
-#' @keywords internal
-#' @name history_internal
-#' @examples
-#' # example
-NULL
-
-
 
 #' Internal Function: Carry multi-year/lifetime durations forward
 #' 

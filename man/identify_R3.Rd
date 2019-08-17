@@ -44,6 +44,7 @@ Other license history functions: \code{\link{carry_duration}},
   \code{\link{check_identify_lapse}},
   \code{\link{identify_lapse}},
   \code{\link{join_first_month}},
+  \code{\link{make_history}},
   \code{\link{make_lic_history}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }

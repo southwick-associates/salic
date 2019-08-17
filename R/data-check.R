@@ -9,6 +9,7 @@
 #' is a wrapper for \code{\link{variable_allowed_values}}.
 #' 
 #' @inheritParams data_check_table
+#' @param stop_error logical: stop with error instead of producing a warning
 #' @family functions to check data format
 #' @keywords internal
 #' @name data_internal
@@ -56,13 +57,19 @@ data_primary_key <- function(df, df_name, primary_key) {
 
 #' @rdname data_internal
 #' @export
-data_required_vars <- function(df, df_name, required_vars) {
+data_required_vars <- function(df, df_name, required_vars, stop_error = FALSE) {
     not_included <- dplyr::setdiff(required_vars, colnames(df))
     msg <- paste0(
         df_name, ": ", length(not_included), " Missing variable(s): ",  
         paste(not_included, collapse = ", ")
     )
-    if (length(not_included) > 0) warning(msg, call. = FALSE)
+    if (length(not_included) > 0) {
+        if (stop_error) {
+            stop(msg, call. = FALSE)
+        } else {
+            warning(msg, call. = FALSE)
+        }
+    }
 }
 
 #' @rdname data_internal

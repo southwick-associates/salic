@@ -40,8 +40,6 @@ test_that("forward_vars() result matches previous value for non-purchase years",
 
 # duration_run ------------------------------------------------------------
 
-history_carry <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
-
 test_that("running duration not less than current year duration", {
     x <- history_carry
     expect_true(all((x$duration_run >= x$duration) | is.na(x$duration)))
@@ -54,12 +52,11 @@ test_that("running duration for non-purchase years determined by duration_lag", 
     ))
 })
 
-
 # year_last ---------------------------------------------------------------
 
 test_that("make_history() produced expected year_last", {
     # make sure a lagged year (in history) matches year_last    
-    x <- make_history(sale_ranked, yrs, show_diagnostics = TRUE)
+    x <- history_carry
     y <- select(x, -year_last) %>%
         arrange(year) %>%
         group_by(cust_id) %>%
@@ -67,13 +64,17 @@ test_that("make_history() produced expected year_last", {
         ungroup() 
 })
 
-
 # lapse -------------------------------------------------------------------
 
+test_that("make_history() produced expected lapse", {
+    
+})
 
 # R3 ----------------------------------------------------------------------
 
-
+test_that("identify_R3() produced expected R3", {
+    
+})
 
 # make_history() ----------------------------------------------------------
 
@@ -94,11 +95,11 @@ test_that("make_history() produces expected result", {
     
     # this shows that all the disagreement favors the new method
     # (i.e., the values for the new method match the sale_ranked values)
-    not_equal <- x[is.na(x$res != y$res) | x$res != y$res,]
-    semi_join(sale_ranked, distinct(check, cust_id)) %>%
-        select(cust_id, year, res) %>%
-        left_join(x, by = c("cust_id", "year")) %>%
-        filter(res.x != res.y)
+    # not_equal <- x[is.na(x$res != y$res) | x$res != y$res,]
+    # semi_join(sale_ranked, distinct(check, cust_id)) %>%
+    #     select(cust_id, year, res) %>%
+    #     left_join(x, by = c("cust_id", "year")) %>%
+    #     filter(res.x != res.y)
     
 })
 

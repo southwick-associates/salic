@@ -3,6 +3,34 @@ library(salic)
 library(dplyr)
 data(cust, lic, sale)
 
+# required_vars -----------------------------------------------------------
+
+vars = c("cust_id", "lic_id", "year", "month", "res")
+x <- select(sale, "lic_id")
+
+test_that("data_required_vars() produces warning", {
+    expect_warning(
+        data_required_vars(x, df_name = "sale", required_vars = vars)
+    )
+})
+
+test_that("data_required_vars() does not produce warning", {
+    expect_warning(
+        data_required_vars(sale, df_name = "sale", required_vars = vars),
+        regexp = NA
+    )
+})
+
+test_that("data_required_vars() produces an error", {
+    expect_error(
+        data_required_vars(x, df_name = "sale", required_vars = vars,
+                           stop_error = TRUE)
+    )
+})
+
+
+# Other Funcs -------------------------------------------------------------
+
 test_that("data_primary_key() warnings", {
     # should warn
     x <- bind_rows(lic, lic) # not unique
@@ -17,20 +45,6 @@ test_that("data_primary_key() warnings", {
     # should not warn
     expect_warning(
         data_primary_key(cust, df_name = "cust", primary_key = "cust_id"),
-        regexp = NA
-    )
-})
-
-test_that("data_required_vars() warnings", {
-    # should warn
-    vars = c("cust_id", "lic_id", "year", "month", "res")
-    x <- select(sale, "lic_id")
-    expect_warning(
-        data_required_vars(x, df_name = "sale", required_vars = vars)
-    )
-    # should not warn
-    expect_warning(
-        data_required_vars(sale, df_name = "sale", required_vars = vars),
         regexp = NA
     )
 })
