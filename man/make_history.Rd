@@ -4,7 +4,7 @@
 \alias{make_history}
 \title{New license history function (in progress)}
 \usage{
-make_history(sale_ranked, yrs, carry_vars = NULL,
+make_history(sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE,
   show_diagnostics = FALSE)
 }
 \arguments{
@@ -15,6 +15,9 @@ to create license history}
 
 \item{carry_vars}{character: additional variables to carry over from previous year
 (for multi-year and lifetime licenses).}
+
+\item{calc_lapse}{logical: If TRUE, also estimate lapse (should only be done
+for full-year time period)}
 }
 \description{
 Get a faster function for making license history
