@@ -2,7 +2,7 @@
 % Please edit documentation in R/license-history.R
 \name{make_history}
 \alias{make_history}
-\title{New license history function (in progress)}
+\title{Make a License History table with 1 row per customer per year}
 \usage{
 make_history(sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE,
   show_diagnostics = FALSE)
@@ -16,11 +16,13 @@ to create license history}
 \item{carry_vars}{character: additional variables to carry over from previous year
 (for multi-year and lifetime licenses).}
 
-\item{calc_lapse}{logical: If TRUE, also estimate lapse (should only be done
+\item{calc_lapse}{logical: If TRUE, also calculate lapse (should only be done
 for full-year time period)}
+
+\item{calc_R3}{logical: If TRUE, also calculate R3}
 }
 \description{
-Get a faster function for making license history
+Details my dude
 }
 \examples{
 library(dplyr)
