@@ -67,7 +67,23 @@ test_that("make_history() produced expected year_last", {
 # lapse -------------------------------------------------------------------
 
 test_that("make_history() produced expected lapse", {
-    
+    format_result <- function(x) {
+        select(x, cust_id, year, lapse) %>% filter(year <= 2017)
+    }
+    # temporarily, just compare to previous method
+    # TODO: need to ensure you can set lapse_years
+    # - probably as make_history() argument
+    x <- make_history(sale_ranked, 2008:2018)
+    y <- identify_lapse(history_calc, 2008:2018)
+    expect_equal(format_result(x), format_result(y))
+})
+
+test_that("make_history() lapse == 0 holds license in following year", {
+    history <- make_history(sale_ranked, 2008:2018)
+    no_lapse <- mutate(history, year = year + 1) %>%
+        filter(lapse == 0)
+    no_match <- anti_join(no_lapse, history, by = c("cust_id", "year"))
+    expect_true(nrow(no_match) == 0)
 })
 
 # R3 ----------------------------------------------------------------------

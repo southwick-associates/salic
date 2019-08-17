@@ -218,20 +218,19 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, show_diagnostics = FALSE
 ) {
-    slct_cols <- c("cust_id", "year", "duration", carry_vars)
-    data_required_vars(sale_ranked, "make_history()", slct_cols, 
-                       stop_error = TRUE)
-    
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
+    slct_cols <- c("cust_id", "year", "duration", carry_vars)
+    data_required_vars(sale_ranked, "make_history()", slct_cols, stop_error = TRUE)
+    
     sale_ranked <- sale_ranked[slct_cols] %>%
         filter(.data$year %in% yrs) %>%
         mutate(duration_run = duration) # initialize running duration
-    x <- split(sale_ranked, sale_ranked$year) # for iteration by year
     
+    x <- split(sale_ranked, sale_ranked$year)         # for iteration by year
     x[[1]] <- mutate(x[[1]], year_last = NA_integer_) # initialize year 1
     
     for (i in 2:length(yrs)) {
-        # current year: 
+        # current year: duration_run, year_last (for R3), [carry_vars]
         x[[i]] <- x[[i]] %>%
             full_join( 
                 select(x[[i-1]], cust_id, duration_run, year_last, carry_vars),   
@@ -243,31 +242,44 @@ make_history <- function(
                 year_last = ifelse(duration_run_lag >= 1, year - 1, year_last)
             ) %>%
             forward_vars(carry_vars)
+        
+        # previous year: lapse
+        # TODO: maybe use internal function (not sure, but may make easier to read)
+        # skip if not selected lapse year...need to to decide how that will be done
+        x[[i-1]] <- x[[i-1]] %>%
+            left_join(
+                filter(x[[i]], duration_run >= 1) %>% mutate(lapse = 0L) %>%
+                    select(cust_id, lapse),
+                by = "cust_id"
+            ) %>% 
+            mutate(lapse = ifelse(is.na(lapse), 1L, lapse))
     }
     x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
+        # maybe place identify_R3 here
         mutate_at(vars(duration_run, year_last), "as.integer")
     if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
     x
 }
 
+# carry forward 1 or more variables for a single year
+# only to be called from make_history()
+# requires a number of variable to be present (...)
+
 forward_vars <- function(df, carry_vars = NULL) {
-    if (is.null(carry_vars)) {
-        return(df)
-    }
+    if (is.null(carry_vars)) return(df)
+    
     forward_one <- function(df, var) {
         var_lag <- sym(paste0(var, "_lag"))
         var <- sym(var)
-        # mutate(df, !! var := ifelse(is.na(!! var), !! var_lag, !! var))
-        mutate(df, !! var := case_when(
-            !is.na(!! var) | duration_run_lag <= 1 ~ !! var,
-            TRUE ~ !! var_lag
-        )) %>%
-            select(- !! var_lag)
+        df %>% mutate(
+            !! var := case_when( 
+                !is.na(!! var) | duration_run_lag <= 1 ~ !! var, 
+                TRUE ~ !! var_lag 
+            )
+        ) %>% select(- !! var_lag)
     }
-    for (i in carry_vars) {
-        df <- forward_one(df, i)
-    }
+    for (i in carry_vars) df <- forward_one(df, i)
     df
 }
 
