@@ -147,8 +147,135 @@ prep_yrs <- function(yrs, df, func_name) {
     yrs
 }
 
+# Making History -----------------------------------------------------------
 
-# Old Make History --------------------------------------------------------
+#' Make a License History table with 1 row per customer per year
+#'
+#' Details my dude
+#' 
+#' @param sale_ranked data frame: Sales table from which license history will be made
+#' @param yrs numeric: Years in sales data (column 'year') from which
+#' to create license history
+#' @param carry_vars character: additional variables to carry over from previous year
+#' (for multi-year and lifetime licenses).
+#' @param calc_lapse logical: If TRUE, also calculate lapse (should only be done
+#' for full-year time period)
+#' @param calc_R3 logical: If TRUE, also calculate R3
+#' @import dplyr
+#' @family license history functions
+#' @export
+#' @examples
+#' library(dplyr)
+#' data(sale, lic)
+#' sale_ranked <- left_join(sale, lic) %>% rank_sale()
+#' history <- make_history(sale_ranked, 2008:2019)
+make_history <- function(
+    sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE, calc_R3 = TRUE, 
+    show_diagnostics = FALSE
+) {
+    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
+    slct_cols <- c("cust_id", "year", "duration", carry_vars)
+    data_required_vars(sale_ranked, "make_history()", slct_cols, use_error = TRUE)
+    
+    sale_ranked <- sale_ranked[slct_cols] %>%
+        filter(.data$year %in% yrs) %>%
+        mutate(duration_run = duration) # initialize running duration
+    
+    # iterate over years to produce history
+    x <- list()
+    x[[1]] <- filter(sale_ranked, year == yrs[1]) %>% mutate(year_last = NA_integer_)
+    
+    for (i in 2:length(yrs)) {
+        # current year: duration_run, year_last (for R3), [carry_vars]
+        x[[i]] <- sale_ranked %>%
+            filter(year == yrs[i]) %>%
+            forward_duration(x[[i-1]], yrs[i], carry_vars) %>%
+            forward_vars(carry_vars)
+        
+        # previous year: lapse
+        if (calc_lapse) {
+            # TODO: maybe use internal function (not sure, but may make easier to read)
+            # skip if not selected lapse year...need to to decide how that will be done
+            # TODO: probably change arg to lapse_yrs (maybe defaults to yrs, NULL option needed)
+            x[[i-1]] <- x[[i-1]] %>%
+                left_join(
+                    filter(x[[i]], duration_run >= 1) %>% mutate(lapse = 0L) %>%
+                        select(cust_id, lapse),
+                    by = "cust_id"
+                ) %>% 
+                mutate(lapse = ifelse(is.na(lapse), 1L, lapse))
+        }
+    }
+    x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
+        bind_rows() %>%
+        mutate_at(vars(duration_run), "as.integer")
+    if (calc_R3) # x <- identify_R3(x)
+    if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
+    x
+}
+
+#' @rdname history_internal
+#' @export
+forward_duration <- function(df, df_last, current_year, carry_vars) {
+    full_join(
+        df, 
+        select(df_last, .data$cust_id, .data$duration_run, .data$year_last, 
+               carry_vars),    
+        by = "cust_id", suffix = c("", "_lag")
+    ) %>% mutate(  
+        duration_run = pmax(.data$duration, .data$duration_run_lag - 1, na.rm = TRUE),  
+        year = current_year, 
+        year_last = ifelse(.data$duration_run_lag >= 1, .data$year - 1, .data$year_last)
+    )
+}
+
+#' @rdname history_internal
+#' @export
+forward_vars <- function(df, carry_vars = NULL) {
+    if (is.null(carry_vars)) return(df)
+    
+    forward_one <- function(df, var) {
+        var_lag <- sym(paste0(var, "_lag"))
+        var <- sym(var)
+        df %>% mutate(
+            !! var := case_when( 
+                !is.na(!! var) | .data$duration_run_lag <= 1 ~ !! var, 
+                TRUE ~ !! var_lag 
+            )
+        ) %>% select(- !! var_lag)
+    }
+    for (i in carry_vars) df <- forward_one(df, i)
+    df
+}
+
+#' @rdname history_internal
+#' @export
+make_lapse <- function(df_last, df) {
+    
+}
+
+#' @rdname history_internal
+#' @export
+make_R3 <- function(df) {
+    
+}
+
+#' Internal Functions: Making license history
+#' 
+#' Intended to be called from \code{\link{make_history}}. 
+#' 
+#' @param df data frame: current year table
+#' @param df_last data frame: previous year table
+#' @inheritParams make_history
+#' @family license history functions
+#' @keywords internal
+#' @name history_internal
+#' @import dplyr
+#' @examples
+#' # example
+NULL
+
+# Deprecated --------------------------------------------------------
 
 #' Make a License History table with 1 row per customer per year
 #'
@@ -176,7 +303,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' @param carry_vars character: additional variables to carry over from previous year
 #' (for multi-year and lifetime licenses).
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' library(dplyr)
@@ -207,7 +334,7 @@ make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
 #' @param sale_split list: ranked sale table split by year
 #' @inheritParams make_lic_history
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @keywords internal
 #' @export
 #' @examples
@@ -253,7 +380,7 @@ carry_duration <- function(sale_split, yrs) {
 #' @inheritParams make_lic_history
 #' @inheritParams carry_duration
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @keywords internal
 #' @export
 #' @examples
@@ -306,7 +433,7 @@ carry_variables <- function(sale_split, yrs, carry_vars) {
 #' @param show_check_vars logical: if TRUE, include output variables used in summary
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' library(dplyr)
@@ -369,7 +496,7 @@ identify_R3 <- function(
 #' @param show_summary logical: if TRUE, include a tabular summary that shows lapse 
 #' identification based on how many years until the next license is held.
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' library(dplyr)
@@ -427,114 +554,6 @@ identify_lapse <- function(
 }
 
 
-# Making History -----------------------------------------------------------
-
-#' Make a License History table with 1 row per customer per year
-#'
-#' Details my dude
-#' 
-#' @param sale_ranked data frame: Sales table from which license history will be made
-#' @param yrs numeric: Years in sales data (column 'year') from which
-#' to create license history
-#' @param carry_vars character: additional variables to carry over from previous year
-#' (for multi-year and lifetime licenses).
-#' @param calc_lapse logical: If TRUE, also calculate lapse (should only be done
-#' for full-year time period)
-#' @param calc_R3 logical: If TRUE, also calculate R3
-#' @import dplyr
-#' @family license history functions
-#' @export
-#' @examples
-#' library(dplyr)
-#' data(sale, lic)
-#' sale_ranked <- left_join(sale, lic) %>% rank_sale()
-#' history <- make_history(sale_ranked, 2008:2019)
-make_history <- function(
-    sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE, show_diagnostics = FALSE
-) {
-    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
-    slct_cols <- c("cust_id", "year", "duration", carry_vars)
-    data_required_vars(sale_ranked, "make_history()", slct_cols, stop_error = TRUE)
-    
-    sale_ranked <- sale_ranked[slct_cols] %>%
-        filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration) # initialize running duration
-    
-    # iterate over years to produce history
-    x <- list()
-    x[[1]] <- filter(sale_ranked, year == yrs[1]) %>% mutate(year_last = NA_integer_)
-    
-    for (i in 2:length(yrs)) {
-        # current year: duration_run, year_last (for R3), [carry_vars]
-        x[[i]] <- filter(sale_ranked, year == yrs[i]) %>%
-            full_join( 
-                select(x[[i-1]], cust_id, duration_run, year_last, carry_vars),   
-                by = "cust_id", suffix = c("", "_lag")
-            ) %>%
-            mutate( 
-                duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE), 
-                year = yrs[i],
-                year_last = ifelse(duration_run_lag >= 1, year - 1, year_last)
-            ) %>%
-            forward_vars(carry_vars)
-        
-        # previous year: lapse
-        if (calc_lapse) {
-            # TODO: maybe use internal function (not sure, but may make easier to read)
-            # skip if not selected lapse year...need to to decide how that will be done
-            x[[i-1]] <- x[[i-1]] %>%
-                left_join(
-                    filter(x[[i]], duration_run >= 1) %>% mutate(lapse = 0L) %>%
-                        select(cust_id, lapse),
-                    by = "cust_id"
-                ) %>% 
-                mutate(lapse = ifelse(is.na(lapse), 1L, lapse))
-        }
-    }
-    x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
-        bind_rows() %>%
-        mutate_at(vars(duration_run), "as.integer")
-    if (calc_R3) # x <- identify_R3(x)
-    if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
-    x
-}
-
-# maybe include functions for both of these (to imporove make_history readability)
-# these functions can maybe be documented with a single roxygen block
-# (no need to be fancy since they aren't user facing)
-forward_duration <- function(df_current, df_last, yrs, carry_vars) {
-    
-}
-identify_lapse_new <- function(df_last, df_current) {
-    
-}
-# this should be very straightforward, just case_when() on year_last
-identify_R3_new <- function() {
-    
-}
-
-# carry forward 1 or more variables for a single year
-# only to be called from make_history()
-# requires a number of variable to be present (...)
-forward_vars <- function(df, carry_vars = NULL) {
-    if (is.null(carry_vars)) return(df)
-    
-    forward_one <- function(df, var) {
-        var_lag <- sym(paste0(var, "_lag"))
-        var <- sym(var)
-        df %>% mutate(
-            !! var := case_when( 
-                !is.na(!! var) | duration_run_lag <= 1 ~ !! var, 
-                TRUE ~ !! var_lag 
-            )
-        ) %>% select(- !! var_lag)
-    }
-    for (i in carry_vars) df <- forward_one(df, i)
-    df
-}
-
-
-
 # Checking & Summarizing --------------------------------------------------
 
 #' Sample the output of \code{\link{make_lic_history}}
@@ -547,7 +566,7 @@ forward_vars <- function(df, carry_vars = NULL) {
 #' @param buy_max numeric: maximum number of license purchases for customers to include
 #' @inheritParams identify_R3
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @export
 #' @examples
 #' data(history)
@@ -570,7 +589,7 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' 
 #' @inheritParams identify_R3
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @keywords internal
 #' @export
 #' @examples
@@ -602,7 +621,7 @@ check_identify_R3 <- function(lic_history, yrs) {
 #' 
 #' @inheritParams identify_R3
 #' @import dplyr
-#' @family license history functions
+#' @family deprecated license history functions
 #' @keywords internal
 #' @export
 #' @examples

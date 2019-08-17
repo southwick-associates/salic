@@ -47,14 +47,11 @@ history <- sale_ranked \%>\%
 check_history_samp(history)
 }
 \seealso{
-Other license history functions: \code{\link{carry_duration}},
+Other deprecated license history functions: \code{\link{carry_duration}},
   \code{\link{carry_variables}},
   \code{\link{check_history_samp}},
   \code{\link{check_identify_R3}},
   \code{\link{check_identify_lapse}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{join_first_month}},
-  \code{\link{make_history}}, \code{\link{prep_yrs}},
-  \code{\link{rank_sale}}
+  \code{\link{identify_R3}}, \code{\link{identify_lapse}}
 }
-\concept{license history functions}
+\concept{deprecated license history functions}

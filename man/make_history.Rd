@@ -5,7 +5,7 @@
 \title{Make a License History table with 1 row per customer per year}
 \usage{
 make_history(sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE,
-  show_diagnostics = FALSE)
+  calc_R3 = TRUE, show_diagnostics = FALSE)
 }
 \arguments{
 \item{sale_ranked}{data frame: Sales table from which license history will be made}
@@ -31,14 +31,8 @@ sale_ranked <- left_join(sale, lic) \%>\% rank_sale()
 history <- make_history(sale_ranked, 2008:2019)
 }
 \seealso{
-Other license history functions: \code{\link{carry_duration}},
-  \code{\link{carry_variables}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_identify_R3}},
-  \code{\link{check_identify_lapse}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{join_first_month}},
-  \code{\link{make_lic_history}}, \code{\link{prep_yrs}},
+Other license history functions: \code{\link{forward_duration}},
+  \code{\link{join_first_month}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }
 \concept{license history functions}

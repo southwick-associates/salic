@@ -83,7 +83,7 @@ test_that("make_history() produces expected lapse", {
 
 # R3 ----------------------------------------------------------------------
 
-test_that("identify_R3() produced expected R3", {
+test_that("make_history() produces expected R3", {
     
 })
 

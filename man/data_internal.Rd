@@ -9,7 +9,7 @@
 \usage{
 data_primary_key(df, df_name, primary_key)
 
-data_required_vars(df, df_name, required_vars, stop_error = FALSE)
+data_required_vars(df, df_name, required_vars, use_error = FALSE)
 
 data_allowed_values(df, df_name, allowed_values)
 }
@@ -23,7 +23,7 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 
 \item{required_vars}{character: variables that should be included}
 
-\item{stop_error}{logical: stop with error instead of producing a warning}
+\item{use_error}{logical: If TRUE, stop with error instead of producing a warning}
 
 \item{allowed_values}{list: named list with allowed values for specific variables}
 }
