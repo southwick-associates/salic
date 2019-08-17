@@ -4,8 +4,8 @@
 \alias{make_history}
 \title{Make a License History table with 1 row per customer per year}
 \usage{
-make_history(sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE,
-  calc_R3 = TRUE, show_diagnostics = FALSE)
+make_history(sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs,
+  include_R3 = TRUE, show_diagnostics = FALSE)
 }
 \arguments{
 \item{sale_ranked}{data frame: Sales table from which license history will be made}
@@ -16,10 +16,10 @@ to create license history}
 \item{carry_vars}{character: additional variables to carry over from previous year
 (for multi-year and lifetime licenses).}
 
-\item{calc_lapse}{logical: If TRUE, also calculate lapse (should only be done
-for full-year time period)}
+\item{yrs_lapse}{numeric: years to include in lapse calculation (defaults to yrs). 
+If NULL, lapse will not be calculated (useful for mid-year results)}
 
-\item{calc_R3}{logical: If TRUE, also calculate R3}
+\item{include_R3}{logical: If TRUE, also calculate R3}
 }
 \description{
 Details my dude
@@ -31,8 +31,8 @@ sale_ranked <- left_join(sale, lic) \%>\% rank_sale()
 history <- make_history(sale_ranked, 2008:2019)
 }
 \seealso{
-Other license history functions: \code{\link{forward_duration}},
-  \code{\link{join_first_month}}, \code{\link{prep_yrs}},
+Other license history functions: \code{\link{join_first_month}},
+  \code{\link{make_R3}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }
 \concept{license history functions}

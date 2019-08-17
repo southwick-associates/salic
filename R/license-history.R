@@ -158,9 +158,9 @@ prep_yrs <- function(yrs, df, func_name) {
 #' to create license history
 #' @param carry_vars character: additional variables to carry over from previous year
 #' (for multi-year and lifetime licenses).
-#' @param calc_lapse logical: If TRUE, also calculate lapse (should only be done
-#' for full-year time period)
-#' @param calc_R3 logical: If TRUE, also calculate R3
+#' @param yrs_lapse numeric: years to include in lapse calculation (defaults to yrs). 
+#' If NULL, lapse will not be calculated (useful for mid-year results)
+#' @param include_R3 logical: If TRUE, also calculate R3
 #' @import dplyr
 #' @family license history functions
 #' @export
@@ -170,57 +170,53 @@ prep_yrs <- function(yrs, df, func_name) {
 #' sale_ranked <- left_join(sale, lic) %>% rank_sale()
 #' history <- make_history(sale_ranked, 2008:2019)
 make_history <- function(
-    sale_ranked, yrs, carry_vars = NULL, calc_lapse = TRUE, calc_R3 = TRUE, 
-    show_diagnostics = FALSE
+    sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, 
+    include_R3 = TRUE, show_diagnostics = FALSE
 ) {
     yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
     slct_cols <- c("cust_id", "year", "duration", carry_vars)
     data_required_vars(sale_ranked, "make_history()", slct_cols, use_error = TRUE)
-    
-    sale_ranked <- sale_ranked[slct_cols] %>%
-        filter(.data$year %in% yrs) %>%
-        mutate(duration_run = duration) # initialize running duration
-    
-    # iterate over years to produce history
     x <- list()
-    x[[1]] <- filter(sale_ranked, year == yrs[1]) %>% mutate(year_last = NA_integer_)
     
-    for (i in 2:length(yrs)) {
-        # current year: duration_run, year_last (for R3), [carry_vars]
+    for (i in seq_along(yrs)) {
         x[[i]] <- sale_ranked %>%
-            filter(year == yrs[i]) %>%
-            forward_duration(x[[i-1]], yrs[i], carry_vars) %>%
-            forward_vars(carry_vars)
-        
-        # previous year: lapse
-        if (calc_lapse) {
-            # TODO: maybe use internal function (not sure, but may make easier to read)
-            # skip if not selected lapse year...need to to decide how that will be done
-            # TODO: probably change arg to lapse_yrs (maybe defaults to yrs, NULL option needed)
+            filter(year == yrs[i]) %>% 
+            select(slct_cols) %>%
+            mutate(duration_run = duration)
+        if (i == 1) {
+            x[[i]] <- mutate(x[[i]], year_last = NA_integer_)
+        } else {
+            x[[i]] <- x[[i]] %>%
+                forward_duration(x[[i-1]], yrs[i], carry_vars) %>%
+                forward_vars(carry_vars)
             x[[i-1]] <- x[[i-1]] %>%
-                left_join(
-                    filter(x[[i]], duration_run >= 1) %>% mutate(lapse = 0L) %>%
-                        select(cust_id, lapse),
-                    by = "cust_id"
-                ) %>% 
-                mutate(lapse = ifelse(is.na(lapse), 1L, lapse))
+                make_lapse(x[[i]], yrs_lapse)
         }
     }
-    x <- lapply(x, function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
+    x <- x %>%
+        lapply(function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
-        mutate_at(vars(duration_run), "as.integer")
-    if (calc_R3) # x <- identify_R3(x)
-    if (!show_diagnostics) x <- select(x, -duration_run_lag, -duration)
+        # make_R3(include_R3) %>%
+        mutate(duration_run = as.integer(.data$duration_run))
+    if (!show_diagnostics) {
+        x <- select(x, -.data$duration_run_lag, -.data$duration)
+    }
     x
 }
+
+#' @rdname history_internal
+#' @export
+make_R3 <- function(df) {
+    
+}
+
 
 #' @rdname history_internal
 #' @export
 forward_duration <- function(df, df_last, current_year, carry_vars) {
     full_join(
         df, 
-        select(df_last, .data$cust_id, .data$duration_run, .data$year_last, 
-               carry_vars),    
+        select(df_last, .data$cust_id, .data$duration_run, .data$year_last, carry_vars),    
         by = "cust_id", suffix = c("", "_lag")
     ) %>% mutate(  
         duration_run = pmax(.data$duration, .data$duration_run_lag - 1, na.rm = TRUE),  
@@ -232,8 +228,9 @@ forward_duration <- function(df, df_last, current_year, carry_vars) {
 #' @rdname history_internal
 #' @export
 forward_vars <- function(df, carry_vars = NULL) {
-    if (is.null(carry_vars)) return(df)
-    
+    if (is.null(carry_vars)) {
+        return(df)
+    }
     forward_one <- function(df, var) {
         var_lag <- sym(paste0(var, "_lag"))
         var <- sym(var)
@@ -250,14 +247,18 @@ forward_vars <- function(df, carry_vars = NULL) {
 
 #' @rdname history_internal
 #' @export
-make_lapse <- function(df_last, df) {
+make_lapse <- function(df_last, df, yrs_lapse) {
+    if (is.null(yrs_lapse)) {
+        return(df) 
+    }
+    df <- df %>%
+        filter(.data$duration_run >= 1) %>% 
+        mutate(lapse = 0L) %>%
+        select(.data$cust_id, .data$lapse)
     
-}
-
-#' @rdname history_internal
-#' @export
-make_R3 <- function(df) {
-    
+    df_last %>%
+        left_join(df, by = "cust_id") %>% 
+        mutate(lapse = ifelse(is.na(.data$lapse), 1L, .data$lapse))
 }
 
 #' Internal Functions: Making license history
