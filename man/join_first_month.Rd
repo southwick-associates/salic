@@ -39,7 +39,7 @@ left_join(
 )
 }
 \seealso{
-Other license history functions: \code{\link{make_R3}},
+Other license history functions: \code{\link{forward_duration}},
   \code{\link{make_history}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }

@@ -168,7 +168,10 @@ prep_yrs <- function(yrs, df, func_name) {
 #' library(dplyr)
 #' data(sale, lic)
 #' sale_ranked <- left_join(sale, lic) %>% rank_sale()
-#' history <- make_history(sale_ranked, 2008:2019)
+#' 
+#' carry_vars = c("res", "month")
+#' history <- sale_ranked %>%
+#'    make_history(sale_ranked, 2008:2018, carry_vars, show_diagnostics = TRUE)
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, 
     include_R3 = TRUE, show_diagnostics = FALSE
@@ -196,20 +199,14 @@ make_history <- function(
     x <- x %>%
         lapply(function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
         bind_rows() %>%
-        # make_R3(include_R3) %>%
+        make_R3(include_R3, yrs) %>%
         mutate(duration_run = as.integer(.data$duration_run))
     if (!show_diagnostics) {
-        x <- select(x, -.data$duration_run_lag, -.data$duration)
+        x <- select(x, -.data$duration_run_lag, -.data$duration,  
+                    -.data$year_last, -.data$yrs_since)
     }
     x
 }
-
-#' @rdname history_internal
-#' @export
-make_R3 <- function(df) {
-    
-}
-
 
 #' @rdname history_internal
 #' @export
@@ -261,12 +258,31 @@ make_lapse <- function(df_last, df, yrs_lapse) {
         mutate(lapse = ifelse(is.na(.data$lapse), 1L, .data$lapse))
 }
 
+#' @rdname history_internal
+#' @export
+make_R3 <- function(df, include_R3, yrs) {
+    if (!include_R3) {
+        return(df)
+    }
+    df %>% mutate(
+        yrs_since = .data$year - .data$year_last,
+        R3 = case_when(
+            .data$year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
+            is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
+            .data$yrs_since == 1 & .data$duration_run_lag > 1 ~ 1L, # carried
+            .data$yrs_since == 1 ~ 2L, # renewed
+            TRUE ~ 3L # otherwise reactivated
+        )
+    )
+}
+
 #' Internal Functions: Making license history
 #' 
-#' Intended to be called from \code{\link{make_history}}. 
+#' These functions are intended to be called from \code{\link{make_history}}. 
 #' 
 #' @param df data frame: current year table
 #' @param df_last data frame: previous year table
+#' @param current_year numeric: year of current year table
 #' @inheritParams make_history
 #' @family license history functions
 #' @keywords internal

@@ -28,11 +28,14 @@ Details my dude
 library(dplyr)
 data(sale, lic)
 sale_ranked <- left_join(sale, lic) \%>\% rank_sale()
-history <- make_history(sale_ranked, 2008:2019)
+
+carry_vars = c("res", "month")
+history <- sale_ranked \%>\%
+   make_history(sale_ranked, 2008:2018, carry_vars, show_diagnostics = TRUE)
 }
 \seealso{
-Other license history functions: \code{\link{join_first_month}},
-  \code{\link{make_R3}}, \code{\link{prep_yrs}},
+Other license history functions: \code{\link{forward_duration}},
+  \code{\link{join_first_month}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }
 \concept{license history functions}

@@ -2,9 +2,6 @@ context("License History Functions")
 library(salic)
 library(dplyr)
 
-# these tests are mostly based on previous calculations (sample data)
-# basically to allow refactoring of code with more assurance that nothing gets broken
-
 # shared data & calculations
 yrs <- 2008:2019
 data(sale, lic, history)
@@ -12,24 +9,23 @@ sale_unranked <- left_join(sale, lic)
 sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 
 history_calc <- sale_ranked %>%
-    make_lic_history(2008:2019, carry_vars = c("month", "res"))
+    make_history(yrs, carry_vars = c("month", "res"), show_diagnostics = TRUE) %>%
+    arrange(cust_id, year)
 
 # forward_vars() ----------------------------------------------------------
 
-history_carry <- make_history(sale_ranked, yrs, "res", show_diagnostics = TRUE) %>%
-    arrange(cust_id, year)
 format_result <- function(x) select(x, cust_id, year, res)
 
 test_that("forward_vars() result matches for purchase years (where !is.na(var))", {
     # this ensures that purchase data isn't modified unintentionally
     # note that missing values CAN be overwritten by previous values
     y <- filter(sale_ranked, !is.na(res))
-    x <- semi_join(history_carry, y, by = c("cust_id", "year"))
+    x <- semi_join(history_calc, y, by = c("cust_id", "year"))
     expect_equal(format_result(x), format_result(y))
 })
 
 test_that("forward_vars() result matches previous value for non-purchase years", {
-    x <- history_carry %>%
+    x <- history_calc %>%
         arrange(year) %>%
         group_by(cust_id) %>%
         mutate(res_lag = lag(res)) %>%
@@ -41,12 +37,12 @@ test_that("forward_vars() result matches previous value for non-purchase years",
 # duration_run ------------------------------------------------------------
 
 test_that("running duration not less than current year duration", {
-    x <- history_carry
+    x <- history_calc
     expect_true(all((x$duration_run >= x$duration) | is.na(x$duration)))
 })
 
 test_that("running duration for non-purchase years determined by duration_lag", {
-    x <- filter(history_carry, is.na(duration))
+    x <- filter(history_calc, is.na(duration))
     expect_true(all(
         (x$duration_run == x$duration_run_lag - 1) | x$year == yrs[1]
     ))
@@ -56,12 +52,14 @@ test_that("running duration for non-purchase years determined by duration_lag", 
 
 test_that("make_history() produced expected year_last", {
     # make sure a lagged year (in history) matches year_last    
-    x <- history_carry
+    x <- history_calc
     y <- select(x, -year_last) %>%
         arrange(year) %>%
         group_by(cust_id) %>%
         mutate(year_last = lag(year)) %>%
-        ungroup() 
+        ungroup() %>%
+        arrange(cust_id, year)
+    expect_equal(x$year_last, y$year_last)
 })
 
 # lapse -------------------------------------------------------------------
@@ -83,8 +81,40 @@ test_that("make_history() produces expected lapse", {
 
 # R3 ----------------------------------------------------------------------
 
-test_that("make_history() produces expected R3", {
+history_r3 <- select(history_calc, cust_id, year) %>%
+    arrange(year) %>%
+    group_by(cust_id) %>%
+    mutate(year_lag = lag(year)) %>%
+    ungroup() %>%
+    arrange(cust_id, year)
+
+test_that("make_history() R3 - first 5 years are missing", {
+    x <- filter(history_calc, year <= yrs[5])
+    expect_true(all(is.na(x$R3)))
     
+})
+
+test_that("make_history() R3 - haven't bought in last 5 yrs are recruits", {
+    x <- filter(history_calc, R3 == 4)
+    y <- filter(history_r3, (year - year_lag) >= 6 | 
+                    is.na(year_lag), year > yrs[5]) %>%
+        mutate(R3 = 4)
+    expect_equal(x$R3, y$R3)
+})
+
+test_that("make_history() R3 - didn't buy last year is reactivated", {
+    x <- filter(history_calc, R3 == 3)
+    y <- filter(history_r3, (year - year_lag) >= 2, (year - year_lag) <= 5,
+                year > yrs[5]) %>%
+        mutate(R3 = 3)
+    expect_equal(x$R3, y$R3)
+})
+
+test_that("make_history() R3 - bought last year is carried/renewed", {
+    x <- filter(history_calc, R3 %in% 1:2) %>% select(cust_id, year)
+    y <- filter(history_r3, (year - year_lag) == 1, year > yrs[5]) %>%
+        select(cust_id, year)
+    expect_equal(x, y)
 })
 
 # make_history() ----------------------------------------------------------
@@ -95,26 +125,11 @@ test_that("make_history() produces expected result", {
         select(x, cust_id, year, duration_run, res, month) %>%
             arrange(cust_id, year)
     }
-    x <- make_history(sale_ranked, yrs, carry_vars) %>% format_result()
-    y <- make_lic_history(sale_ranked, yrs, carry_vars) %>% format_result()
-    expect_equal(x$month, y$month)
-    expect_equal(x$res, y$res)
-    
-    # res equality test currently fails (this is okay)
-    # the new function produces a slightly different result (better I think)
-    # vars are only overwritten if they are carried from a previous year
-    
-    # this shows that all the disagreement favors the new method
-    # (i.e., the values for the new method match the sale_ranked values)
-    # not_equal <- x[is.na(x$res != y$res) | x$res != y$res,]
-    # semi_join(sale_ranked, distinct(check, cust_id)) %>%
-    #     select(cust_id, year, res) %>%
-    #     left_join(x, by = c("cust_id", "year")) %>%
-    #     filter(res.x != res.y)
-    
+    # might do a compare to example data here as a catch-all
+    # maybe not needed since individual units are covered
 })
 
-# Previous Functions ------------------------------------------------------
+# rank_sale() ------------------------------------------------------
 
 test_that("rank_sale() produces expected result", {
     # compare function output to a simple dplyr pipeline
@@ -156,67 +171,4 @@ test_that("join_first_month() produces expected result", {
     x <- rank_sale(sale_unranked, first_month = TRUE) %>%
         select(cust_id, year, month)
     expect_equal(x, y)
-})
-    
-test_that("make_lic_history() produces expected result", {
-    x <- select(history_calc, cust_id, year, month, res)
-    y <- select(history, cust_id, year, month, res)
-    expect_equal(x, y)
-})
-
-test_that("identify_R3() produces expected result", {
-    x <- history_calc %>%
-        identify_R3(2008:2019) %>%
-        select(cust_id, year, R3)
-    y <- select(history, cust_id, year, R3)
-    expect_equal(x, y)
-})
-
-test_that("identify_lapse() produces expected result", {
-    x <- history_calc %>%
-        identify_lapse(2008:2018) %>%
-        select(cust_id, year, lapse)
-    y <- select(history, cust_id, year, lapse)
-    expect_equal(x, y)
-})
-
-# Carry Forward Funcs -----------------------------------------------------
-# these are closer to unit tests for make_lic_history
-
-test_that("carry_duration() produces expected result", {
-    yrs <- 2010:2015
-    sale_ranked2 <- select(sale_ranked, cust_id, year, duration, month, res) %>%
-        filter(year %in% yrs)
-    format_same <- function(x) {
-        select(x, cust_id, year) %>% arrange(cust_id, year) %>% data.frame()
-    }
-    # salic-estimated
-    x <- split(sale_ranked2, sale_ranked2$year) %>% 
-        carry_duration(yrs) %>% 
-        bind_rows()
-    
-    # carry forward using an alternative (less efficient) method
-    # this implementation feels a bit hacky
-    y <- rename(sale_ranked2, ref_year = year) %>%
-        merge(data.frame(year = yrs)) %>%
-        mutate(duration = ref_year - year + duration) %>%
-        filter(duration > 0, year > ref_year) %>%
-        bind_rows(sale_ranked2) %>%
-        distinct(cust_id, year) # resolve purchase/carry overlaps
-    expect_equal(format_same(x), format_same(y))
-})
-
-test_that("carry_variables() produces expected result", {
-    yrs <- 2008:2019
-    format_same <- function(x) {
-        select(x, cust_id, year, month, res) %>%
-            arrange(cust_id, year) %>%
-            data.frame()
-    }
-    z <- sale_ranked
-    x <- split(sale_ranked, sale_ranked$year) %>%
-        carry_duration(yrs) %>%
-        carry_variables(yrs, c("month", "res")) %>%
-        bind_rows()
-    expect_equal(format_same(x), format_same(history))
 })

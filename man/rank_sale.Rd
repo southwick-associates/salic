@@ -50,8 +50,8 @@ left_join(
 )
 }
 \seealso{
-Other license history functions: \code{\link{join_first_month}},
-  \code{\link{make_R3}}, \code{\link{make_history}},
-  \code{\link{prep_yrs}}
+Other license history functions: \code{\link{forward_duration}},
+  \code{\link{join_first_month}},
+  \code{\link{make_history}}, \code{\link{prep_yrs}}
 }
 \concept{license history functions}
