@@ -8,7 +8,8 @@ make_history(sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs,
   show_diagnostics = FALSE)
 }
 \arguments{
-\item{sale_ranked}{data frame: Sales table from which license history will be made}
+\item{sale_ranked}{data frame: Sales table from which license history will be made; 
+must include at least 3 variables (cust_id, year, duration)}
 
 \item{yrs}{numeric: Years in sales data (column 'year') from which
 to create license history}
@@ -23,10 +24,11 @@ If NULL, lapse will not be calculated (useful for mid-year results)}
 output dataset, useful for running checks.}
 }
 \description{
-The license history table accounts for multi-year/lifetime licenses directly by including
-a row for every year a license is held. The input data frame (sale_ranked) must 
-have at least 3 columns (cust_id, year, duration) and should only have 1 record 
-per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
+The license history table accounts for multi-year/lifetime licenses by including
+1 row for every year a license is held. The input data frame should only have 1 record 
+per customer-year (ensured by running \code{\link{rank_sale}} beforehand).
+}
+\details{
 The output data frame includes the following variables:
 \itemize{
 \item \emph{cust_id}: Customer ID
@@ -38,8 +40,11 @@ multi-year/lifetime records are complete in future years.
 \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
 Only included if more than 5 years are present.
 }
-Development Note: This function makes use of several \code{\link{history_internal}}
-functions.
+Development Note: make_history() uses several \code{\link{history_internal}}
+functions, all of which make use of package data.table for performance, 
+see \href{https://github.com/Rdatatable/data.table/wiki}{data.table wiki} &
+\href{https://github.com/Rdatatable/data.table/wiki/Getting-started}{getting started vignette}
+for more information.
 }
 \examples{
 library(dplyr)

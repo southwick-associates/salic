@@ -150,25 +150,29 @@ prep_yrs <- function(yrs, df, func_name) {
 
 #' Make license history table
 #'
-#' The license history table accounts for multi-year/lifetime licenses directly by including
-#' a row for every year a license is held. The input data frame (sale_ranked) must 
-#' have at least 3 columns (cust_id, year, duration) and should only have 1 record 
-#' per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
+#' The license history table accounts for multi-year/lifetime licenses by including
+#' 1 row for every year a license is held. The input data frame should only have 1 record 
+#' per customer-year (ensured by running \code{\link{rank_sale}} beforehand).
+#' 
 #' The output data frame includes the following variables:
 #' \itemize{
 #' \item \emph{cust_id}: Customer ID
 #' \item \emph{year}: License Year
 #' \item \emph{carry_vars}: One or more optional variables to include; ensures 
 #' multi-year/lifetime records are complete in future years.
-#' \item \emph{duration_run}: A duration that accounts for multi-year/lifetimes.
+#' \item \emph{duration_run}: A duration variable that accounts for multi-year/lifetimes.
 #' \item \emph{lapse}: Lapse next year? (1=Yes, 0=No). Only included if yrs_lapse != NULL
 #' \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
 #' Only included if more than 5 years are present.
 #' }
-#' Development Note: This function makes use of several \code{\link{history_internal}}
-#' functions.
+#' Development Note: make_history() uses several \code{\link{history_internal}}
+#' functions, all of which make use of package data.table for performance, 
+#' see \href{https://github.com/Rdatatable/data.table/wiki}{data.table wiki} &
+#' \href{https://github.com/Rdatatable/data.table/wiki/Getting-started}{getting started vignette}
+#' for more information.
 #' 
-#' @param sale_ranked data frame: Sales table from which license history will be made
+#' @param sale_ranked data frame: Sales table from which license history will be made; 
+#' must include at least 3 variables (cust_id, year, duration)
 #' @param yrs numeric: Years in sales data (column 'year') from which
 #' to create license history
 #' @param carry_vars character: additional variables to carry over from previous year
