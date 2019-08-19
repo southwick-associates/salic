@@ -31,10 +31,10 @@ sale_ranked <- left_join(sale, lic) \%>\% rank_sale()
 
 carry_vars = c("res", "month")
 history <- sale_ranked \%>\%
-   make_history(sale_ranked, 2008:2018, carry_vars, show_diagnostics = TRUE)
+   make_history(2008:2018, carry_vars, show_diagnostics = TRUE)
 }
 \seealso{
-Other license history functions: \code{\link{forward_duration}},
+Other license history functions: \code{\link{history_internal}},
   \code{\link{join_first_month}}, \code{\link{prep_yrs}},
   \code{\link{rank_sale}}
 }

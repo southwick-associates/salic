@@ -2,13 +2,11 @@
 % Please edit documentation in R/license-history.R
 \name{check_history_samp}
 \alias{check_history_samp}
-\title{Sample the output of \code{\link{make_lic_history}}}
+\title{Sample the output of \code{\link{make_history}}}
 \usage{
 check_history_samp(lic_history, n_samp = 3, buy_min = 3, buy_max = 8)
 }
 \arguments{
-\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
-
 \item{n_samp}{numeric: number of customers to view}
 
 \item{buy_min}{numeric: minimum number of license purchases for customers to include}
@@ -24,11 +22,7 @@ data(history)
 check_history_samp(history, n_samp = 5)
 }
 \seealso{
-Other deprecated license history functions: \code{\link{carry_duration}},
-  \code{\link{carry_variables}},
-  \code{\link{check_identify_R3}},
-  \code{\link{check_identify_lapse}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{make_lic_history}}
+Other deprecated license history functions: \code{\link{check_identify_R3}},
+  \code{\link{check_identify_lapse}}
 }
 \concept{deprecated license history functions}

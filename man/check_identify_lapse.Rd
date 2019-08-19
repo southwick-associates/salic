@@ -6,9 +6,6 @@
 \usage{
 check_identify_lapse(lic_history)
 }
-\arguments{
-\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
-}
 \description{
 Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
 Produces a count summary of customers by lapse and lead_year.
@@ -23,12 +20,8 @@ select(history, -lapse) \%>\%
     check_identify_lapse()
 }
 \seealso{
-Other deprecated license history functions: \code{\link{carry_duration}},
-  \code{\link{carry_variables}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_identify_R3}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{make_lic_history}}
+Other deprecated license history functions: \code{\link{check_history_samp}},
+  \code{\link{check_identify_R3}}
 }
 \concept{deprecated license history functions}
 \keyword{internal}

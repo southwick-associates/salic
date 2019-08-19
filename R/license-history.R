@@ -4,7 +4,7 @@
 
 #' Filter sales to 1 row per customer per year.
 #'
-#' Intended to run before \code{\link{make_lic_history}} to ensure that 
+#' Intended to run before \code{\link{make_history}} to ensure that 
 #' multi-year/lifetime sales are accounted for.  
 #' The default (and intended purpose) is to pick the maximum "duration" value 
 #' per customer-year. Optionally, it will also pick the minimum value of month 
@@ -120,12 +120,11 @@ join_first_month <- function(
 #' ordering in subsequent license history calculations, which include iterations
 #' by year that would produce incorrect results if not sorted.
 #' 
-#' This function is intended to be called from \code{\link{make_lic_history}},
-#' \code{\link{identify_R3}}, or \code{\link{identify_lapse}}.
+#' This function is intended to be called from \code{\link{make_history}}
 #' 
 #' @param df data frame: table that contains "year" variable
 #' @param func_name character: name of function to print in warning
-#' @inheritParams make_lic_history
+#' @inheritParams make_history
 #' @family license history functions
 #' @keywords internal
 #' @export
@@ -148,78 +147,6 @@ prep_yrs <- function(yrs, df, func_name) {
 }
 
 # Making History -----------------------------------------------------------
-
-# In progress: faster (hopefully) version using data.table
-make_history2 <- function(
-    sale, yrs, carrry_vars
-) {
-    setDT(sale)
-    sale[, `:=`(duration_run = duration)]
-    
-    x <- list()
-    x[[1]] <- sale[year == yrs[1]]
-    x[[1]][, `:=`(year_last = NA_integer_)]
-    
-    for (i in 2:length(yrs)) {
-        # prep by joining current & last year
-        fwd_cols <- c("cust_id", "duration_run", "year_last", carry_vars)
-        x[[i]] <- merge(
-            sale[year == yrs[i]], 
-            x[[i-1]][, ..fwd_cols],
-            by = "cust_id", all = TRUE, suffixes = c("", "_lag")
-        )
-        
-        # carry duration
-        x[[i]][, `:=`(
-            duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
-            year = yrs[i]
-        )]
-        x[[i]][, `:=`(year_last = ifelse(duration_run_lag >= 1, year - 1, year_last))]
-        
-        # carry variables
-        # TODO: consider if this list needs to be created: I'm sure it's causing a slowdown
-        lag_list <- sapply(paste0(carry_vars, "_lag"),
-                           function(var) x[[i]][[var]], simplify = FALSE)
-        x[[i]][, (carry_vars) := Map(forward_vars2, .SD, lag_list, list(duration_run_lag)),
-               .SDcols = carry_vars]
-        
-        # identify lapse
-        lapse_ref <- x[[i]][duration_run >= 1, .(cust_id, lapse = 0L)]
-        x[[i-1]][lapse_ref, on = "cust_id", `:=`(lapse = i.lapse)]
-        x[[i-1]][, `:=`(lapse = ifelse(is.na(lapse), 1L, lapse))]
-    }
-    z <- x %>% 
-        lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
-        # lapply(function(df) filter(df, !is.na(duration_run), duration_run > 0)) %>%
-        rbindlist(fill = TRUE) %>%
-        make_R32(include_R3 = TRUE, yrs) %>%
-        as_tibble()
-}
-
-# TODO: consider pulling more out into functions (forward_duration, make_lapse, etc.)
-# - it (might) mess up the speed gained by assigning by reference (something to think about)
-# - (although I believe side effects are allowed in these functions...usually not good practice)
-forward_vars2 <- function(x, x_lag, duration_run_lag) {
-    case_when(!is.na(x) | duration_run_lag <= 1 ~ x, TRUE ~ x_lag)
-}
-make_R32 <- function(df, include_R3, yrs) {
-    if (!include_R3) {
-        return(df)
-    }
-    df[, `:=`(
-        yrs_since = year - year_last
-    )]
-    df[, `:=`(
-        R3 = case_when(
-            year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
-            is.na(yrs_since) | yrs_since > 5 ~ 4L, # recruited
-            yrs_since == 1 & duration_run_lag > 1 ~ 1L, # carried
-            yrs_since == 1 ~ 2L, # renewed
-            TRUE ~ 3L # otherwise reactivated
-        )
-    )]
-    df
-}
 
 #' Make a License History table with 1 row per customer per year
 #'
@@ -248,410 +175,108 @@ make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, 
     include_R3 = TRUE, show_diagnostics = FALSE
 ) {
-    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
+    yrs <- prep_yrs(yrs, sale_ranked, "make_history()")
     slct_cols <- c("cust_id", "year", "duration", carry_vars)
     data_required_vars(sale_ranked, "make_history()", slct_cols, use_error = TRUE)
+    
+    sale <- data.table(sale_ranked[slct_cols])
+    sale[, `:=`(duration_run = duration)]
+    
     x <- list()
+    x[[1]] <- sale[year == yrs[1]]
+    x[[1]][, `:=`(year_last = NA_integer_)]
     
-    for (i in seq_along(yrs)) {
-        x[[i]] <- sale_ranked %>%
-            filter(year == yrs[i]) %>% 
-            select(slct_cols) %>%
-            mutate(duration_run = duration)
-        if (i == 1) {
-            x[[i]] <- mutate(x[[i]], year_last = NA_integer_)
-        } else {
-            x[[i]] <- x[[i]] %>%
-                forward_duration(x[[i-1]], yrs[i], carry_vars) %>%
-                forward_vars(carry_vars)
-            x[[i-1]] <- x[[i-1]] %>%
-                make_lapse(x[[i]], yrs_lapse)
-        }
+    for (i in 2:length(yrs)) {
+        # prep by joining current & last year
+        fwd_cols <- c("cust_id", "duration_run", "year_last", carry_vars)
+        x[[i]] <- merge(
+            sale[year == yrs[i]], 
+            x[[i-1]][, ..fwd_cols],
+            by = "cust_id", all = TRUE, suffixes = c("", "_lag")
+        )
+        forward_duration(x[[i]], yrs[i])
+        if (!is.null(carry_vars)) forward_vars(x[[i]], carry_vars)
+        if (yrs[i] %in% yrs_lapse) make_lapse(x[[i-1]], x[[i]])
     }
-    x <- x %>%
-        lapply(function(x) filter(x, !is.na(duration_run), duration_run > 0)) %>%
-        bind_rows() %>%
-        make_R3(include_R3, yrs) %>%
-        mutate(duration_run = as.integer(.data$duration_run))
+    x <- x %>% 
+        lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
+        rbindlist(fill = TRUE)
+    if (include_R3) make_R3(x, yrs)
     if (!show_diagnostics) {
-        x <- select(x, -.data$duration_run_lag, -.data$duration,  
-                    -.data$year_last, -.data$yrs_since)
+        x[, c("duration_run_lag", "duration", "year_last", "yrs_since") := NULL]
     }
-    x
-}
-
-
-
-#' @rdname history_internal
-#' @export
-forward_duration <- function(df, df_last, current_year, carry_vars) {
-    full_join(
-        df, 
-        select(df_last, .data$cust_id, .data$duration_run, .data$year_last, carry_vars),    
-        by = "cust_id", suffix = c("", "_lag")
-    ) %>% mutate(  
-        duration_run = pmax(.data$duration, .data$duration_run_lag - 1, na.rm = TRUE),  
-        year = current_year, 
-        year_last = ifelse(.data$duration_run_lag >= 1, .data$year - 1, .data$year_last)
-    )
-}
-
-#' @rdname history_internal
-#' @export
-forward_vars <- function(df, carry_vars = NULL) {
-    if (is.null(carry_vars)) {
-        return(df)
-    }
-    forward_one <- function(df, var) {
-        var_lag <- sym(paste0(var, "_lag"))
-        var <- sym(var)
-        df %>% mutate(
-            !! var := case_when( 
-                !is.na(!! var) | .data$duration_run_lag <= 1 ~ !! var, 
-                TRUE ~ !! var_lag 
-            )
-        ) %>% select(- !! var_lag)
-    }
-    for (i in carry_vars) df <- forward_one(df, i)
-    df
-}
-
-#' @rdname history_internal
-#' @export
-make_lapse <- function(df_last, df, yrs_lapse) {
-    if (is.null(yrs_lapse)) {
-        return(df) 
-    }
-    df <- df %>%
-        filter(.data$duration_run >= 1) %>% 
-        mutate(lapse = 0L) %>%
-        select(.data$cust_id, .data$lapse)
-    
-    df_last %>%
-        left_join(df, by = "cust_id") %>% 
-        mutate(
-            lapse = ifelse(is.na(.data$lapse), 1L, .data$lapse),
-            lapse = ifelse(.data$year >= yrs_lapse[length(yrs_lapse)], 
-                           NA_integer_, .data$lapse)
-        )
-}
-
-#' @rdname history_internal
-#' @export
-make_R3 <- function(df, include_R3, yrs) {
-    if (!include_R3) {
-        return(df)
-    }
-    df %>% mutate(
-        yrs_since = .data$year - .data$year_last,
-        R3 = case_when(
-            .data$year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
-            is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
-            .data$yrs_since == 1 & .data$duration_run_lag > 1 ~ 1L, # carried
-            .data$yrs_since == 1 ~ 2L, # renewed
-            TRUE ~ 3L # otherwise reactivated
-        )
-    )
+    x[, duration_run := as.integer(duration_run)]
+    as_tibble(x)
 }
 
 #' Internal Functions: Making license history
 #' 
-#' These functions are intended to be called from \code{\link{make_history}}. 
+#' These functions are only to be called from \code{\link{make_history}}. 
+#' They work by side-effects; modifying the input data.table by reference.
 #' 
-#' @param df data frame: current year table
-#' @param df_last data frame: previous year table
+#' @param dt data.table: current year table
+#' @param dt_last data.table: previous year table
 #' @param current_year numeric: year of current year table
 #' @inheritParams make_history
 #' @family license history functions
 #' @keywords internal
 #' @name history_internal
-#' @import dplyr
+#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @examples
-#' # example
+#' # examples
 NULL
 
-# Deprecated --------------------------------------------------------
-
-#' Make a License History table with 1 row per customer per year
-#'
-#' The license history table accounts for multi-year/lifetime licenses directly by including
-#' a row for every year a license is held. The input data frame (sale_ranked) must 
-#' have at least 3 columns (cust_id, year, duration) and should only have 1 record 
-#' per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
-#' 
-#' The output data frame includes the following variables:
-#' \itemize{
-#' \item \emph{cust_id}
-#' \item \emph{year}
-#' \item \emph{duration_run}: A duration variable that accounts for multi-year/lifetimes, 
-#' also used in downstream R3 calculations.
-#' \item \emph{carry_vars}: One or more optional variables to include, 
-#' based on the corresponding argument (typically carry_vars = c("month", "res")).
-#' For multi-year/lifetimes, carry_vars inherit values from the previous year.
-#' }
-#' Development Note: This function is largely a wrapper for \code{\link{carry_duration}} 
-#' and \code{\link{carry_variables}}
-#' 
-#' @param sale_ranked data frame: Sales table from which license history will be made
-#' @param yrs numeric: Years in sales data (column 'year') from which
-#' to create license history
-#' @param carry_vars character: additional variables to carry over from previous year
-#' (for multi-year and lifetime licenses).
-#' @import dplyr
-#' @family deprecated license history functions
+#' @rdname history_internal
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(lic, sale)
-#' sale_unranked <- left_join(sale, lic)
-#' sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
-#' history <- sale_ranked %>%
-#'     make_lic_history(2008:2019, carry_vars = c("month", "res"))
-#' 
-#' # check a sample of several customers
-#' check_history_samp(history)
-make_lic_history <- function(sale_ranked, yrs, carry_vars = NULL) {
-    yrs <- prep_yrs(yrs, sale_ranked, "make_lic_history()")
-    x <- sale_ranked[c("cust_id", "year", "duration", carry_vars)] %>%
-        filter(.data$year %in% yrs)
-    split(x, x$year) %>%
-        carry_duration(yrs) %>%
-        carry_variables(yrs, carry_vars) %>%
-        bind_rows() %>% 
-        rename(duration_run = duration)
+forward_duration <- function(dt, current_year) {
+    dt[, `:=`(
+        duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
+        year = current_year
+    )]
+    dt[, `:=`(year_last = ifelse(duration_run_lag >= 1, year - 1, year_last))]
 }
 
-
-#' Internal Function: Carry multi-year/lifetime durations forward
-#' 
-#' This function is intended to be called from \code{\link{make_lic_history}}.
-#' 
-#' @param sale_split list: ranked sale table split by year
-#' @inheritParams make_lic_history
-#' @import dplyr
-#' @family deprecated license history functions
-#' @keywords internal
+#' @rdname history_internal
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(sale, lic)
-#' 
-#' sale_unranked <- left_join(lic, sale)
-#' sale_ranked <- rank_sale(sale_unranked) %>%
-#'     select(cust_id, year, duration)
-#' 
-#' split(sale_ranked, sale_ranked$year) %>%     
-#'     carry_duration(2008:2019)
-carry_duration <- function(sale_split, yrs) {
-    if (any(!c("cust_id", "year", "duration") %in% colnames(sale_split[[1]]))) {
-        stop(
-            "All 3 variables (cust_id, year, duration) needed ", 
-            "for make_lic_history()", call. = FALSE
-        ) 
-    }
-    for (i in 2L:length(yrs)) {
-        # carry forward previous year
-        sale_split[[i]] <- sale_split[[i-1]] %>%
-            filter(.data$duration != 1) %>%
-            mutate(lag_duration = .data$duration - 1) %>%
-            select(.data$cust_id, .data$lag_duration) %>%
-            
-            # join to current year & pick highest duration
-            full_join(sale_split[[i]], by = "cust_id") %>%
-            mutate(
-                duration = pmax(.data$duration, .data$lag_duration, na.rm = TRUE) %>%
-                    as.integer(),
-                year = yrs[i]
-            ) %>%
-            select(-.data$lag_duration)
-    }
-    sale_split
-}
-
-#' Internal Function: Carry specified variables forward
-#' 
-#' This function is intended to be called from \code{\link{make_lic_history}}.
-#' 
-#' @inheritParams make_lic_history
-#' @inheritParams carry_duration
-#' @import dplyr
-#' @family deprecated license history functions
-#' @keywords internal
-#' @export
-#' @examples
-#' library(dplyr)
-#' data(sale, lic)
-#' 
-#' sale_unranked <- left_join(lic, sale)
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' split(sale_ranked, sale_ranked$year) %>%     
-#'     carry_duration(2008:2019) %>%
-#'     carry_variables(2008:2019, c("month", "res"))
-carry_variables <- function(sale_split, yrs, carry_vars) {
-    if (is.null(carry_vars)) {
-        return(sale_split)
-    }
-    if (any(!carry_vars %in% colnames(sale_split[[1]]))) {
-        stop(
-            "All carry_vars (", paste(carry_vars, collapse = ", "), 
-            ") needed for make_lic_history()", call. = FALSE
-        )
-    }
-    # replace missings (of var) with value from previous year (if available)
+forward_vars <- function(dt, carry_vars) {
     for (var in carry_vars) {
-        for (i in 2L:length(yrs)) {
-            sale_split[[i]] <- filter(sale_split[[i]], is.na(.data[[var]])) %>%
-                left_join(
-                    select(sale_split[[i-1]], .data$cust_id, lastvar = .data[[var]]),  
-                    by = "cust_id"
-                ) %>%
-                mutate(!! var := .data$lastvar) %>%
-                select(-.data$lastvar) %>%
-                bind_rows(filter(sale_split[[i]], !is.na(.data[[var]])))
-        }
+        var_lag <- paste0(var, "_lag")
+        dt[, (var) := dplyr::case_when(
+            !is.na(get(var)) | duration_run_lag <= 1 ~ get(var),
+            TRUE ~ get(var_lag)
+        )]
+        dt[, (var_lag) := NULL]
     }
-    sale_split
 }
 
-#' Identify R3 group each year
-#'
-#' Intended to be called following \code{\link{make_lic_history}}, creates the
-#' categorical variable, R3 (1=carried, 2=renewed, 3=reactivated, 4=recruited), 
-#' where "retained" consists of carried + renewed (hence R3: retain, reactivate, recruit).
-#' 
-#' @param lic_history data frame: output of \code{\link{make_lic_history}} 
-#' @param yrs numeric: years used for identifying R3 (note that the first 5 years 
-#' will all have missing values for R3 output)
-#' @param show_summary logical: if TRUE, print a tabular summary that shows R3 category
-#' by the number of years since a license was held.
-#' @param show_check_vars logical: if TRUE, include output variables used in summary
-#' @rawNamespace import(data.table, except = c(first, between, last))
-#' @import dplyr
-#' @family deprecated license history functions
+#' @rdname history_internal
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(history)
-#' 
-#' x <- select(history, -R3) %>%
-#'     identify_R3(show_summary = TRUE)
-#' 
-#' # calculate % of license holders who are recruits
-#' group_by(x, year, R3) %>% 
-#'     summarise(n = n()) %>% 
-#'     mutate(pct = n / sum(n)) %>%
-#'     filter(R3 == 4, year != 2019)
-identify_R3 <- function(
-    lic_history, yrs = sort(unique(lic_history$year)),
-    show_summary = FALSE, show_check_vars = FALSE
-) {
-    yrs <- prep_yrs(yrs, lic_history, "identify_R3()")
-    if (length(yrs) <= 5) {
-        warning(
-            "No R3 identification performed: only ", length(yrs), 
-            " yrs specified (requires 6 or more)", call. = FALSE
-        )
-        return(lic_history)
-    }
-    # get lag year for R3 identification
-    dt <- data.table(lic_history)
-    cols <- c("year", "duration_run")
-    anscols <- paste("lag", cols, sep = "_")
-    dt[order(year), (anscols) := shift(.SD, 1), by = cust_id, .SDcols = cols]
-    
-    lic_history <- as_tibble(dt) %>%
-        mutate(
-            yrs_since = .data$year - .data$lag_year,
-            R3 = case_when(
-                .data$year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
-                is.na(.data$yrs_since) | .data$yrs_since > 5 ~ 4L, # recruited
-                .data$yrs_since == 1 & .data$lag_duration_run > 1 ~ 1L, # carried
-                .data$yrs_since == 1 ~ 2L, # renewed
-                TRUE ~ 3L # otherwise reactivated
-            )
-        ) 
-    if (show_summary) {
-        check_identify_R3(lic_history, yrs) %>% print()
-    }
-    if (!show_check_vars) {
-        lic_history <- select(lic_history, -.data$lag_duration_run, -.data$yrs_since)
-    }
-    select(lic_history, -.data$lag_year)
+make_lapse <- function(dt_last, dt) {
+    lapse_ref <- dt[duration_run >= 1, .(cust_id, lapse = 0L)]
+    dt_last[lapse_ref, on = "cust_id", `:=`(lapse = i.lapse)]
+    dt_last[, `:=`(lapse = ifelse(is.na(lapse), 1L, lapse))]
 }
 
-#' Identify lapse group each year
-#'
-#' This is intended to be called following \code{\link{make_lic_history}} 
-#' and codes lapse (0 = renews next year, 1 = lapses next year).
-#' 
-#' @inheritParams identify_R3
-#' @param yrs numeric: years used for identifying lapse (note that the last year will
-#' have all missing values for lapse output)
-#' @param show_summary logical: if TRUE, include a tabular summary that shows lapse 
-#' identification based on how many years until the next license is held.
-#' @import dplyr
-#' @family deprecated license history functions
+#' @rdname history_internal
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(history)
-#' 
-#' # excluding partial year 2019 since churn is only estimated for full-year results
-#' history <- filter(history, year != 2019)
-#' 
-#' x <- select(history, -lapse) %>%
-#'     identify_lapse(show_summary = TRUE) 
-#' 
-#' # calculate annual churn rate
-#' # (note that a given year's churn is based on lapse summary from the previous year)
-#' group_by(x, year) %>% 
-#'     summarise(mean(lapse)) %>%
-#'     mutate(year = year + 1)
-identify_lapse <- function(
-    lic_history, yrs = sort(unique(lic_history$year)), 
-    show_summary = FALSE, show_check_vars = FALSE
-) {
-    yrs <- prep_yrs(yrs, lic_history, "identify_lapse()")
-    
-    # issue warning if low final year
-    cnt <- count(lic_history, .data$year) %>%
-        filter(.data$year %in% yrs) %>%
-        mutate(pct_change = (.data$n - lag(.data$n)) / lag(.data$n) * 100)
-    last_change <- cnt$pct_change[length(yrs)] %>% round(1)
-    
-    if (last_change < -20) {
-        warning(
-            "There is a large drop in the final year specified: ", last_change, 
-            "%\n- Please ensure all specified yrs are complete for lapse identification.", 
-            call. = FALSE
+make_R3 <- function(dt, yrs) {
+    dt[, `:=`(
+        yrs_since = year - year_last
+    )]
+    dt[, `:=`(
+        R3 = dplyr::case_when(
+            year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
+            is.na(yrs_since) | yrs_since > 5 ~ 4L, # recruited
+            yrs_since == 1 & duration_run_lag > 1 ~ 1L, # carried
+            yrs_since == 1 ~ 2L, # renewed
+            TRUE ~ 3L # otherwise reactivated
         )
-    }
-    # get lead year for lapse identification
-    dt <- data.table(lic_history)
-    cols <- "year"
-    anscols <- paste("lead", cols, sep = "_")
-    dt[order(year), (anscols) := shift(.SD, 1, type = "lead"), by = cust_id, .SDcols = cols]
-    
-    lic_history <- as_tibble(dt) %>%
-        mutate(lapse = case_when( 
-            .data$year >= max(yrs) ~ NA_integer_, 
-            .data$lead_year == (.data$year + 1) ~ 0L, # renewed 
-            TRUE ~ 1L # lapsed 
-        ))
-    if (show_summary) {
-        check_identify_lapse(lic_history) %>% print()
-    }
-    if (!show_check_vars) {
-        lic_history <- select(lic_history, -.data$lead_year)
-    }
-    lic_history
+    )]
 }
-
 
 # Checking & Summarizing --------------------------------------------------
 
-#' Sample the output of \code{\link{make_lic_history}}
+#' Sample the output of \code{\link{make_history}}
 #'
 #' View a sample of customers from license history table to check the 
 #' year over year dynamics (outputs a list split by customer ID).
@@ -659,7 +284,6 @@ identify_lapse <- function(
 #' @param n_samp numeric: number of customers to view
 #' @param buy_min numeric: minimum number of license purchases for customers to include
 #' @param buy_max numeric: maximum number of license purchases for customers to include
-#' @inheritParams identify_R3
 #' @import dplyr
 #' @family deprecated license history functions
 #' @export
@@ -682,7 +306,6 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).
 #' Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
 #' 
-#' @inheritParams identify_R3
 #' @import dplyr
 #' @family deprecated license history functions
 #' @keywords internal
@@ -691,14 +314,11 @@ check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8
 #' library(dplyr)
 #' data(history)
 #' 
-#' select(history, -R3) %>%
-#'     identify_R3(2008:2019, show_check_vars = TRUE) %>%
-#'     check_identify_R3(2008:2019)
 check_identify_R3 <- function(lic_history, yrs) {
     if (!"yrs_since" %in% names(lic_history)) {
         warning(
             "yrs_since variable needed for check_identify_R3 ", 
-            "(see ?identify_R3", call. = FALSE
+            "(see ?make_history(show_diagnostics = TRUE)", call. = FALSE
         )
         return(invisible())
     }
@@ -714,7 +334,6 @@ check_identify_R3 <- function(lic_history, yrs) {
 #' Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
 #' Produces a count summary of customers by lapse and lead_year.
 #' 
-#' @inheritParams identify_R3
 #' @import dplyr
 #' @family deprecated license history functions
 #' @keywords internal

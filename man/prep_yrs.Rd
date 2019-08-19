@@ -21,8 +21,7 @@ ordering in subsequent license history calculations, which include iterations
 by year that would produce incorrect results if not sorted.
 }
 \details{
-This function is intended to be called from \code{\link{make_lic_history}},
-\code{\link{identify_R3}}, or \code{\link{identify_lapse}}.
+This function is intended to be called from \code{\link{make_history}}
 }
 \examples{
 data(sale)
@@ -30,7 +29,7 @@ prep_yrs(c(2010, 2008, 2015), sale, "my_function")
 prep_yrs(c(2007, 2015, 2010), sale, "my_function") # print a warning
 }
 \seealso{
-Other license history functions: \code{\link{forward_duration}},
+Other license history functions: \code{\link{history_internal}},
   \code{\link{join_first_month}},
   \code{\link{make_history}}, \code{\link{rank_sale}}
 }

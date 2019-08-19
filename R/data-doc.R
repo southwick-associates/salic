@@ -69,7 +69,7 @@ NULL
 #' \item{lapse}{Lapsed next Year? (integer) (1=lapse, 0=renew)}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{make_lic_history}}
+#' @seealso \code{\link{make_history}}
 NULL
 
 #' Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)

@@ -19,7 +19,7 @@ to ensure the output contains the earliest month by grp_var
 (useful for mid-year dashboards)}
 }
 \description{
-Intended to run before \code{\link{make_lic_history}} to ensure that 
+Intended to run before \code{\link{make_history}} to ensure that 
 multi-year/lifetime sales are accounted for.  
 The default (and intended purpose) is to pick the maximum "duration" value 
 per customer-year. Optionally, it will also pick the minimum value of month 
@@ -50,7 +50,7 @@ left_join(
 )
 }
 \seealso{
-Other license history functions: \code{\link{forward_duration}},
+Other license history functions: \code{\link{history_internal}},
   \code{\link{join_first_month}},
   \code{\link{make_history}}, \code{\link{prep_yrs}}
 }

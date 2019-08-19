@@ -6,12 +6,6 @@
 \usage{
 check_identify_R3(lic_history, yrs)
 }
-\arguments{
-\item{lic_history}{data frame: output of \code{\link{make_lic_history}}}
-
-\item{yrs}{numeric: years used for identifying R3 (note that the first 5 years 
-will all have missing values for R3 output)}
-}
 \description{
 Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).
 Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
@@ -20,17 +14,10 @@ Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
 library(dplyr)
 data(history)
 
-select(history, -R3) \%>\%
-    identify_R3(2008:2019, show_check_vars = TRUE) \%>\%
-    check_identify_R3(2008:2019)
 }
 \seealso{
-Other deprecated license history functions: \code{\link{carry_duration}},
-  \code{\link{carry_variables}},
-  \code{\link{check_history_samp}},
-  \code{\link{check_identify_lapse}},
-  \code{\link{identify_R3}}, \code{\link{identify_lapse}},
-  \code{\link{make_lic_history}}
+Other deprecated license history functions: \code{\link{check_history_samp}},
+  \code{\link{check_identify_lapse}}
 }
 \concept{deprecated license history functions}
 \keyword{internal}
