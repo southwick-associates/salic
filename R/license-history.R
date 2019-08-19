@@ -148,9 +148,25 @@ prep_yrs <- function(yrs, df, func_name) {
 
 # Making History -----------------------------------------------------------
 
-#' Make a License History table with 1 row per customer per year
+#' Make license history table
 #'
-#' Details my dude
+#' The license history table accounts for multi-year/lifetime licenses directly by including
+#' a row for every year a license is held. The input data frame (sale_ranked) must 
+#' have at least 3 columns (cust_id, year, duration) and should only have 1 record 
+#' per customer per year (ensured by running \code{\link{rank_sale}} beforehand).
+#' The output data frame includes the following variables:
+#' \itemize{
+#' \item \emph{cust_id}: Customer ID
+#' \item \emph{year}: License Year
+#' \item \emph{carry_vars}: One or more optional variables to include; ensures 
+#' multi-year/lifetime records are complete in future years.
+#' \item \emph{duration_run}: A duration that accounts for multi-year/lifetimes.
+#' \item \emph{lapse}: Lapse next year? (1=Yes, 0=No). Only included if yrs_lapse != NULL
+#' \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
+#' Only included if more than 5 years are present.
+#' }
+#' Development Note: This function makes use of several \code{\link{history_internal}}
+#' functions.
 #' 
 #' @param sale_ranked data frame: Sales table from which license history will be made
 #' @param yrs numeric: Years in sales data (column 'year') from which
@@ -159,21 +175,25 @@ prep_yrs <- function(yrs, df, func_name) {
 #' (for multi-year and lifetime licenses).
 #' @param yrs_lapse numeric: years to include in lapse calculation (defaults to yrs). 
 #' If NULL, lapse will not be calculated (useful for mid-year results)
-#' @param include_R3 logical: If TRUE, also calculate R3
+#' @param show_diagnostics: If TRUE, will include intermediate variables in the
+#' output dataset, useful for running checks.
 #' @import dplyr
+#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions
 #' @export
 #' @examples
 #' library(dplyr)
 #' data(sale, lic)
 #' sale_ranked <- left_join(sale, lic) %>% rank_sale()
+#' history <- make_history(sale_ranked, 2008:2018, "res")
 #' 
-#' carry_vars = c("res", "month")
-#' history <- sale_ranked %>%
-#'    make_history(2008:2018, carry_vars, show_diagnostics = TRUE)
+#' # history includes more rows than sale_ranked if multi-year/lifetimes are present
+#' left_join(count(history, year), count(sale_ranked, year), by = "year")
+#' 
+#' # run with diagnostics for checking
+#' # TODO
 make_history <- function(
-    sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, 
-    include_R3 = TRUE, show_diagnostics = FALSE
+    sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, show_diagnostics = FALSE
 ) {
     yrs <- prep_yrs(yrs, sale_ranked, "make_history()")
     slct_cols <- c("cust_id", "year", "duration", carry_vars)
@@ -201,7 +221,7 @@ make_history <- function(
     x <- x %>% 
         lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
         rbindlist(fill = TRUE)
-    if (include_R3) make_R3(x, yrs)
+    if (length(yrs) > 5) make_R3(x, yrs)
     if (!show_diagnostics) {
         x[, c("duration_run_lag", "duration", "year_last", "yrs_since") := NULL]
     }
@@ -218,7 +238,7 @@ make_history <- function(
 #' @param dt_last data.table: previous year table
 #' @param current_year numeric: year of current year table
 #' @inheritParams make_history
-#' @family license history functions
+#' @family internal license history functions
 #' @keywords internal
 #' @name history_internal
 #' @rawNamespace import(data.table, except = c(first, between, last))

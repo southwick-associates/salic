@@ -39,9 +39,8 @@ left_join(
 )
 }
 \seealso{
-Other license history functions: \code{\link{history_internal}},
-  \code{\link{make_history}}, \code{\link{prep_yrs}},
-  \code{\link{rank_sale}}
+Other license history functions: \code{\link{make_history}},
+  \code{\link{prep_yrs}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}
 \keyword{internal}

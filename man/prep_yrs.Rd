@@ -29,8 +29,7 @@ prep_yrs(c(2010, 2008, 2015), sale, "my_function")
 prep_yrs(c(2007, 2015, 2010), sale, "my_function") # print a warning
 }
 \seealso{
-Other license history functions: \code{\link{history_internal}},
-  \code{\link{join_first_month}},
+Other license history functions: \code{\link{join_first_month}},
   \code{\link{make_history}}, \code{\link{rank_sale}}
 }
 \concept{license history functions}

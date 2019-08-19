@@ -36,10 +36,5 @@ They work by side-effects; modifying the input data.table by reference.
 \examples{
 # examples
 }
-\seealso{
-Other license history functions: \code{\link{join_first_month}},
-  \code{\link{make_history}}, \code{\link{prep_yrs}},
-  \code{\link{rank_sale}}
-}
-\concept{license history functions}
+\concept{internal license history functions}
 \keyword{internal}
