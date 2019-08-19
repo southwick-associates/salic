@@ -149,6 +149,78 @@ prep_yrs <- function(yrs, df, func_name) {
 
 # Making History -----------------------------------------------------------
 
+# In progress: faster (hopefully) version using data.table
+make_history2 <- function(
+    sale, yrs, carrry_vars
+) {
+    setDT(sale)
+    sale[, `:=`(duration_run = duration)]
+    
+    x <- list()
+    x[[1]] <- sale[year == yrs[1]]
+    x[[1]][, `:=`(year_last = NA_integer_)]
+    
+    for (i in 2:length(yrs)) {
+        # prep by joining current & last year
+        fwd_cols <- c("cust_id", "duration_run", "year_last", carry_vars)
+        x[[i]] <- merge(
+            sale[year == yrs[i]], 
+            x[[i-1]][, ..fwd_cols],
+            by = "cust_id", all = TRUE, suffixes = c("", "_lag")
+        )
+        
+        # carry duration
+        x[[i]][, `:=`(
+            duration_run = pmax(duration, duration_run_lag - 1, na.rm = TRUE),
+            year = yrs[i]
+        )]
+        x[[i]][, `:=`(year_last = ifelse(duration_run_lag >= 1, year - 1, year_last))]
+        
+        # carry variables
+        # TODO: consider if this list needs to be created: I'm sure it's causing a slowdown
+        lag_list <- sapply(paste0(carry_vars, "_lag"),
+                           function(var) x[[i]][[var]], simplify = FALSE)
+        x[[i]][, (carry_vars) := Map(forward_vars2, .SD, lag_list, list(duration_run_lag)),
+               .SDcols = carry_vars]
+        
+        # identify lapse
+        lapse_ref <- x[[i]][duration_run >= 1, .(cust_id, lapse = 0L)]
+        x[[i-1]][lapse_ref, on = "cust_id", `:=`(lapse = i.lapse)]
+        x[[i-1]][, `:=`(lapse = ifelse(is.na(lapse), 1L, lapse))]
+    }
+    z <- x %>% 
+        lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
+        # lapply(function(df) filter(df, !is.na(duration_run), duration_run > 0)) %>%
+        rbindlist(fill = TRUE) %>%
+        make_R32(include_R3 = TRUE, yrs) %>%
+        as_tibble()
+}
+
+# TODO: consider pulling more out into functions (forward_duration, make_lapse, etc.)
+# - it (might) mess up the speed gained by assigning by reference (something to think about)
+# - (although I believe side effects are allowed in these functions...usually not good practice)
+forward_vars2 <- function(x, x_lag, duration_run_lag) {
+    case_when(!is.na(x) | duration_run_lag <= 1 ~ x, TRUE ~ x_lag)
+}
+make_R32 <- function(df, include_R3, yrs) {
+    if (!include_R3) {
+        return(df)
+    }
+    df[, `:=`(
+        yrs_since = year - year_last
+    )]
+    df[, `:=`(
+        R3 = case_when(
+            year <= yrs[5] ~ NA_integer_, # 1st 5 yrs shouldn't be identified
+            is.na(yrs_since) | yrs_since > 5 ~ 4L, # recruited
+            yrs_since == 1 & duration_run_lag > 1 ~ 1L, # carried
+            yrs_since == 1 ~ 2L, # renewed
+            TRUE ~ 3L # otherwise reactivated
+        )
+    )]
+    df
+}
+
 #' Make a License History table with 1 row per customer per year
 #'
 #' Details my dude
@@ -207,6 +279,8 @@ make_history <- function(
     }
     x
 }
+
+
 
 #' @rdname history_internal
 #' @export
