@@ -139,7 +139,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' @param yrs_lapse numeric: years to include in lapse calculation (defaults to yrs). 
 #' If NULL, lapse will not be calculated (useful for mid-year results)
 #' @param show_diagnostics: If TRUE, will include intermediate variables in the
-#' output dataset, useful for running checks.
+#' output dataset, necessary for running checks: \code{\link{history_check}}.
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions
@@ -255,92 +255,87 @@ make_R3 <- function(dt, yrs) {
 
 # Checking & Summarizing --------------------------------------------------
 
-# TODO: Probably wrap docs into one NULL block: history_check
-
-#' Sample the output of \code{\link{make_history}}
-#'
-#' View a sample of customers from license history table to check the 
-#' year over year dynamics (outputs a list split by customer ID).
+#' Checking license history
 #' 
+#' These functions can be called following \code{\link{make_history}} with 
+#' show_diagnostics = TRUE.
+#' \itemize{
+#' \item \emph{check_history_sample}: View a sample of customers from history table 
+#' to check year over year dynamics (outputs a list split by customer ID).
+#' \item \emph{check_R3}: Produce a count summary of customers by R3, yrs_since, 
+#' & duration_run_lag.
+#' \item \emph{check_lapse}: Produces a count summary of customers by lapse and lead_year.
+#' }
+#' 
+#' @param history data frame: license history table
 #' @param n_samp numeric: number of customers to view
 #' @param buy_min numeric: minimum number of license purchases for customers to include
 #' @param buy_max numeric: maximum number of license purchases for customers to include
+#' @inheritParams make_history
+#' @family license history functions
 #' @import dplyr
-#' @family deprecated license history functions
+#' @rawNamespace import(data.table, except = c(first, between, last))
+#' @name history_check
+#' @examples 
+#' library(dplyr)
+#' data(sale, lic)
+#' yrs <- 2008:2018
+#' 
+#' history <- inner_join(sale, lic) %>% 
+#'     rank_sale() %>%
+#'     make_history(yrs, "res", show_diagnostics = TRUE)
+#' 
+#' check_history_sample(history)
+#' check_R3(history, 2008:2018)
+#' check_lapse(history)
+NULL
+
+#' @rdname history_check
 #' @export
-#' @examples
-#' data(history)
-#' check_history_samp(history, n_samp = 5)
-check_history_samp <- function(lic_history, n_samp = 3, buy_min = 3, buy_max = 8) {
-    samp <- lic_history %>%
+check_history_sample <- function(history, n_samp = 3, buy_min = 3, buy_max = 8) {
+    show_cols <- c("cust_id", "year", "duration_run", "lapse", "R3", "res", "month")
+    output_cols <- dplyr::intersect(colnames(history), show_cols)
+    
+    samp <- history %>%
         count(.data$cust_id) %>%
         filter(.data$n >= buy_min, .data$n <= buy_max) %>%
         sample_n(n_samp) %>%
-        left_join(lic_history, by = "cust_id") %>%
-        select(-.data$n) %>%
+        left_join(history, by = "cust_id") %>%
         data.frame()
+    samp <- samp[output_cols]
     split(samp, samp$cust_id)
 }
 
-#' Internal Function: Check R3 Identification
-#'
-#' Intended to be run as part of \code{\link{identify_R3}} (where show_summary = TRUE).
-#' Produces a count summary of customers by R3, yrs_since, & lag_duration_run.
-#' 
-#' @import dplyr
-#' @family deprecated license history functions
-#' @keywords internal
+#' @rdname history_check
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(history)
-#' 
-check_identify_R3 <- function(lic_history, yrs) {
-    if (!"yrs_since" %in% names(lic_history)) {
+check_R3 <- function(history, yrs) {
+    if (!"yrs_since" %in% names(history)) {
         warning(
-            "yrs_since variable needed for check_identify_R3 ", 
+            "yrs_since variable needed for check_R3 ", 
             "(see ?make_history(show_diagnostics = TRUE)", call. = FALSE
         )
         return(invisible())
     }
-    lic_history %>%
+    history %>%
         filter(.data$year > yrs[5]) %>%
         mutate(R3_label = factor_R3(.data$R3)) %>%
-        count(.data$R3, .data$R3_label, .data$yrs_since, .data$lag_duration_run) %>%
+        count(.data$R3, .data$R3_label, .data$yrs_since, .data$duration_run_lag) %>%
         data.frame()
 }
 
-#' Internal Function: Check lapse identification
-#'
-#' Intended to be run as part of \code{\link{identify_lapse}} (where show_summary = TRUE).
-#' Produces a count summary of customers by lapse and lead_year.
-#' 
-#' @import dplyr
-#' @family deprecated license history functions
-#' @keywords internal
+#' @rdname history_check
 #' @export
-#' @examples
-#' library(dplyr)
-#' data(history)
-#' 
-#' select(history, -lapse) %>%
-#'     filter(year %in% 2008:2018) %>%
-#'     identify_lapse(2008:2018, show_check_vars = TRUE) %>%
-#'     check_identify_lapse()
-check_identify_lapse <- function(lic_history) {
-    if (!"lead_year" %in% names(lic_history)) {
-        warning(
-            "lead_year variable needed for check_identify_lapse ", 
-            "(see ?identify_lapse", call. = FALSE
-        )
-        return(invisible())
-    }
-    lapse_summary <- lic_history %>%
-        mutate(yrs_till_next = case_when(
-            is.na(.data$lapse) ~ "C. Next time held: unknown",
-            .data$lead_year - .data$year == 1 ~ "A. Next time held: 1yr (i.e., renewed)",
-            TRUE ~ "B. Next time held: >1yr/never (i.e., lapsed)"
-        )) %>%
+check_lapse <- function(history) {
+    # get lead year for checking
+    dt <- data.table(history)
+    dt[order(year), lead_year := shift(year, 1, type = "lead"), by = cust_id]
+    dt[, yrs_till_next := case_when(
+        is.na(lapse) ~ "C. Next time held: unknown",
+        lead_year - year == 1 ~ "A. Next time held: 1yr (i.e., renewed)",
+        TRUE ~ "B. Next time held: >1yr/never (i.e., lapsed)"
+    )]
+    
+    lapse_summary <- dt %>% 
         count(.data$lapse, .data$year, .data$yrs_till_next) %>%
         data.frame()
     lapse_summary %>%

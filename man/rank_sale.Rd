@@ -49,6 +49,7 @@ left_join(
 )
 }
 \seealso{
-Other license history functions: \code{\link{make_history}}
+Other license history functions: \code{\link{history_check}},
+  \code{\link{make_history}}
 }
 \concept{license history functions}

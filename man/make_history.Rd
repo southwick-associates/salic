@@ -21,7 +21,7 @@ to create license history}
 If NULL, lapse will not be calculated (useful for mid-year results)}
 
 \item{show_diagnostics:}{If TRUE, will include intermediate variables in the
-output dataset, useful for running checks.}
+output dataset, necessary for running checks: \code{\link{history_check}}.}
 }
 \description{
 The license history table accounts for multi-year/lifetime licenses by including
@@ -56,6 +56,7 @@ history <- make_history(sale_ranked, 2008:2018, "res")
 left_join(count(history, year), count(sale_ranked, year), by = "year")
 }
 \seealso{
-Other license history functions: \code{\link{rank_sale}}
+Other license history functions: \code{\link{history_check}},
+  \code{\link{rank_sale}}
 }
 \concept{license history functions}
