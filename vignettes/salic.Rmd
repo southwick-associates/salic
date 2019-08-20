@@ -15,23 +15,27 @@ knitr::opts_chunk$set(
 )
 library(dplyr)
 library(salic)
-# library(devtools)
-# devtools::load_all()
 ```
 
-```{r}
-# playing around
-library(ggplot2)
-data(dashboard)
+Package salic lays out a workflow for use in AFWA's national/regional dashboard project. It's intended to simplify/standardize the production of the necessary summary data by providing a set of easy-to-use functions. This vignette illustrates the workflow using sample data (included as part of the salic installation).
 
-dashboard %>%
-    filter(metric == "participants", segment == "Gender") %>%
-    ggplot(aes(year, value, fill = category)) +
-    geom_col() +
-    facet_wrap(~ group) +
-    ggtitle("Hunter vs. Anglers over Time",
-            "'all_sports' refer to those who are both hunters and anglers")
-```
+Processing data for the dashboard can be divided into 3 parts:
+
+1. **Standardized License Data**: Getting license data into a standard (anonymized) format well-suited for generalized data processing functions.
+
+2. **License History**: Converting into a license history format for easy calculation of dashboard metrics.
+
+3. **Dashboard Metrics**: Applying estimation functions to the license history data, which produces the summaries used as input to the dashboard software.
+
+## 1. Standardized License Data
+
+It's much easier to build a generalized set of tools if we know what the input data looks like. For this reason, salic is pretty strict about how the input license data should be formatted. The process necessary to produce this format will vary by state, but fortunately the data needs for producing dashboards are fairly minimal (and salic provides the `data_check()` function to facilitate this). 
+
+### Customer & License IDs
+
+The fundamental assumption of salic is that customers can be identified across transactions using a customer ID (and similarly, license types can be identified using a license ID). 
+
+![](lic5.png) '
 
 ```{r}
 # test
@@ -39,20 +43,6 @@ data(history, package = "salic")
 est_part(history)
 ```
 
-Could maybe present an example of how to dig into questions using the license history. Perhaps this would go at the very end if I want to include it.
-
-Processing data for dashboard involves successive steps:
-
-1. **Standardize Data**: First get necessary license data into a standard (anonymized) format well-suited for generalized data processing functions.
-
-2. **Build License History**: Convert into a license history, which tracks license holding at the permission level across years, enabling easy calculation of dashboard metrics.
-
-3. **Calculate Dashboard Metrics**: Apply estimation functions to license history data, which produces the summaries used as input to the dashboard software.
-
-## TODO
-
-- obviously do some outlining/thinking about a good narrative, could potentially use the existing Word documentation to help this process.
-- running R code to show sample data, operations,
 
 ## Standardizing License Data
 
@@ -112,79 +102,3 @@ Need to also consider the key parameters for this process:
 
 ### Formatting for final Output
 
-
-## License History Data Mining Example
-
-```{r}
-data(history)
-x <- history %>%
-    label_categories() %>%
-    recode_agecat()
-
-filter(x, !is.na(sex), !is.na(lapse)) %>%
-    group_by(sex) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(sex, churn)) +
-    geom_col() +
-    ggtitle("Women churn at a higher rate than men")
-
-filter(x, !is.na(sex), !is.na(R3)) %>%
-    count(sex, R3) %>%
-    ggplot(aes(R3, n)) +
-    geom_col() +
-    facet_wrap(~ sex, scales = "free") +
-    ggtitle("But, women are more likely to be recruits (a higher churn group)")
-
-filter(x, !is.na(sex), !is.na(R3), R3 == "Recruit", !is.na(lapse), !is.na(agecat)) %>%
-    group_by(sex, agecat) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(sex, churn)) +
-    geom_col() +
-    facet_wrap(~ agecat, nrow = 2) +
-    ggtitle("Not clear that femail recruits churn at a higher rate than male recruits",
-            "Although maybe an exception for youths, complex dynamics could be at work")
-```
-
-```{r}
-
-# I thought this would disappear, but it doesn't
-# previously retained women appear especially more likely to churn
-filter(x, !is.na(sex), !is.na(lapse), !is.na(R3)) %>%
-    group_by(sex, R3) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(sex, churn)) +
-    geom_col() +
-    facet_wrap(~ R3)
-
-# look closer at retained by gender, maybe age is playing a role?
-filter(x, !is.na(sex), !is.na(lapse), !is.na(R3), !is.na(agecat)) %>%
-    filter(R3 == "Retain") %>%
-    group_by(sex, agecat) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(sex, churn)) +
-    geom_col() +
-    facet_wrap(~ agecat)
-
-filter(x, !is.na(sex), !is.na(lapse), !is.na(R3), !is.na(agecat)) %>%
-    filter(R3 == "Recruit") %>%
-    group_by(sex, agecat) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(sex, churn)) +
-    geom_col() +
-    facet_wrap(~ agecat)
-
-# of course it is difficult to infer alot from this sample...
-# perhaps women have lower avidity generally
-# recruits who are women don't seem to be any more likely to churn out
-
-x %>%
-    filter(!is.na(agecat), !is.na(R3), !is.na(lapse), !is.na(sex),
-           age_year >= 18, age_year <= 64) %>%
-    group_by(R3, sex, agecat) %>%
-    summarise(churn = mean(lapse)) %>%
-    ggplot(aes(agecat, churn)) +
-    geom_col() +
-    facet_grid(sex ~ R3) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Churn rates by R3, gender, age (all_sports permission)")
-```

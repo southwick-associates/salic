@@ -178,7 +178,7 @@ make_history <- function(
         if (yrs[i] %in% yrs_lapse) make_lapse(x[[i-1]], x[[i]])
     }
     x <- x %>% 
-        # keeping only records that represent a held license
+        # keep only records that represent a held license
         lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
         rbindlist(fill = TRUE)
     if (length(yrs) > 5) make_R3(x, yrs)
