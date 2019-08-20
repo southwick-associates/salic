@@ -171,23 +171,14 @@ test_that("rank_sale(rank_var = c('duration', 'res') produces expected result", 
 
 # rank_sale() first_month -------------------------------------------------
 
-# comparing to simple calculation
-y <- group_by(sale_unranked, cust_id, year) %>%
-    arrange(month) %>%
-    slice(1L) %>%
-    ungroup() %>%
-    select(cust_id, year, month)
-
-test_that("join_first_month() produces expected month result", {
-    x <- rank_sale(sale_unranked)
-    x <- join_first_month(data.table::setDT(x), data.table::setDT(sale_unranked)) %>%
-        as_tibble() %>%
-        select(cust_id, year, month)
-    expect_equal(x, y)
-})
-
 test_that("rank_sale(first_month = TRUE) produces expected month result", {
     x <- rank_sale(sale_unranked, first_month = TRUE) %>%
+        select(cust_id, year, month)
+    # comparing to simple calculation
+    y <- group_by(sale_unranked, cust_id, year) %>%
+        arrange(month) %>%
+        slice(1L) %>%
+        ungroup() %>%
         select(cust_id, year, month)
     expect_equal(x, y)
 })

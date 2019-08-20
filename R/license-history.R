@@ -8,24 +8,24 @@
 #' multi-year/lifetime sales are accounted for.  
 #' The default (and intended purpose) is to pick the maximum "duration" value 
 #' per customer-year. Optionally, it will also pick the minimum value of month 
-#' (useful in mid-year dashboards) if first_month = TRUE. 
+#' (intended for mid-year dashboards) if first_month = TRUE. 
 #' 
 #' @param sale data frame: Input sales data
 #' @param rank_var character: name of variable(s) to use for ranking
 #' @param grp_var character: name of variable(s) used for grouping
-#' @param first_month logical: If TRUE, also runs \code{\link{join_first_month}}
-#' to ensure the output contains the earliest month by grp_var 
-#' (useful for mid-year dashboards)
+#' @param first_month logical: If TRUE, also ensures the output contains the 
+#' earliest month by grp_var (intended for mid-year dashboards)
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @import dplyr
 #' @importFrom utils tail
+#' @importFrom utils head
 #' @family license history functions
 #' @export
 #' @examples
 #' library(dplyr)
 #' data(lic, sale)
 #' 
-#' sale_unranked <- left_join(sale, lic)
+#' sale_unranked <- inner_join(sale, lic)
 #' sale_ranked <- rank_sale(sale_unranked)
 #'     
 #' # check sale ranking - highest duration will always be picked
@@ -53,64 +53,23 @@ rank_sale <- function(
             ") must be included in sale", call. = FALSE
         )
     }
-    setDT(sale)
+    sale <- data.table(sale)
     setorderv(sale, rank_var) # order ascending
     ranked <- sale
     ranked <- ranked[, tail(.SD, 1), by = grp_var] # pick last
     
     if (first_month) {
-        if (!"month" %in% colnames(sale)) return(sale)
-        ranked <- join_first_month(ranked, sale, grp_var)
+        if (!"month" %in% colnames(sale)) {
+            warning("No month variable supplied in rank_sale();",
+                    " first_month = TRUE ignored.", call. = FALSE)
+            return(as_tibble(ranked))
+        }
+        setorderv(sale, "month")
+        sale <- sale[, .(month = head(month, 1)), by = grp_var]
+        ranked[, month := NULL]
+        ranked[sale, on = c("cust_id", "year"), `:=`(month = i.month)]
     }
     as_tibble(ranked)
-}
-
-#' Internal Function: Join earliest sale month by customer-year
-#'
-#' This function is only intended to be run as part of
-#' \code{\link{rank_sale}}; ensures the earliest month value gets recorded in 
-#' the license history table (useful for mid-year results).
-#' 
-#' @param sale_ranked data.table: Input ranked sales data
-#' @param sale_unranked data.table: Input unranked sales data
-#' @inheritParams rank_sale
-#' @import dplyr
-#' @rawNamespace import(data.table, except = c(first, between, last))
-#' @importFrom utils head
-#' @family license history functions
-#' @keywords internal
-#' @export
-#' @examples
-#' library(dplyr)
-#' data(lic, sale)
-#' sale_unranked <- left_join(sale, lic)
-#' sale_ranked <- rank_sale(sale_unranked)
-#' 
-#' data.table::setDT(sale_unranked)
-#' data.table::setDT(sale_ranked)
-#' sale_ranked <- join_first_month(sale_ranked, sale_unranked) %>%
-#'     as_tibble()
-#' 
-#' # check month ranking - earliest month will always be picked
-#' left_join(
-#'     count(sale_ranked, month), 
-#'     distinct(sale_unranked, cust_id, year, month) %>% count(month), 
-#'     by = "month",
-#'     suffix = c(".ranked", ".unranked")
-#' )
-join_first_month <- function(
-    sale_ranked, sale_unranked, grp_var = c("cust_id", "year")
-) {
-    if (!"month" %in% colnames(sale_unranked)) {
-        stop("month variable must be included in sale_unranked", call. = FALSE)
-    }
-    setorderv(sale_unranked, "month") # order ascending
-    sale_unranked <- sale_unranked[, .(month = head(month, 1)), by = grp_var]
-    
-    sale_ranked[, month := NULL]
-    setkeyv(sale_ranked, grp_var)
-    setkeyv(sale_unranked, grp_var)
-    sale_ranked[sale_unranked, nomatch = 0]
 }
 
 #' Internal Function: Check years range & sort
@@ -125,7 +84,7 @@ join_first_month <- function(
 #' @param df data frame: table that contains "year" variable
 #' @param func_name character: name of function to print in warning
 #' @inheritParams make_history
-#' @family license history functions
+#' @family internal license history functions
 #' @keywords internal
 #' @export
 #' @examples
@@ -193,9 +152,6 @@ prep_yrs <- function(yrs, df, func_name) {
 #' 
 #' # history includes more rows than sale_ranked if multi-year/lifetimes are present
 #' left_join(count(history, year), count(sale_ranked, year), by = "year")
-#' 
-#' # run with diagnostics for checking
-#' # TODO
 make_history <- function(
     sale_ranked, yrs, carry_vars = NULL, yrs_lapse = yrs, show_diagnostics = FALSE
 ) {
@@ -223,13 +179,14 @@ make_history <- function(
         if (yrs[i] %in% yrs_lapse) make_lapse(x[[i-1]], x[[i]])
     }
     x <- x %>% 
+        # keeping only records that represent a held license
         lapply(function(df) df[!is.na(duration_run) & duration_run > 0]) %>%
         rbindlist(fill = TRUE)
     if (length(yrs) > 5) make_R3(x, yrs)
     if (!show_diagnostics) {
         x[, c("duration_run_lag", "duration", "year_last", "yrs_since") := NULL]
     }
-    x[, duration_run := as.integer(duration_run)]
+    x[, duration_run := as.integer(duration_run)] # for consistency
     as_tibble(x)
 }
 
@@ -297,6 +254,8 @@ make_R3 <- function(dt, yrs) {
 }
 
 # Checking & Summarizing --------------------------------------------------
+
+# TODO: Probably wrap docs into one NULL block: history_check
 
 #' Sample the output of \code{\link{make_history}}
 #'

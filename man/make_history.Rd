@@ -54,12 +54,8 @@ history <- make_history(sale_ranked, 2008:2018, "res")
 
 # history includes more rows than sale_ranked if multi-year/lifetimes are present
 left_join(count(history, year), count(sale_ranked, year), by = "year")
-
-# run with diagnostics for checking
-# TODO
 }
 \seealso{
-Other license history functions: \code{\link{join_first_month}},
-  \code{\link{prep_yrs}}, \code{\link{rank_sale}}
+Other license history functions: \code{\link{rank_sale}}
 }
 \concept{license history functions}
