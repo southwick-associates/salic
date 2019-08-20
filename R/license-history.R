@@ -246,8 +246,6 @@ make_history <- function(
 #' @keywords internal
 #' @name history_internal
 #' @rawNamespace import(data.table, except = c(first, between, last))
-#' @examples
-#' # examples
 NULL
 
 #' @rdname history_internal

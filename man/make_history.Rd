@@ -35,7 +35,7 @@ The output data frame includes the following variables:
 \item \emph{year}: License Year
 \item \emph{carry_vars}: One or more optional variables to include; ensures 
 multi-year/lifetime records are complete in future years.
-\item \emph{duration_run}: A duration that accounts for multi-year/lifetimes.
+\item \emph{duration_run}: A duration variable that accounts for multi-year/lifetimes.
 \item \emph{lapse}: Lapse next year? (1=Yes, 0=No). Only included if yrs_lapse != NULL
 \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
 Only included if more than 5 years are present.

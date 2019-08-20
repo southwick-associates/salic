@@ -33,8 +33,5 @@ to create license history}
 These functions are only to be called from \code{\link{make_history}}. 
 They work by side-effects; modifying the input data.table by reference.
 }
-\examples{
-# examples
-}
 \concept{internal license history functions}
 \keyword{internal}
