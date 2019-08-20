@@ -3,17 +3,17 @@
 \docType{data}
 \name{metrics}
 \alias{metrics}
-\title{Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)}
+\title{Sample Data: Dashboard Metrics}
 \format{A list of 3 metrics (participants, recruits, churn) with 4 segments each 
 (tot, res, sex, agecat): 12 data frames total
 \describe{
-\item{part}{Sportspersons per Year}
-\item{recruit}{New Sportspersons (i.e., recruits) per Year}
+\item{participants}{Sportspersons per Year}
+\item{recruits}{New Sportspersons (i.e., recruits) per Year}
 \item{churn}{Churn (i.e., turnover) per Year}
 }}
 \description{
 This list holds national/regional dashboard metrics (full-year) for the sample 
-data and corresponds to "Hunters & Anglers" aged 18-64 each year. Each element 
+data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each element 
 (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
 "agecat" = by Age Category)
 }

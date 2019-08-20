@@ -3,7 +3,7 @@
 \docType{data}
 \name{history}
 \alias{history}
-\title{Sample Data: License  History (Jan 1, 2008 through June 30, 2019)}
+\title{Sample Data: License  History}
 \format{A data frame with 9 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (composite key)}
@@ -21,7 +21,7 @@ This is a table that corresponds to the "all_sports" permission for the included
 license sample data; containing 1 row per customer per year a license was held.
 }
 \seealso{
-\code{\link{make_history}}
+\code{\link{rank_sale}} \code{\link{make_history}}
 
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{lic}},

@@ -3,7 +3,7 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: Sales (Jan 1, 2008 through June 30, 2019)}
+\title{Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)}
 \format{A data frame with 5 variables
 \describe{
 \item{cust_id}{Customer ID (integer) (foreign key)}
@@ -13,7 +13,7 @@
 \item{res}{Residency (integer) (1=Res, 0=Nonres)}
 }}
 \description{
-Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
+Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},

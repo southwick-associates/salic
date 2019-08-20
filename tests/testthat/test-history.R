@@ -3,14 +3,13 @@ library(salic)
 library(dplyr)
 
 # shared data & calculations
-yrs <- 2008:2019
+yrs <- 2008:2018
 data(sale, lic, history)
-sale_unranked <- left_join(sale, lic)
+sale_unranked <- inner_join(lic, sale)
 sale_ranked <- rank_sale(sale_unranked, first_month = TRUE)
 
 history_calc <- sale_ranked %>%
-    make_history(yrs, carry_vars = c("month", "res"), show_diagnostics = TRUE,
-                 yrs_lapse = 2008:2018) %>%
+    make_history(yrs, carry_vars = c("month", "res"), show_diagnostics = TRUE) %>%
     arrange(cust_id, year)
 
 # forward_vars() ----------------------------------------------------------
@@ -67,13 +66,13 @@ test_that("make_history() produced expected year_last", {
 
 test_that("make_history() produces expected lapse", {
     format_result <- function(x) select(x, cust_id, year, lapse)
-    x <- history <- make_history(sale_ranked, 2008:2019, yrs_lapse = 2008:2018)
+    x <- history <- make_history(sale_ranked, yrs)
     y <- arrange(x, year) %>%
         group_by(cust_id) %>%
         mutate(duration_lead = lead(duration_run), lead_year = lead(year)) %>%
         ungroup() %>%
         mutate(lapse = case_when(
-            year %in% 2018:2019 ~ NA_integer_,
+            year == yrs[length(yrs)] ~ NA_integer_,
             duration_lead >= 1 & lead_year == (year +1) ~ 0L,
             TRUE ~ 1L
         ))

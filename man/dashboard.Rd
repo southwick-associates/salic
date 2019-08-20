@@ -18,7 +18,7 @@
 This data frame holds national/regional dashboard metrics formatted for dashboard input.
 The results correspond to full-year metrics for the sample data and include permission 
 breakouts for customers aged 18-64 each year. Three permissions are included: 
-Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and 
+All Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and 
 Anglers (group = "fish") .
 }
 \seealso{

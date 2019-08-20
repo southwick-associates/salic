@@ -1,8 +1,5 @@
 # Checks for Data
 
-# TODO
-# - maybe speed-up data_check() with data.table
-
 # Internal Functions ---------------------------------------------------
 
 #' Internal Functions: Individual Data Checks
@@ -228,8 +225,7 @@ data_check_sale <- function(
 #' 
 #' Produces warnings if any checks fail (stays silent on success).
 #' This function is simply a wrapper for several calls to \code{\link{data_check_table}} and 
-#' \code{\link{data_foreign_key}}; checking formatting rules for all standardized 
-#' data tables. Rules are designed to ensure:
+#' \code{\link{data_foreign_key}}. Rules are designed to ensure:
 #' \itemize{
 #'   \item primary keys are unique and non-missing
 #'   \item all required variables are present

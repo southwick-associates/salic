@@ -1,11 +1,8 @@
 # Documentation for Sample Data
 
-# TODO
-# - probably update sample data to exclude 2019
-
 # Standarized License Data ---------------------------------------------------
 
-#' Sample Data: 25,000 Customers
+#' Sample Data: 30,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
@@ -33,7 +30,7 @@ NULL
 #' @family Sample Data
 NULL
 
-#' Sample Data: Sales (Jan 1, 2008 through June 30, 2019)
+#' Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)
 #'
 #' @docType data
 #' @keywords datasets
@@ -51,7 +48,7 @@ NULL
 
 # Derived License Data ----------------------------------------------------
 
-#' Sample Data: License  History (Jan 1, 2008 through June 30, 2019)
+#' Sample Data: License  History
 #' 
 #' This is a table that corresponds to the "all_sports" permission for the included
 #' license sample data; containing 1 row per customer per year a license was held.
@@ -72,13 +69,13 @@ NULL
 #' \item{lapse}{Lapsed next Year? (integer) (1=lapse, 0=renew)}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{make_history}}
+#' @seealso \code{\link{rank_sale}} \code{\link{make_history}}
 NULL
 
-#' Sample Data: Dashboard Metrics (Jan 1, 2008 through Dec 31, 2018)
+#' Sample Data: Dashboard Metrics
 #' 
 #' This list holds national/regional dashboard metrics (full-year) for the sample 
-#' data and corresponds to "Hunters & Anglers" aged 18-64 each year. Each element 
+#' data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each element 
 #' (metric) holds four segments ("tot" = overall, "res" = by Residency, "sex" = by Gender, 
 #' "agecat" = by Age Category)
 #'
@@ -88,8 +85,8 @@ NULL
 #' @format A list of 3 metrics (participants, recruits, churn) with 4 segments each 
 #' (tot, res, sex, agecat): 12 data frames total
 #' \describe{
-#' \item{part}{Sportspersons per Year}
-#' \item{recruit}{New Sportspersons (i.e., recruits) per Year}
+#' \item{participants}{Sportspersons per Year}
+#' \item{recruits}{New Sportspersons (i.e., recruits) per Year}
 #' \item{churn}{Churn (i.e., turnover) per Year}
 #' }
 #' @family Sample Data
@@ -101,7 +98,7 @@ NULL
 #' This data frame holds national/regional dashboard metrics formatted for dashboard input.
 #' The results correspond to full-year metrics for the sample data and include permission 
 #' breakouts for customers aged 18-64 each year. Three permissions are included: 
-#' Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and 
+#' All Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and 
 #' Anglers (group = "fish") . 
 #'
 #' @docType data
