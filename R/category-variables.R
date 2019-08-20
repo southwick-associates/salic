@@ -1,5 +1,6 @@
 # functions for working with category variables
 
+# For Production Code -------------------------------------------------------
 
 #' Create age category based on year (of sale) and birth year
 #' 
@@ -68,7 +69,6 @@ label_categories <- function(df, categories = c("R3", "sex", "res"), ...) {
     df
 }
 
-
 # Vector-based Labelling --------------------------------------------------------
 # These act on vectors (typically variables in a data frame)
 
@@ -129,7 +129,6 @@ factor_R3 <- function(x, levels = 1:4,
                       labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...) {
     factor_var(x, levels = levels, labels = labels, ...)
 }
-
 
 # Data Frame-based Labelling ----------------------------------------------------
 # These act on data frames, which is convenient for piping

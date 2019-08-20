@@ -20,7 +20,7 @@ to create license history}
 \item{yrs_lapse}{numeric: years to include in lapse calculation (defaults to yrs). 
 If NULL, lapse will not be calculated (useful for mid-year results)}
 
-\item{show_diagnostics:}{If TRUE, will include intermediate variables in the
+\item{show_diagnostics}{logical: If TRUE, will include intermediate variables in the
 output dataset, necessary for running checks: \code{\link{history_check}}.}
 }
 \description{

@@ -1,5 +1,8 @@
 # Documentation for Sample Data
 
+# TODO
+# - probably update sample data to exclude 2019
+
 # Standarized License Data ---------------------------------------------------
 
 #' Sample Data: 25,000 Customers

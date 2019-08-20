@@ -138,8 +138,9 @@ prep_yrs <- function(yrs, df, func_name) {
 #' (for multi-year and lifetime licenses).
 #' @param yrs_lapse numeric: years to include in lapse calculation (defaults to yrs). 
 #' If NULL, lapse will not be calculated (useful for mid-year results)
-#' @param show_diagnostics: If TRUE, will include intermediate variables in the
+#' @param show_diagnostics logical: If TRUE, will include intermediate variables in the
 #' output dataset, necessary for running checks: \code{\link{history_check}}.
+#' 
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions

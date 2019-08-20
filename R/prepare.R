@@ -1,6 +1,8 @@
 # functions for preparing license data from states
 
-# TODO (version 2.1): Tidy up old code and remove global variable dependencies
+# TODO after version 2.0: 
+# - maybe refactor code for the older functions (perhaps use data.table for speed)
+# - maybe remove the global variable dependencies
 
 # certain functions reference global variables (e.g., named variables in data frames)
 # - these occur in a number of places in salic (mostly validation functions)
@@ -10,9 +12,10 @@ if(getRversion() >= "2.15.1") utils::globalVariables(c(
     "age", "age_year", "agecat", "birth_year", "change_cust",
     "change_revenue", "change_sales", "customers", "dot", "dot2", "duration", 
     "issue_month", "issue_year",  "lastvar",  "sales", "var_old", "yr_diff",  
-    ":=", "old", "cust_id", "month", "year", "lapse", "."
+    ":=", "old", "cust_id", "month", "year", "lapse", ".", "lead_year",
+    "yrs_till_next", "duration_run_lag", "year_last", "..fwd_cols",
+    "duration_run", "i.lapse", "i.month"
 ))
-
 
 # Recoding Data -----------------------------------------------------------
 
@@ -91,7 +94,6 @@ recode_month <- function(sale, month_range = 0:12) {
     sale %>%
         select(-yr_diff, -issue_month, -issue_year, -dot2)
 }
-
 
 # Validation --------------------------------------------------------------
 # functions for validating license data
@@ -284,7 +286,6 @@ summary_churn <- function(
         print_dat(out_print, title, note_out)
     }
 }
-
 
 # Validation Helpers ------------------------------------------------------
 # only intended for use by salic functions

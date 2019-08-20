@@ -1,5 +1,8 @@
 # functions for building dashboard summary data
 
+# TODO after version 2.0
+# - add functions for participation rate calculation
+# - maybe refactor with data.table for speed
 
 # Estimate ------------------------------------------------------------
 
@@ -41,7 +44,6 @@ check_threshold <- function(
         action(msg, "\n", paste(capture.output(print(flagged)), collapse = "\n"), "\n")
     } 
 }
-
 
 #' Estimate participants by year from license history
 #' 
@@ -195,7 +197,6 @@ est_churn <- function(
     ungroup(out)
 }
 
-
 #' Scale segmented participation counts to total (if needed)
 #' 
 #' This scaling accounts for missing values in segments, scaling up all counts
@@ -306,7 +307,6 @@ scaleup_recruit <- function(
     scaleup_part(part_segment, part_total, test_threshold, 
                  show_test_stat, outvar)
 }
-
 
 # Data Format -------------------------------------------------------------
 

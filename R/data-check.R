@@ -1,5 +1,8 @@
 # Checks for Data
 
+# TODO
+# - maybe speed-up data_check() with data.table
+
 # Internal Functions ---------------------------------------------------
 
 #' Internal Functions: Individual Data Checks
