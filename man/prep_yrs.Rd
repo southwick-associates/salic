@@ -15,13 +15,11 @@ to create license history}
 \item{func_name}{character: name of function to print in warning}
 }
 \description{
+Intended to be called from \code{\link{make_history}}.
 Prints a warning any of the specified years aren't included in the dataset and 
 returns a vector of availabe years, sorted ascending. The sort ensures correct 
 ordering in subsequent license history calculations, which include iterations
 by year that would produce incorrect results if not sorted.
-}
-\details{
-This function is intended to be called from \code{\link{make_history}}
 }
 \examples{
 data(sale)

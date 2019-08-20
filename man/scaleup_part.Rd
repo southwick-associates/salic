@@ -39,26 +39,30 @@ produced by \code{\link{est_part}}. If no scaling is needed (i.e., sum(part_segm
 \examples{
 library(dplyr)
 data(history)
-history <- filter(history, year != 2019) \%>\%
-    label_categories()
+history <- label_categories(history)
 
 # demonstrate the need for scaling
 part_total <- est_part(history)
 part_segment <- est_part(history, "sex", test_threshold = 40)
-sum(part_segment$participants) == sum(part_total$participants)
+left_join(
+    select(part_total, year, part_tot = participants),
+    group_by(part_segment, year) \%>\% summarise(part_seg = sum(participants)),
+)
 
 # perform scaling
 part_segment <- scaleup_part(part_segment, part_total)
-sum(part_segment$participants) == sum(part_total$participants)
+left_join(
+    select(part_total, year, part_tot = participants),
+    group_by(part_segment, year) \%>\% summarise(part_seg = sum(participants)),
+)
 
-# making test threshold more strict
-part_segment <- est_part(history, "sex")
-# scaleup_part(part_segment, part_total, test_threshold = 3) # throws error if run
-
-# new recruits
+# new recruits - unscaled
 history_new <- filter(history, R3 == "Recruit")
 part_total <- est_recruit(history_new, "tot")
 part_segment <- est_recruit(history_new, "sex")
+part_segment
+
+# new recruits - scaled
 scaleup_recruit(part_segment, part_total)
 }
 \seealso{

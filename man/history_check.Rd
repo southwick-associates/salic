@@ -31,9 +31,10 @@ show_diagnostics = TRUE.
 \itemize{
 \item \emph{check_history_sample}: View a sample of customers from history table 
 to check year over year dynamics (outputs a list split by customer ID).
+\item \emph{check_lapse}: Produces a count summary of customers by lapse value
+(outputs a list).
 \item \emph{check_R3}: Produce a count summary of customers by R3, yrs_since, 
-& duration_run_lag.
-\item \emph{check_lapse}: Produces a count summary of customers by lapse and lead_year.
+& duration_run_lag (outputs a data frame).
 }
 }
 \examples{
@@ -41,13 +42,13 @@ library(dplyr)
 data(sale, lic)
 yrs <- 2008:2018
 
-history <- inner_join(sale, lic) \%>\% 
+history <- inner_join(lic, sale) \%>\% 
     rank_sale() \%>\%
     make_history(yrs, "res", show_diagnostics = TRUE)
 
 check_history_sample(history)
-check_R3(history, 2008:2018)
 check_lapse(history)
+check_R3(history, 2008:2018)
 }
 \seealso{
 Other license history functions: \code{\link{make_history}},

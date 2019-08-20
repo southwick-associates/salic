@@ -29,7 +29,7 @@ test_threshold. Intended for use in calculating dashboard metrics.
 \examples{
 library(dplyr)
 
-# produce a warning
+# produce warnings
 x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 1000, sd = 100))
 x <- mutate(x, pct_change = (part - lag(part)) / lag(part) * 100)
 check_threshold(x, 5)

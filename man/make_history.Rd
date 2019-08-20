@@ -49,7 +49,7 @@ for more information.
 \examples{
 library(dplyr)
 data(sale, lic)
-sale_ranked <- left_join(sale, lic) \%>\% rank_sale()
+sale_ranked <- inner_join(lic, sale) \%>\% rank_sale()
 history <- make_history(sale_ranked, 2008:2018, "res")
 
 # history includes more rows than sale_ranked if multi-year/lifetimes are present

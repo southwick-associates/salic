@@ -48,43 +48,25 @@ history <- history \%>\%
     label_categories() \%>\%
     recode_agecat() \%>\%
     filter(!agecat \%in\% c("0-17", "65+"))
-
-# a flag will be raised since 2019 is a partial year
-est_part(history, show_test_stat = TRUE)
-
-# fix by dropping partial year
-history <- filter(history, year != 2019)
+    
+# participants
 est_part(history)
 
-### for new recruits
-history_new <- filter(history, !is.na(R3), R3 == "Recruit")
-est_recruit(history_new)
-
-### by segment
+# by segment
 est_part(history, "agecat")
 est_part(history, "agecat", test_threshold = 15) # produce a warning
+
+# new recruits
+history_new <- filter(history, !is.na(R3), R3 == "Recruit")
+est_recruit(history_new)
 
 # apply over multiple segments
 segs <- c("tot", "res", "sex", "agecat")
 sapply(segs, function(x) est_part(history, x), simplify = FALSE)
 
 # specify test thesholds by segment
-tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
+tests <- c(tot = 20, res = 45, sex = 30, agecat = 40)
 part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
-
-### scaleup_part()
-# missing values can cause problem with counts by segment
-filter(history, is.na(sex))
-group_by(part$sex, year) \%>\% 
-    summarise(part_sex = sum(participants)) \%>\%
-    left_join(select(part$tot, year, participants), by = "year")
-
-# fix by scaling segments to total
-# reasonable assumption if missing at random (less so otherwise)
-part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
-group_by(part_scaled$sex, year) \%>\% 
-    summarise(part_sex = sum(participants)) \%>\%
-    left_join(select(part_scaled$tot, year, participants), by = "year")
 }
 \seealso{
 Other dashboard functions: \code{\link{check_threshold}},

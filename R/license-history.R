@@ -25,7 +25,7 @@
 #' library(dplyr)
 #' data(lic, sale)
 #' 
-#' sale_unranked <- inner_join(sale, lic)
+#' sale_unranked <- inner_join(lic, sale)
 #' sale_ranked <- rank_sale(sale_unranked)
 #'     
 #' # check sale ranking - highest duration will always be picked
@@ -74,12 +74,11 @@ rank_sale <- function(
 
 #' Internal Function: Check years range & sort
 #' 
+#' Intended to be called from \code{\link{make_history}}.
 #' Prints a warning any of the specified years aren't included in the dataset and 
 #' returns a vector of availabe years, sorted ascending. The sort ensures correct 
 #' ordering in subsequent license history calculations, which include iterations
 #' by year that would produce incorrect results if not sorted.
-#' 
-#' This function is intended to be called from \code{\link{make_history}}
 #' 
 #' @param df data frame: table that contains "year" variable
 #' @param func_name character: name of function to print in warning
@@ -140,7 +139,6 @@ prep_yrs <- function(yrs, df, func_name) {
 #' If NULL, lapse will not be calculated (useful for mid-year results)
 #' @param show_diagnostics logical: If TRUE, will include intermediate variables in the
 #' output dataset, necessary for running checks: \code{\link{history_check}}.
-#' 
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions
@@ -148,7 +146,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' @examples
 #' library(dplyr)
 #' data(sale, lic)
-#' sale_ranked <- left_join(sale, lic) %>% rank_sale()
+#' sale_ranked <- inner_join(lic, sale) %>% rank_sale()
 #' history <- make_history(sale_ranked, 2008:2018, "res")
 #' 
 #' # history includes more rows than sale_ranked if multi-year/lifetimes are present
@@ -263,9 +261,10 @@ make_R3 <- function(dt, yrs) {
 #' \itemize{
 #' \item \emph{check_history_sample}: View a sample of customers from history table 
 #' to check year over year dynamics (outputs a list split by customer ID).
+#' \item \emph{check_lapse}: Produces a count summary of customers by lapse value
+#' (outputs a list).
 #' \item \emph{check_R3}: Produce a count summary of customers by R3, yrs_since, 
-#' & duration_run_lag.
-#' \item \emph{check_lapse}: Produces a count summary of customers by lapse and lead_year.
+#' & duration_run_lag (outputs a data frame).
 #' }
 #' 
 #' @param history data frame: license history table
@@ -282,13 +281,13 @@ make_R3 <- function(dt, yrs) {
 #' data(sale, lic)
 #' yrs <- 2008:2018
 #' 
-#' history <- inner_join(sale, lic) %>% 
+#' history <- inner_join(lic, sale) %>% 
 #'     rank_sale() %>%
 #'     make_history(yrs, "res", show_diagnostics = TRUE)
 #' 
 #' check_history_sample(history)
-#' check_R3(history, 2008:2018)
 #' check_lapse(history)
+#' check_R3(history, 2008:2018)
 NULL
 
 #' @rdname history_check
@@ -329,10 +328,10 @@ check_R3 <- function(history, yrs) {
 check_lapse <- function(history) {
     # get lead year for checking
     dt <- data.table(history)
-    dt[order(year), lead_year := shift(year, 1, type = "lead"), by = cust_id]
+    dt[order(year), next_year := shift(year, 1, type = "lead"), by = cust_id]
     dt[, yrs_till_next := case_when(
         is.na(lapse) ~ "C. Next time held: unknown",
-        lead_year - year == 1 ~ "A. Next time held: 1yr (i.e., renewed)",
+        next_year - year == 1 ~ "A. Next time held: 1yr (i.e., renewed)",
         TRUE ~ "B. Next time held: >1yr/never (i.e., lapsed)"
     )]
     

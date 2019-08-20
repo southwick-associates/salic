@@ -38,7 +38,7 @@ data(history)
 history <- history \%>\%
     label_categories() \%>\%
     recode_agecat() \%>\%
-    filter(!agecat \%in\% c("0-17", "65+"), year != 2019)
+    filter(!agecat \%in\% c("0-17", "65+"))
 est_churn(history)
 
 # apply across all segments

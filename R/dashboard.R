@@ -26,7 +26,7 @@
 #' @examples
 #' library(dplyr)
 #' 
-#' # produce a warning
+#' # produce warnings
 #' x <- data.frame(tot = "All", year = 2008:2018, part = rnorm(11, 1000, sd = 100))
 #' x <- mutate(x, pct_change = (part - lag(part)) / lag(part) * 100)
 #' check_threshold(x, 5)
@@ -75,43 +75,25 @@ check_threshold <- function(
 #'     label_categories() %>%
 #'     recode_agecat() %>%
 #'     filter(!agecat %in% c("0-17", "65+"))
-#' 
-#' # a flag will be raised since 2019 is a partial year
-#' est_part(history, show_test_stat = TRUE)
-#' 
-#' # fix by dropping partial year
-#' history <- filter(history, year != 2019)
+#'     
+#' # participants
 #' est_part(history)
 #' 
-#' ### for new recruits
-#' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
-#' est_recruit(history_new)
-#' 
-#' ### by segment
+#' # by segment
 #' est_part(history, "agecat")
 #' est_part(history, "agecat", test_threshold = 15) # produce a warning
+#' 
+#' # new recruits
+#' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
+#' est_recruit(history_new)
 #' 
 #' # apply over multiple segments
 #' segs <- c("tot", "res", "sex", "agecat")
 #' sapply(segs, function(x) est_part(history, x), simplify = FALSE)
 #' 
 #' # specify test thesholds by segment
-#' tests <- c(tot = 20, res = 40, sex = 30, agecat = 40)
+#' tests <- c(tot = 20, res = 45, sex = 30, agecat = 40)
 #' part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
-#' 
-#' ### scaleup_part()
-#' # missing values can cause problem with counts by segment
-#' filter(history, is.na(sex))
-#' group_by(part$sex, year) %>% 
-#'     summarise(part_sex = sum(participants)) %>%
-#'     left_join(select(part$tot, year, participants), by = "year")
-#' 
-#' # fix by scaling segments to total
-#' # reasonable assumption if missing at random (less so otherwise)
-#' part_scaled <- lapply(part, function(x) scaleup_part(x, part$tot))
-#' group_by(part_scaled$sex, year) %>% 
-#'     summarise(part_sex = sum(participants)) %>%
-#'     left_join(select(part_scaled$tot, year, participants), by = "year")
 est_part <- function(
     history, segment = "tot", test_threshold = 20, show_test_stat = FALSE,
     suppress_warning = FALSE, outvar = "participants"
@@ -162,7 +144,7 @@ est_recruit <- function(
 #' history <- history %>%
 #'     label_categories() %>%
 #'     recode_agecat() %>%
-#'     filter(!agecat %in% c("0-17", "65+"), year != 2019)
+#'     filter(!agecat %in% c("0-17", "65+"))
 #' est_churn(history)
 #' 
 #' # apply across all segments
@@ -221,26 +203,30 @@ est_churn <- function(
 #' @examples
 #' library(dplyr)
 #' data(history)
-#' history <- filter(history, year != 2019) %>%
-#'     label_categories()
+#' history <- label_categories(history)
 #' 
 #' # demonstrate the need for scaling
 #' part_total <- est_part(history)
 #' part_segment <- est_part(history, "sex", test_threshold = 40)
-#' sum(part_segment$participants) == sum(part_total$participants)
+#' left_join(
+#'     select(part_total, year, part_tot = participants),
+#'     group_by(part_segment, year) %>% summarise(part_seg = sum(participants)),
+#' )
 #' 
 #' # perform scaling
 #' part_segment <- scaleup_part(part_segment, part_total)
-#' sum(part_segment$participants) == sum(part_total$participants)
+#' left_join(
+#'     select(part_total, year, part_tot = participants),
+#'     group_by(part_segment, year) %>% summarise(part_seg = sum(participants)),
+#' )
 #' 
-#' # making test threshold more strict
-#' part_segment <- est_part(history, "sex")
-#' # scaleup_part(part_segment, part_total, test_threshold = 3) # throws error if run
-#' 
-#' # new recruits
+#' # new recruits - unscaled
 #' history_new <- filter(history, R3 == "Recruit")
 #' part_total <- est_recruit(history_new, "tot")
 #' part_segment <- est_recruit(history_new, "sex")
+#' part_segment
+#' 
+#' # new recruits - scaled
 #' scaleup_recruit(part_segment, part_total)
 scaleup_part <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,

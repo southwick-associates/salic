@@ -28,7 +28,7 @@ per customer-year. Optionally, it will also pick the minimum value of month
 library(dplyr)
 data(lic, sale)
 
-sale_unranked <- inner_join(sale, lic)
+sale_unranked <- inner_join(lic, sale)
 sale_ranked <- rank_sale(sale_unranked)
     
 # check sale ranking - highest duration will always be picked
