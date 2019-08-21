@@ -1,12 +1,12 @@
 ---
 title: "Introduction to salic"
 output: 
-    html_document:
-        toc: TRUE
-        title: Introduction to salic
+    rmarkdown::html_vignette:
     md_document:
         toc: TRUE
         variant: markdown_github
+    html_document:
+        toc: TRUE
 vignette: >
   %\VignetteIndexEntry{Multi-format vignettes}
   %\VignetteEncoding{UTF-8}

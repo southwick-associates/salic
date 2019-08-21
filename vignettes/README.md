@@ -1,5 +1,4 @@
-Introduction to salic
----------------------
+# Introduction to salic
 
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
