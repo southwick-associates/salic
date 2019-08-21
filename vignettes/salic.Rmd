@@ -17,32 +17,31 @@ library(dplyr)
 library(salic)
 ```
 
-Package salic lays out a workflow for use in AFWA's national/regional dashboard project. It's intended to simplify/standardize the production of the necessary summary data by providing a set of easy-to-use functions. This vignette illustrates the workflow using sample data (included as part of the salic installation).
-
-Processing data for the dashboard can be divided into 3 parts:
-
-1. **Standardized License Data**: Getting license data into a standard (anonymized) format well-suited for generalized data processing functions.
-
-2. **License History**: Converting into a license history format for easy calculation of dashboard metrics.
-
-3. **Dashboard Metrics**: Applying estimation functions to the license history data, which produces the summaries used as input to the dashboard software.
-
-## 1. Standardized License Data
-
-It's much easier to build a generalized set of tools if we know what the input data looks like. For this reason, salic is pretty strict about how the input license data should be formatted. The process necessary to produce this format will vary by state, but fortunately the data needs for producing dashboards are fairly minimal (and salic provides the `data_check()` function to facilitate this). 
-
-### Customer & License IDs
-
-The fundamental assumption of salic is that customers can be identified across transactions using a customer ID (and similarly, license types can be identified using a license ID). 
-
-![](lic5.png) '
+Salic helps you get from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)). You'll want to load both packages:
 
 ```{r}
-# test
-data(history, package = "salic")
-est_part(history)
+library(salic)
+library(dplyr)
 ```
 
+This vignette walks through salic functionality using provided sample data (run `?data_salic` for more info).
+
+## Standardized Data
+
+To provide a generalizable workflow, salic is strict about the license data format. Fortunately, the data needs for the project are light: 3 tables (cust, lic, sale) with 9 columns total.
+
+### Customers (cust table)
+
+Only 3 customer columns are needed (cust_id being the most important):
+
+```{r}
+data(cust)
+head(cust)
+```
+
+### License Types (lic table)
+
+### License Sales (sale table)
 
 ## Standardizing License Data
 
