@@ -1,4 +1,4 @@
-# Introduction to Salic
+# Introduction to salic
 
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
@@ -6,15 +6,15 @@
     -   [License Types (lic)](#license-types-lic)
     -   [License Sales (sale)](#license-sales-sale)
 -   [License History](#license-history)
-    -   [rank\_sale()](#rank_sale)
-    -   [make\_history()](#make_history)
+    -   [rank\_sale](#rank_sale)
+    -   [make\_history](#make_history)
 -   [Dashboard Metrics](#dashboard-metrics)
 -   [Summary Output](#summary-output)
 
 Overview
 --------
 
-Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages:
+Salic provides functions to progress from license data to dashboard summaries. It also provides package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
 
 ``` r
 library(salic)
@@ -26,15 +26,15 @@ This vignette walks through salic functionality using provided sample data (see 
 Standardized License Data
 -------------------------
 
-To provide a generalized workflow, salic is strict about the input license data format. That said, the dashboard data needs are fairly light: 3 tables related by 2 key columns:
+To facilitate a generalized workflow, salic is strict about data formatting. Some up-front effort will be needed to standardize the relevant state-level data. That said, the dashboard data needs are fairly light (9 variables total in 3 tables).
 
-<br> ![](relations.png)
+Salic includes documentation about each table's formatting (see `?cust`, `?lic`, `?sale`). The 3 tables should be related by 2 key columns:
 
-Salic provides formatting rules in the documentation (see `?cust`, `?lic`, `?sale`). An overview of each table is included below.
+![](relations.png)
 
 ### Customers (cust)
 
-Three customer columns are needed; "cust\_id" being the most important. The ID should uniquely identify every row in the table (i.e., it's a primary key).
+Three customer columns are needed; "cust\_id" being the most important. The cust\_id should uniquely identify every row in the table (i.e., it's a primary key).
 
 ``` r
 data(cust)
@@ -49,7 +49,7 @@ length(unique(cust$cust_id)) == nrow(cust)
 #> [1] TRUE
 ```
 
-Salic expects specific codes for categorical variables. For example, "sex" can include 3 values. You can check categorical codes using `salic::label_categories`.
+Salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1, 2, or NA). You can view the corresponding labels using `salic::label_categories`.
 
 ``` r
 count(cust, sex)
@@ -69,14 +69,14 @@ label_categories(cust) %>% count(sex)
 #> 3 <NA>     537
 ```
 
-Functions are provided to check your data against the formatting rules (see `?data_check_table`). The function is silent if all checks pass and will print a warning for every check that doesn't pass.
+Functions are provided to check your data against the formatting rules (see `?data_check_table`). The function is silent if all checks pass and will print a warning for every failed check.
 
 ``` r
 data_check_cust(cust) 
 
 # introduce some problems
 tmp <- cust
-tmp$cust_id[1:2] <- "dupkey"
+tmp$cust_id[2] <- 1
 tmp$birth_year <- NULL
 data_check_cust(tmp)
 #> Warning: cust: Primary key (cust_id) not unique: 29999 keys and 30000 rows
@@ -85,7 +85,7 @@ data_check_cust(tmp)
 
 ### License Types (lic)
 
-Three license type columns are needed. Similar to customers, license types should be uniquely identified using a "lic\_id" column.
+Three license type columns are needed. Similar to customers, license types should be uniquely identified using "lic\_id".
 
 ``` r
 data(lic)
@@ -141,7 +141,7 @@ count(lic, duration)
 
 ### License Sales (sale)
 
-The license sale table includes 5 variables. No primary key is needed; the table links to customers and license types using foreign keys.
+The license sales table includes 5 variables. No primary key is needed; the table links to customers and license types using foreign keys.
 
 ``` r
 data(sale)
@@ -183,7 +183,7 @@ filter(sale, year >= 2015, month <= 6) %>%
 #> 4  2018  3220
 ```
 
-You can also make use of "type" to focus on hunters or anglers only. Note, that since the data contain combination licenses, we can't use a `group_by` operation directly for this purpose.
+You can also make use of "type" to focus on hunters or anglers specifically. Note, that since the data contain combination licenses, we can't use a `group_by` operation directly for this purpose.
 
 ``` r
 filter(lic, type %in% c("hunt", "combo")) %>%
@@ -221,9 +221,11 @@ label_categories(sale) %>% count(res)
 License History
 ---------------
 
-### rank\_sale()
+START HERE
 
-### make\_history()
+### rank\_sale
+
+### make\_history
 
 #### R3
 
