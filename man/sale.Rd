@@ -3,17 +3,18 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)}
+\title{Sample Data: Sales 2008 thru 2018}
 \format{A data frame with 5 variables
 \describe{
-\item{cust_id}{Customer ID (integer) (foreign key)}
-\item{lic_id}{License ID (integer) (foreign key)}
-\item{year}{License Year (integer) (yyyy)}
-\item{month}{Transaction Purchase Month (integer) (1 = Jan, 2 = Feb, ...)}
-\item{res}{Residency (integer) (1 = State Resident, 0 = State Nonresident)}
+\item{cust_id}{Customer ID (foreign key)}
+\item{lic_id}{License ID (foreign key)}
+\item{year}{License Year (numeric) (yyyy)}
+\item{month}{Transaction Purchase Month (numeric) (1 = Jan, 2 = Feb, ...)}
+\item{res}{Residency (numeric) (1 = State Resident, 0 = State Nonresident, 
+NA = Unknown)}
 }}
 \description{
-Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)
+Sample Data: Sales 2008 thru 2018
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},

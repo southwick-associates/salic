@@ -6,10 +6,12 @@
 \title{Sample Data: License Types}
 \format{A data frame with 3 variables
 \describe{
-\item{lic_id}{License ID (integer) (primary key)}
-\item{type}{License Type (character) ("hunt" = hunting license, "fish" = fishing license, 
-"combo" = combination hunting/fishing license)}
-\item{duration}{Duration in years (integer) (1 = 1yr/short-term, 2 = 2yr,..., 99 = lifetime)}
+\item{lic_id}{License ID (numeric) (primary key) - Note that IDs can be stored 
+as character, but this is less efficient.}
+\item{type}{License Type (character) ("hunt" = hunting license, "fish" = 
+fishing license,  "combo" = combination hunting/fishing license)}
+\item{duration}{Duration in years (numeric) (1 = 1yr/short-term, 2 = 2yr,..., 
+99 = lifetime)}
 }}
 \description{
 Sample Data: License Types

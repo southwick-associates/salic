@@ -1,9 +1,13 @@
 ---
 title: "Introduction to salic"
-output: rmarkdown::html_vignette
+output: 
+    html_document:
+        toc: TRUE
+    md_document:
+        variant: markdown_github
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Multi-format vignettes}
+  %\VignetteEngine{knitr::multiformat}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -17,104 +21,119 @@ library(dplyr)
 library(salic)
 ```
 
-Salic helps you get from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)). You'll want to load both packages:
+## Overview
+
+Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)). You'll want to load both packages:
 
 ```{r}
 library(salic)
 library(dplyr)
 ```
 
-This vignette walks through salic functionality using provided sample data (run `?data_salic` for more info).
+This vignette walks through salic functionality using provided sample data (see `?data_salic` for details).
 
-## Standardized Data
+## Standardized License Data
 
-To provide a generalizable workflow, salic is strict about the input license data format. Fortunately, the data needs for dashboard production are light: 3 tables (cust, lic, sale) with 9 columns total.
+To provide a generalized workflow, salic is strict about the input license data format. That said, the dashboard data needs are fairly light: 3 tables related by 2 keys:
 
-### Customers (cust table)
+<br>
+![](relations.png)
 
-Three customer columns are needed. The cust_id column is the most important; it should uniquely identify every row (i.e., it's a primary key).
+<br>
+
+Salic provides formatting rules in the documentation (see `?cust`, `?lic`, `?sale`). An overview of each table is included below.
+
+### Customers (cust)
+
+Three customer columns are needed; "cust_id" being the most important; it should uniquely identify every row in the table (i.e., it's a primary key).
 
 ```{r}
 data(cust)
 glimpse(cust)
 
-length(unique(cust$cust_id))
+length(unique(cust$cust_id)) == nrow(cust)
 ```
 
-Salic expects specific numeric coding for categorical variables (run `?cust` for details). Automatic labelling (via `label_categories`) is provided to help you check the coding:
+Salic expects specific codes for categorical variables. For example, "sex" can include 3 values: 
 
 ```{r}
 count(cust, sex)
 
-tmp <- label_categories(cust)
-count(tmp, sex)
+# you can check categorical codes using salic::label_categories()
+label_categories(cust) %>% count(sex)
 ```
 
-More generally, you can also check all formatting rules at once (see `?data_check_table` for details):
+Functions are provided to check your data against the formatting rules (see `?data_check_table` for details):
 
 ```{r}
-# silent if all checks passes
+# silent if all checks pass
 data_check_cust(cust) 
 
-# prints warning for every check that doesn't pass
+# prints a warning for every check that doesn't pass
 tmp <- cust
-tmp$sex[1] <- 3
-tmp$cust_id[2] <- 1
+tmp$cust_id[1:2] <- "dupkey"
 tmp$birth_year <- NULL
 data_check_cust(tmp)
 ```
 
-### License Types (lic table)
+### License Types (lic)
 
-License types....bla di bla...
-
-```{r}
-
-```
-
-### License Sales (sale table)
+Three license type columns are needed. Similar to customers, license types should be uniquely identified using a "lic_id" column.
 
 ```{r}
-
-```
-
-
-## Standardizing License Data
-
-These need to be prepared into a standardized format (which is also anonymized to remove any personally-identifiable information).
-
-This process is state-specific since agencies vary in how license data is stored. The standardization is intended to produce a standard format that is well-suited for the generalized presented here. An important part of this step involves anonymizing data by excluding any personally identifiable information from the standard storage format.
-
-### Sample Data
-
-To get started, first load package dependencies:
-
-```r
-library(salic)
-library(dplyr)
-```
-
-Samples of standardized data are provided in salic:
-
-```{r}
-data(cust)
-glimpse(cust)
-
 data(lic)
 glimpse(lic)
 
+length(unique(lic$lic_id)) == nrow(lic)
+```
+
+Unlike the customer table, no missing values are allowed in the license types table:
+
+```{r}
+tmp <- lic
+tmp$type[1] <- NA
+tmp$duration[1] <- NA
+data_check_lic(tmp)
+```
+
+The "type" column specifies whether a license provides a hunting privilege ("hunt"), a fishing privilege ("fish"), or both ("combo").
+
+```{r}
+count(lic, type)
+```
+
+The "duration" column is necessary for building a license history. Specifically:
+
+- multi-year licenses hold values according to the number of years they last
+- Lifetimes are identified using a special value: 99
+- All other license types should = 1.
+
+```{r}
+count(lic, duration)
+```
+
+### License Sales (sale)
+
+The license sale table includes 5 variables. No primary key is needed; the table links to customers and license types using foreign keys.
+
+```{r}
 data(sale)
 glimpse(sale)
 ```
 
-A function is provided to check that your data fits the specifications (strict for this reason...):
+The "year" and "month" variables indicate the date of purchase. bla di bla...
 
-```r
-# produces no output (i.e., silent) if no issues detected
-check_format(cust, lic, sale)
+```{r}
+
 ```
 
-## Building License History
+The "res" variable, bla di bla...
+
+```{r}
+
+```
+
+## License History
 
 - `rank_sale()` to do this...
     + `join_first_month()` to do that...
@@ -129,11 +148,19 @@ Need to also consider the key parameters for this process:
 - timeframe: full-year or mid-year
 - years
 
-## Calculating Dashboard Metrics
+## Dashboard Metrics
 
 - filter by age
 - `label_categories()` & `recode_agecat()`
 - `est_part()`, `est_recruit()`, `est_churn()`
 
-### Formatting for final Output
+### Summary Output
 
+## Older - keep temporarily
+
+
+Automatic labelling is also provided (via `label_categories`); this can be used to help check the coding:
+
+```{r}
+label_categories(cust) %>% count(sex)
+```

@@ -2,7 +2,7 @@
 % Please edit documentation in R/data-doc.R
 \name{data_salic}
 \alias{data_salic}
-\title{Salic Sample Data}
+\title{Salic Sample Data Overview}
 \description{
 Salic provides sample data for each stage of dashboard production:
 \itemize{

@@ -2,7 +2,7 @@
 
 # Standarized License Data ---------------------------------------------------
 
-#' Salic Sample Data
+#' Salic Sample Data Overview
 #' 
 #' Salic provides sample data for each stage of dashboard production:
 #' \itemize{
@@ -31,9 +31,10 @@ NULL
 #' @name cust
 #' @format A data frame with 3 variables
 #' \describe{
-#' \item{cust_id}{Customer ID (integer) (primary key)}
-#' \item{sex}{Gender (integer) (1=Male, 2=Female)}
-#' \item{birth_year}{Year of Birth (integer) (yyyy)}
+#' \item{cust_id}{Customer ID (numeric) (primary key) - Note that IDs can be stored 
+#' as character, but this is less efficient.}
+#' \item{sex}{Gender (numeric) (1=Male, 2=Female, NA=Unknown)}
+#' \item{birth_year}{Year of Birth (numeric) (yyyy, NA=Unknown)}
 #' }
 #' @family Sample Data
 NULL
@@ -45,26 +46,29 @@ NULL
 #' @name lic
 #' @format A data frame with 3 variables
 #' \describe{
-#' \item{lic_id}{License ID (integer) (primary key)}
-#' \item{type}{License Type (character) ("hunt" = hunting license, "fish" = fishing license, 
-#' "combo" = combination hunting/fishing license)}
-#' \item{duration}{Duration in years (integer) (1 = 1yr/short-term, 2 = 2yr,..., 99 = lifetime)}
+#' \item{lic_id}{License ID (numeric) (primary key) - Note that IDs can be stored 
+#' as character, but this is less efficient.}
+#' \item{type}{License Type (character) ("hunt" = hunting license, "fish" = 
+#' fishing license,  "combo" = combination hunting/fishing license)}
+#' \item{duration}{Duration in years (numeric) (1 = 1yr/short-term, 2 = 2yr,..., 
+#' 99 = lifetime)}
 #' }
 #' @family Sample Data
 NULL
 
-#' Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)
+#' Sample Data: Sales 2008 thru 2018
 #'
 #' @docType data
 #' @keywords datasets
 #' @name sale
 #' @format A data frame with 5 variables
 #' \describe{
-#' \item{cust_id}{Customer ID (integer) (foreign key)}
-#' \item{lic_id}{License ID (integer) (foreign key)}
-#' \item{year}{License Year (integer) (yyyy)}
-#' \item{month}{Transaction Purchase Month (integer) (1 = Jan, 2 = Feb, ...)}
-#' \item{res}{Residency (integer) (1 = State Resident, 0 = State Nonresident)}
+#' \item{cust_id}{Customer ID (foreign key)}
+#' \item{lic_id}{License ID (foreign key)}
+#' \item{year}{License Year (numeric) (yyyy)}
+#' \item{month}{Transaction Purchase Month (numeric) (1 = Jan, 2 = Feb, ...)}
+#' \item{res}{Residency (numeric) (1 = State Resident, 0 = State Nonresident, 
+#' NA = Unknown)}
 #' }
 #' @family Sample Data
 NULL
@@ -81,15 +85,15 @@ NULL
 #' @name history
 #' @format A data frame with 9 variables
 #' \describe{
-#' \item{cust_id}{Customer ID (integer) (composite key)}
-#' \item{year}{License Year (integer) (yyyy) (composite key)}
-#' \item{duration_run}{Running Duration in years (integer)}
-#' \item{month}{Earliest Transaction Month (integer) (1=Jan, 2=Feb, ...)}
-#' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
-#' \item{sex}{Gender (integer) (1=Male, 2=Female)}
-#' \item{birth_year}{Year of Birth (integer) (yyyy)}
-#' \item{R3}{R3 Group this Year (integer) (1=carry, 2=renew, 3=reactivate, 4=recruit)}
-#' \item{lapse}{Lapsed next Year? (integer) (1=lapse, 0=renew)}
+#' \item{cust_id}{Customer ID (numeric) (composite key)}
+#' \item{year}{License Year (numeric) (yyyy) (composite key)}
+#' \item{duration_run}{Running Duration in years (numeric)}
+#' \item{month}{Earliest Transaction Month (numeric) (1=Jan, 2=Feb, ...)}
+#' \item{res}{Residency (numeric) (1=Res, 0=Nonres)}
+#' \item{sex}{Gender (numeric) (1=Male, 2=Female)}
+#' \item{birth_year}{Year of Birth (numeric) (yyyy)}
+#' \item{R3}{R3 Group this Year (numeric) (1=carry, 2=renew, 3=reactivate, 4=recruit)}
+#' \item{lapse}{Lapsed next Year? (numeric) (1=lapse, 0=renew)}
 #' }
 #' @family Sample Data
 #' @seealso \code{\link{rank_sale}} \code{\link{make_history}}

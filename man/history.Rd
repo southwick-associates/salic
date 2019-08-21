@@ -6,15 +6,15 @@
 \title{Sample Data: License  History}
 \format{A data frame with 9 variables
 \describe{
-\item{cust_id}{Customer ID (integer) (composite key)}
-\item{year}{License Year (integer) (yyyy) (composite key)}
-\item{duration_run}{Running Duration in years (integer)}
-\item{month}{Earliest Transaction Month (integer) (1=Jan, 2=Feb, ...)}
-\item{res}{Residency (integer) (1=Res, 0=Nonres)}
-\item{sex}{Gender (integer) (1=Male, 2=Female)}
-\item{birth_year}{Year of Birth (integer) (yyyy)}
-\item{R3}{R3 Group this Year (integer) (1=carry, 2=renew, 3=reactivate, 4=recruit)}
-\item{lapse}{Lapsed next Year? (integer) (1=lapse, 0=renew)}
+\item{cust_id}{Customer ID (numeric) (composite key)}
+\item{year}{License Year (numeric) (yyyy) (composite key)}
+\item{duration_run}{Running Duration in years (numeric)}
+\item{month}{Earliest Transaction Month (numeric) (1=Jan, 2=Feb, ...)}
+\item{res}{Residency (numeric) (1=Res, 0=Nonres)}
+\item{sex}{Gender (numeric) (1=Male, 2=Female)}
+\item{birth_year}{Year of Birth (numeric) (yyyy)}
+\item{R3}{R3 Group this Year (numeric) (1=carry, 2=renew, 3=reactivate, 4=recruit)}
+\item{lapse}{Lapsed next Year? (numeric) (1=lapse, 0=renew)}
 }}
 \description{
 This is a table that corresponds to the "all_sports" permission for the included

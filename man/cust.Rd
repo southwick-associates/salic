@@ -6,9 +6,10 @@
 \title{Sample Data: 30,000 Customers}
 \format{A data frame with 3 variables
 \describe{
-\item{cust_id}{Customer ID (integer) (primary key)}
-\item{sex}{Gender (integer) (1=Male, 2=Female)}
-\item{birth_year}{Year of Birth (integer) (yyyy)}
+\item{cust_id}{Customer ID (numeric) (primary key) - Note that IDs can be stored 
+as character, but this is less efficient.}
+\item{sex}{Gender (numeric) (1=Male, 2=Female, NA=Unknown)}
+\item{birth_year}{Year of Birth (numeric) (yyyy, NA=Unknown)}
 }}
 \description{
 Sample Data: 30,000 Customers
