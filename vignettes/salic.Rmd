@@ -53,19 +53,24 @@ count(tmp, sex)
 More generally, you can also check all formatting rules at once (see `?data_check_table` for details):
 
 ```{r}
-# silent if checks passes
+# silent if all checks passes
 data_check_cust(cust) 
 
-# warns for every check that doesn't pass
+# prints warning for every check that doesn't pass
 tmp <- cust
 tmp$sex[1] <- 3
 tmp$cust_id[2] <- 1
+tmp$birth_year <- NULL
 data_check_cust(tmp)
 ```
 
-
 ### License Types (lic table)
 
+License types....bla di bla...
+
+```{r}
+
+```
 
 ### License Sales (sale table)
 

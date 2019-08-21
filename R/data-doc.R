@@ -46,8 +46,9 @@ NULL
 #' @format A data frame with 3 variables
 #' \describe{
 #' \item{lic_id}{License ID (integer) (primary key)}
-#' \item{type}{License Type (character) (hunt, fish, combo)}
-#' \item{duration}{Duration in years (integer) (1=1yr/short-term, 2=2yr,..., 99=lifetime)}
+#' \item{type}{License Type (character) ("hunt" = hunting license, "fish" = fishing license, 
+#' "combo" = combination hunting/fishing license)}
+#' \item{duration}{Duration in years (integer) (1 = 1yr/short-term, 2 = 2yr,..., 99 = lifetime)}
 #' }
 #' @family Sample Data
 NULL
@@ -62,8 +63,8 @@ NULL
 #' \item{cust_id}{Customer ID (integer) (foreign key)}
 #' \item{lic_id}{License ID (integer) (foreign key)}
 #' \item{year}{License Year (integer) (yyyy)}
-#' \item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ...)}
-#' \item{res}{Residency (integer) (1=Res, 0=Nonres)}
+#' \item{month}{Transaction Purchase Month (integer) (1 = Jan, 2 = Feb, ...)}
+#' \item{res}{Residency (integer) (1 = State Resident, 0 = State Nonresident)}
 #' }
 #' @family Sample Data
 NULL

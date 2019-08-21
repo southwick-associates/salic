@@ -9,8 +9,8 @@
 \item{cust_id}{Customer ID (integer) (foreign key)}
 \item{lic_id}{License ID (integer) (foreign key)}
 \item{year}{License Year (integer) (yyyy)}
-\item{month}{Transaction Purchase Month (integer) (1=Jan, 2=Feb, ...)}
-\item{res}{Residency (integer) (1=Res, 0=Nonres)}
+\item{month}{Transaction Purchase Month (integer) (1 = Jan, 2 = Feb, ...)}
+\item{res}{Residency (integer) (1 = State Resident, 0 = State Nonresident)}
 }}
 \description{
 Sample Data: Sales (Jan 1, 2008 through Dec 31, 2018)
