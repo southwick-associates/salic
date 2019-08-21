@@ -15,9 +15,9 @@ Sample Data: 30,000 Customers
 }
 \seealso{
 Other Sample Data: \code{\link{dashboard}},
-  \code{\link{history}}, \code{\link{lic}},
-  \code{\link{metrics}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}
+  \code{\link{data_salic}}, \code{\link{history}},
+  \code{\link{lic}}, \code{\link{metrics}},
+  \code{\link{sale}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

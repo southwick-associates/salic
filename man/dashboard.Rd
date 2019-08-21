@@ -25,9 +25,9 @@ Anglers (group = "fish") .
 \code{\link{format_result}}
 
 Other Sample Data: \code{\link{cust}},
-  \code{\link{history}}, \code{\link{lic}},
-  \code{\link{metrics}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}
+  \code{\link{data_salic}}, \code{\link{history}},
+  \code{\link{lic}}, \code{\link{metrics}},
+  \code{\link{sale}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

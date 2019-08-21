@@ -2,6 +2,28 @@
 
 # Standarized License Data ---------------------------------------------------
 
+#' Salic Sample Data
+#' 
+#' Salic provides sample data for each stage of dashboard production:
+#' \itemize{
+#'   \item Standardized License Data
+#'     \itemize{
+#'       \item Customers: \code{\link{cust}}
+#'       \item License Types: \code{\link{lic}}
+#'       \item Sales: \code{\link{sale}}
+#'     }
+#'   \item License History Data: \code{\link{history}}
+#'   \item Dashboard Metrics
+#'     \itemize{
+#'       \item Calculated dashboard metrics (stored in list): \code{\link{metrics}}
+#'       \item Metrics formatted for Dashboard Input (single table): \code{\link{dashboard}}
+#'     }
+#' }
+#' 
+#' @name data_salic
+#' @family Sample Data
+NULL
+
 #' Sample Data: 30,000 Customers
 #'
 #' @docType data

@@ -24,9 +24,9 @@ license sample data; containing 1 row per customer per year a license was held.
 \code{\link{rank_sale}} \code{\link{make_history}}
 
 Other Sample Data: \code{\link{cust}},
-  \code{\link{dashboard}}, \code{\link{lic}},
-  \code{\link{metrics}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{data_salic}},
+  \code{\link{lic}}, \code{\link{metrics}},
+  \code{\link{sale}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

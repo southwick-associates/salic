@@ -15,9 +15,9 @@ Sample Data: License Types
 }
 \seealso{
 Other Sample Data: \code{\link{cust}},
-  \code{\link{dashboard}}, \code{\link{history}},
-  \code{\link{metrics}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{data_salic}},
+  \code{\link{history}}, \code{\link{metrics}},
+  \code{\link{sale}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}

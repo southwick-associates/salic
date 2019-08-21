@@ -143,8 +143,10 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' 
 #' Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 #' Table-specific versions are convenience functions that call data_check_table() 
-#' with appropriate defaults. Note that data_check_table() is itself a wrapper for several
-#' internal functions (see \code{\link{data_internal}}).
+#' with appropriate defaults. 
+#' 
+#' Developer note: data_check_table() is itself a wrapper 
+#' for several internal functions (see \code{\link{data_internal}}).
 #'  
 #' @param df data frame: table to check
 #' @param df_name character: name of relevant data table ("cust", "lic", or "sale")
@@ -183,12 +185,12 @@ data_check_table <- function(
 
 #' @rdname data_check_table
 #' @export
-data_check_lic <- function(
-    df, df_name = "lic", primary_key = "lic_id", 
-    required_vars = c("lic_id", "type", "duration"), 
+data_check_cust <- function( 
+    df, df_name = "cust", primary_key = "cust_id", 
+    required_vars = c("cust_id", "sex", "birth_year"), 
     allowed_values = list(
-        type = c("fish", "hunt", "combo"), 
-        duration = 1:99
+        sex = c(1, 2, NA),  
+        birth_year = c(1900:substr(Sys.Date(), 1, 4), NA)
     )
 ) {
     data_check_table(df, df_name, primary_key, required_vars, allowed_values)
@@ -196,12 +198,12 @@ data_check_lic <- function(
 
 #' @rdname data_check_table
 #' @export
-data_check_cust <- function( 
-    df, df_name = "cust", primary_key = "cust_id", 
-    required_vars = c("cust_id", "sex", "birth_year"), 
+data_check_lic <- function(
+    df, df_name = "lic", primary_key = "lic_id", 
+    required_vars = c("lic_id", "type", "duration"), 
     allowed_values = list(
-        sex = c(1, 2, NA),  
-        birth_year = c(1900:substr(Sys.Date(), 1, 4), NA)
+        type = c("fish", "hunt", "combo"), 
+        duration = 1:99
     )
 ) {
     data_check_table(df, df_name, primary_key, required_vars, allowed_values)

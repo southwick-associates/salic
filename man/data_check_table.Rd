@@ -2,22 +2,22 @@
 % Please edit documentation in R/data-check.R
 \name{data_check_table}
 \alias{data_check_table}
-\alias{data_check_lic}
 \alias{data_check_cust}
+\alias{data_check_lic}
 \alias{data_check_sale}
 \title{Check formatting rules for standardized data tables}
 \usage{
 data_check_table(df, df_name, primary_key, required_vars, allowed_values)
 
-data_check_lic(df, df_name = "lic", primary_key = "lic_id",
-  required_vars = c("lic_id", "type", "duration"),
-  allowed_values = list(type = c("fish", "hunt", "combo"), duration =
-  1:99))
-
 data_check_cust(df, df_name = "cust", primary_key = "cust_id",
   required_vars = c("cust_id", "sex", "birth_year"),
   allowed_values = list(sex = c(1, 2, NA), birth_year =
   c(1900:substr(Sys.Date(), 1, 4), NA)))
+
+data_check_lic(df, df_name = "lic", primary_key = "lic_id",
+  required_vars = c("lic_id", "type", "duration"),
+  allowed_values = list(type = c("fish", "hunt", "combo"), duration =
+  1:99))
 
 data_check_sale(df, df_name = "sale", primary_key = NULL,
   required_vars = c("cust_id", "lic_id", "year", "month", "res"),
@@ -39,8 +39,11 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 \description{
 Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 Table-specific versions are convenience functions that call data_check_table() 
-with appropriate defaults. Note that data_check_table() is itself a wrapper for several
-internal functions (see \code{\link{data_internal}}).
+with appropriate defaults.
+}
+\details{
+Developer note: data_check_table() is itself a wrapper 
+for several internal functions (see \code{\link{data_internal}}).
 }
 \examples{
 library(dplyr)

@@ -28,20 +28,51 @@ This vignette walks through salic functionality using provided sample data (run 
 
 ## Standardized Data
 
-To provide a generalizable workflow, salic is strict about the license data format. Fortunately, the data needs for the project are light: 3 tables (cust, lic, sale) with 9 columns total.
+To provide a generalizable workflow, salic is strict about the input license data format. Fortunately, the data needs for dashboard production are light: 3 tables (cust, lic, sale) with 9 columns total.
 
 ### Customers (cust table)
 
-Only 3 customer columns are needed (cust_id being the most important):
+Three customer columns are needed. The cust_id column is the most important; it should uniquely identify every row (i.e., it's a primary key).
 
 ```{r}
 data(cust)
-head(cust)
+glimpse(cust)
+
+length(unique(cust$cust_id))
 ```
+
+Salic expects specific numeric coding for categorical variables (run `?cust` for details). Automatic labelling (via `label_categories`) is provided to help you check the coding:
+
+```{r}
+count(cust, sex)
+
+tmp <- label_categories(cust)
+count(tmp, sex)
+```
+
+More generally, you can also check all formatting rules at once (see `?data_check_table` for details):
+
+```{r}
+# silent if checks passes
+data_check_cust(cust) 
+
+# warns for every check that doesn't pass
+tmp <- cust
+tmp$sex[1] <- 3
+tmp$cust_id[2] <- 1
+data_check_cust(tmp)
+```
+
 
 ### License Types (lic table)
 
+
 ### License Sales (sale table)
+
+```{r}
+
+```
+
 
 ## Standardizing License Data
 

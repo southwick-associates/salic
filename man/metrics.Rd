@@ -21,9 +21,9 @@ data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each eleme
 \code{\link{est_part}} \code{\link{est_churn}}
 
 Other Sample Data: \code{\link{cust}},
-  \code{\link{dashboard}}, \code{\link{history}},
-  \code{\link{lic}}, \code{\link{sale}},
-  \code{\link{state_abbreviations}}
+  \code{\link{dashboard}}, \code{\link{data_salic}},
+  \code{\link{history}}, \code{\link{lic}},
+  \code{\link{sale}}, \code{\link{state_abbreviations}}
 }
 \concept{Sample Data}
 \keyword{datasets}
