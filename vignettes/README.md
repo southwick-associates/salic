@@ -1,4 +1,4 @@
-# Introduction to salic
+# Introduction to Salic
 
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
@@ -6,14 +6,15 @@
     -   [License Types (lic)](#license-types-lic)
     -   [License Sales (sale)](#license-sales-sale)
 -   [License History](#license-history)
+    -   [rank\_sale()](#rank_sale)
+    -   [make\_history()](#make_history)
 -   [Dashboard Metrics](#dashboard-metrics)
-    -   [Summary Output](#summary-output)
--   [Older - keep temporarily](#older---keep-temporarily)
+-   [Summary Output](#summary-output)
 
 Overview
 --------
 
-Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages:
+Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages:
 
 ``` r
 library(salic)
@@ -25,17 +26,15 @@ This vignette walks through salic functionality using provided sample data (see 
 Standardized License Data
 -------------------------
 
-To provide a generalized workflow, salic is strict about the input license data format. That said, the dashboard data needs are fairly light: 3 tables related by 2 keys:
+To provide a generalized workflow, salic is strict about the input license data format. That said, the dashboard data needs are fairly light: 3 tables related by 2 key columns:
 
 <br> ![](relations.png)
-
-<br>
 
 Salic provides formatting rules in the documentation (see `?cust`, `?lic`, `?sale`). An overview of each table is included below.
 
 ### Customers (cust)
 
-Three customer columns are needed; "cust\_id" being the most important; it should uniquely identify every row in the table (i.e., it's a primary key).
+Three customer columns are needed; "cust\_id" being the most important. The ID should uniquely identify every row in the table (i.e., it's a primary key).
 
 ``` r
 data(cust)
@@ -50,7 +49,7 @@ length(unique(cust$cust_id)) == nrow(cust)
 #> [1] TRUE
 ```
 
-Salic expects specific codes for categorical variables. For example, "sex" can include 3 values:
+Salic expects specific codes for categorical variables. For example, "sex" can include 3 values. You can check categorical codes using `salic::label_categories`.
 
 ``` r
 count(cust, sex)
@@ -61,7 +60,6 @@ count(cust, sex)
 #> 2     2  7498
 #> 3    NA   537
 
-# you can check categorical codes using salic::label_categories()
 label_categories(cust) %>% count(sex)
 #> # A tibble: 3 x 2
 #>   sex        n
@@ -71,13 +69,12 @@ label_categories(cust) %>% count(sex)
 #> 3 <NA>     537
 ```
 
-Functions are provided to check your data against the formatting rules (see `?data_check_table` for details):
+Functions are provided to check your data against the formatting rules (see `?data_check_table`). The function is silent if all checks pass and will print a warning for every check that doesn't pass.
 
 ``` r
-# silent if all checks pass
 data_check_cust(cust) 
 
-# prints a warning for every check that doesn't pass
+# introduce some problems
 tmp <- cust
 tmp$cust_id[1:2] <- "dupkey"
 tmp$birth_year <- NULL
@@ -128,8 +125,8 @@ count(lic, type)
 
 The "duration" column is necessary for building a license history. Specifically:
 
--   multi-year licenses hold values according to the number of years they last
--   Lifetimes are identified using a special value: 99
+-   Multi-year license are identified with values &gt; 1 (e.g., 2 = 2-year, 3 = 3-year, etc.).
+-   Lifetimes are identified using a special value: 99.
 -   All other license types should = 1.
 
 ``` r
@@ -158,24 +155,79 @@ glimpse(sale)
 #> $ res     <int> 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
 ```
 
-The "year" and "month" variables indicate the date of purchase. bla di bla...
+The "year" and "month" variables indicate the date of purchase (1 = Jan, 2 = Feb, etc.). The month variable is needed for building "mid-year" dashboards, which present a year-to-year view for the first six months of sales.
 
-The "res" variable, bla di bla...
+``` r
+# all customers per year
+filter(sale, year >= 2015) %>%
+    distinct(cust_id, year) %>% 
+    count(year)
+#> # A tibble: 4 x 2
+#>    year     n
+#>   <int> <int>
+#> 1  2015  7660
+#> 2  2016  7568
+#> 3  2017  7673
+#> 4  2018  7281
+
+# customers in the first six months
+filter(sale, year >= 2015, month <= 6) %>%
+    distinct(cust_id, year) %>%
+    count(year)
+#> # A tibble: 4 x 2
+#>    year     n
+#>   <int> <int>
+#> 1  2015  3369
+#> 2  2016  3461
+#> 3  2017  3490
+#> 4  2018  3220
+```
+
+You can also make use of "type" to focus on hunters or anglers only. Note, that since the data contain combination licenses, we can't use a `group_by` operation directly for this purpose.
+
+``` r
+filter(lic, type %in% c("hunt", "combo")) %>%
+    inner_join(sale, by = "lic_id") %>%
+    filter(year >= 2015) %>%
+    distinct(cust_id, year) %>% 
+    count(year)
+#> # A tibble: 4 x 2
+#>    year     n
+#>   <int> <int>
+#> 1  2015  2910
+#> 2  2016  2868
+#> 3  2017  3008
+#> 4  2018  2925
+```
+
+The "res" variable identifies state residency for the customer. Storing this info at the transaction level provides additional flexibility since a person's residency status could conceivably change over time.
+
+``` r
+count(sale, res)
+#> # A tibble: 2 x 2
+#>     res      n
+#>   <int>  <int>
+#> 1     0  28365
+#> 2     1 120341
+
+label_categories(sale) %>% count(res)
+#> # A tibble: 2 x 2
+#>   res              n
+#>   <fct>        <int>
+#> 1 Resident    120341
+#> 2 Nonresident  28365
+```
 
 License History
 ---------------
 
--   `rank_sale()` to do this...
-    -   `join_first_month()` to do that...
--   `make_lic_history()`
-    -   `identify_R3()`
-    -   `identify_lapse()`
+### rank\_sale()
 
-Need to also consider the key parameters for this process:
+### make\_history()
 
--   permission: specifically related to license types include (fish, hunt, combo)
--   timeframe: full-year or mid-year
--   years
+#### R3
+
+#### Lapse
 
 Dashboard Metrics
 -----------------
@@ -184,19 +236,5 @@ Dashboard Metrics
 -   `label_categories()` & `recode_agecat()`
 -   `est_part()`, `est_recruit()`, `est_churn()`
 
-### Summary Output
-
-Older - keep temporarily
-------------------------
-
-Automatic labelling is also provided (via `label_categories`); this can be used to help check the coding:
-
-``` r
-label_categories(cust) %>% count(sex)
-#> # A tibble: 3 x 2
-#>   sex        n
-#>   <fct>  <int>
-#> 1 Male   21965
-#> 2 Female  7498
-#> 3 <NA>     537
-```
+Summary Output
+--------------
