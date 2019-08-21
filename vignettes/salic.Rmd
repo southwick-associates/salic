@@ -1,11 +1,12 @@
 ---
 title: "Introduction to salic"
 output: 
+    html_document:
+        toc: TRUE
+        title: Introduction to salic
     md_document:
         toc: TRUE
         variant: markdown_github
-    html_document:
-        toc: TRUE
 vignette: >
   %\VignetteIndexEntry{Multi-format vignettes}
   %\VignetteEncoding{UTF-8}
@@ -24,7 +25,7 @@ library(salic)
 
 ## Overview
 
-Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)). You'll want to load both packages:
+Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages:
 
 ```{r}
 library(salic)

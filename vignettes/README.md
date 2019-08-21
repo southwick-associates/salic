@@ -1,3 +1,6 @@
+Introduction to salic
+---------------------
+
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
     -   [Customers (cust)](#customers-cust)
@@ -11,7 +14,7 @@
 Overview
 --------
 
-Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)). You'll want to load both packages:
+Salic helps you progress from license data to dashboard summaries. It also provides package dplyr on installation ([dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages:
 
 ``` r
 library(salic)
