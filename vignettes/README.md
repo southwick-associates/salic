@@ -1,3 +1,13 @@
+-   [Overview](#overview)
+-   [Standardized License Data](#standardized-license-data)
+    -   [Customers (cust)](#customers-cust)
+    -   [License Types (lic)](#license-types-lic)
+    -   [License Sales (sale)](#license-sales-sale)
+-   [License History](#license-history)
+-   [Dashboard Metrics](#dashboard-metrics)
+    -   [Summary Output](#summary-output)
+-   [Older - keep temporarily](#older---keep-temporarily)
+
 Overview
 --------
 

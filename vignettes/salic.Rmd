@@ -1,14 +1,15 @@
 ---
 title: "Introduction to salic"
 output: 
+    md_document:
+        toc: TRUE
+        variant: markdown_github
     html_document:
         toc: TRUE
-    md_document:
-        variant: markdown_github
 vignette: >
   %\VignetteIndexEntry{Multi-format vignettes}
-  %\VignetteEngine{knitr::multiformat}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::multiformat}
 ---
 
 ```{r setup, include = FALSE, message = FALSE}
