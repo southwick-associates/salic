@@ -24,7 +24,7 @@ library(salic)
 
 ## Overview
 
-Salic provides a set of functions to progress from license data to dashboard summaries. It also includes package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
+Salic provides a set of functions to progress from state license data to dashboard summaries. It also includes package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
 
 ```{r}
 library(salic)
@@ -41,7 +41,7 @@ Salic includes documentation about each table's formatting expectations (see `?c
 
 ![](relations.png)
 
-### Formatting Rules
+### Checking Formatting Rules
 
 Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
 
@@ -50,9 +50,10 @@ data(cust, lic, sale) # load sample data
 data_check(cust, lic, sale)
 
 # introduce some rule-breaking changes
-cust$cust_id[1:2] <- 1
-lic$type <- NULL
-data_check(cust, lic, sale)
+cust_tmp <- cust
+cust_tmp$cust_id[1:2] <- 1
+cust_tmp$birth_year <- NULL
+data_check(cust_tmp, lic, sale)
 ```
 
 ### Categorical Variables
