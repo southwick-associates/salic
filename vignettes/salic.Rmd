@@ -32,13 +32,13 @@ library(dplyr)
 ```
 
 This vignette walks through salic functionality using provided sample data. A function reference
-can be accessed by running `?salic` from the R console; it's organization approximately mirrors this vignette.
+can be accessed by running `?salic` from the R console; it's organization mirrors this vignette.
 
 ## Standardized License Data
 
 To facilitate a generalized workflow, salic is strict about data formatting, and some up-front effort is needed to standardize the relevant state-level data. That said, the dashboard data needs are fairly light (9 variables total in 3 tables).
 
-Salic includes documentation about each table's formatting expectations (see `?cust`, `?sale`, `?lic` for details). The 3 tables should be related by 2 key columns:
+Salic documents each table's formatting expectations (see `?cust`, `?sale`, `?lic` for details). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
 ![](relations.png)
 
@@ -47,8 +47,8 @@ Salic includes documentation about each table's formatting expectations (see `?c
 Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
-data(cust, lic, sale) # load sample data
-data_check(cust, lic, sale)
+data(cust, lic, sale)       # load sample data
+data_check(cust, lic, sale) # prints no warnings
 
 # introduce some rule-breaking changes
 cust_tmp <- cust
