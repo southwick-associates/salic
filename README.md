@@ -1,4 +1,3 @@
-
 # salic: An R Package to Prepare Agency Dashboard Data
 
 This R package includes a set of functions for summarizing agency data for dashboards, developed under the leadership of the Association of Fish and Wildlife Agencies.
