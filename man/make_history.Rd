@@ -40,11 +40,6 @@ multi-year/lifetime records are complete in future years.
 \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
 Only included if more than 5 years are present.
 }
-Development Note: make_history() uses several \code{\link{history_internal}}
-functions, all of which make use of package data.table for performance, 
-see \href{https://github.com/Rdatatable/data.table/wiki}{data.table wiki} &
-\href{https://github.com/Rdatatable/data.table/wiki/Getting-started}{getting started vignette}
-for more information.
 }
 \examples{
 library(dplyr)

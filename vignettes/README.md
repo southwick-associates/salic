@@ -1,7 +1,6 @@
-# Introduction to salic
-
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
+    -   [Checking the formatting](#checking-the-formatting)
     -   [Customers (cust)](#customers-cust)
     -   [License Types (lic)](#license-types-lic)
     -   [License Sales (sale)](#license-sales-sale)
@@ -14,7 +13,7 @@
 Overview
 --------
 
-Salic provides functions to progress from license data to dashboard summaries. It also provides package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
+Salic provides a set of functions to progress from license data to dashboard summaries. It also includes package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
 
 ``` r
 library(salic)
@@ -26,11 +25,29 @@ This vignette walks through salic functionality using provided sample data (see 
 Standardized License Data
 -------------------------
 
-To facilitate a generalized workflow, salic is strict about data formatting. Some up-front effort will be needed to standardize the relevant state-level data. That said, the dashboard data needs are fairly light (9 variables total in 3 tables).
+To facilitate a generalized workflow, salic is strict about data formatting, and some up-front effort is needed to standardize the relevant state-level data. That said, the dashboard data needs are fairly light (9 variables total in 3 tables).
 
-Salic includes documentation about each table's formatting (see `?cust`, `?lic`, `?sale`). The 3 tables should be related by 2 key columns:
+Salic includes documentation about each table's formatting expectations (see `?cust`, `?sale`, `?lic` for details). The 3 tables should be related by 2 key columns:
 
 ![](relations.png)
+
+### Checking the formatting
+
+Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
+
+``` r
+data(cust, lic, sale) # load sample data
+data_check(cust, lic, sale)
+
+# introduce some rule-breaking changes
+cust$cust_id[1:2] <- 1
+lic$type <- NULL
+data_check(cust, lic, sale)
+#> Warning: cust: Primary key (cust_id) not unique: 29999 keys and 30000 rows
+#> Warning: cust: Primary key (cust_id) is missing 1 value(s) present in the
+#> sale table
+#> Warning: lic: 1 Missing variable(s): type
+```
 
 ### Customers (cust)
 
@@ -69,7 +86,7 @@ label_categories(cust) %>% count(sex)
 #> 3 <NA>     537
 ```
 
-Functions are provided to check your data against the formatting rules (see `?data_check_table`). The function is silent if all checks pass and will print a warning for every failed check.
+To assist standardization, salic includes functions to check your data against the formatting rules (see `?data_check_table`). The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ``` r
 data_check_cust(cust) 
@@ -107,8 +124,8 @@ tmp <- lic
 tmp$type[1] <- NA
 tmp$duration[1] <- NA
 data_check_lic(tmp)
-#> Warning: lic$type: contains values that aren't allowed: NA
-#> Warning: lic$duration: contains values that aren't allowed: NA
+#> Warning: lic$type: Contains values that aren't allowed: NA
+#> Warning: lic$duration: Contains values that aren't allowed: NA
 ```
 
 The "type" column specifies whether a license provides a hunting privilege ("hunt"), a fishing privilege ("fish"), or both ("combo").
@@ -222,6 +239,8 @@ License History
 ---------------
 
 START HERE
+
+Also think about whether the above is too much of a data dump...it might be good to show the workflow that is needed earlier. There is a risk that people will begin reading and just give up.
 
 ### rank\_sale
 

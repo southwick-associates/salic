@@ -2,16 +2,16 @@
 % Please edit documentation in R/license-history.R
 \name{history_check}
 \alias{history_check}
-\alias{check_history_sample}
-\alias{check_R3}
-\alias{check_lapse}
+\alias{history_check_sample}
+\alias{history_check_R3}
+\alias{history_check_lapse}
 \title{Checking license history}
 \usage{
-check_history_sample(history, n_samp = 3, buy_min = 3, buy_max = 8)
+history_check_sample(history, n_samp = 3, buy_min = 3, buy_max = 8)
 
-check_R3(history, yrs)
+history_check_R3(history, yrs)
 
-check_lapse(history)
+history_check_lapse(history)
 }
 \arguments{
 \item{history}{data frame: license history table}
@@ -29,11 +29,11 @@ to create license history}
 These functions can be called following \code{\link{make_history}} with 
 show_diagnostics = TRUE.
 \itemize{
-\item \emph{check_history_sample}: View a sample of customers from history table 
+\item \emph{history_check_sample}: View a sample of customers from history table 
 to check year over year dynamics (outputs a list split by customer ID).
-\item \emph{check_lapse}: Produces a count summary of customers by lapse value
+\item \emph{history_check_lapse}: Produces a count summary of customers by lapse value
 (outputs a list).
-\item \emph{check_R3}: Produce a count summary of customers by R3, yrs_since, 
+\item \emph{history_check_R3}: Produce a count summary of customers by R3, yrs_since, 
 & duration_run_lag (outputs a data frame).
 }
 }
@@ -46,9 +46,9 @@ history <- inner_join(lic, sale) \%>\%
     rank_sale() \%>\%
     make_history(yrs, "res", show_diagnostics = TRUE)
 
-check_history_sample(history)
-check_lapse(history)
-check_R3(history, 2008:2018)
+history_check_sample(history)
+history_check_lapse(history)
+history_check_R3(history, 2008:2018)
 }
 \seealso{
 Other license history functions: \code{\link{make_history}},

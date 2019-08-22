@@ -39,7 +39,8 @@ which should be unique and non-missing. NULL indicates no primary key in table.}
 \description{
 Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 Table-specific versions are convenience functions that call data_check_table() 
-with appropriate defaults.
+with appropriate defaults. The \code{\link{data_check}} function is a wrapper
+that calls all 3 versions (cust, lic, sale) together.
 }
 \details{
 Developer note: data_check_table() is itself a wrapper 
@@ -70,4 +71,3 @@ Other functions to check data format: \code{\link{data_check}},
   \code{\link{variable_allowed_values}}
 }
 \concept{functions to check data format}
-\keyword{internal}

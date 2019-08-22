@@ -102,7 +102,7 @@ data_allowed_values <- function(df, df_name, allowed_values) {
 variable_allowed_values <- function(x, x_name, allowed_values) {
     not_allowed <- dplyr::setdiff(unique(x), allowed_values)
     msg <- paste0(
-        x_name, ": contains values that aren't allowed: ", 
+        x_name, ": Contains values that aren't allowed: ", 
         paste(not_allowed, collapse = ", ")
     )
     if (length(not_allowed) > 0) warning(msg, call. = FALSE)
@@ -133,8 +133,9 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
     missing_keys <- dplyr::anti_join(df_foreign, df_primary, by = key)
     
     msg <- paste0(
-        primary_name, ": missing ", length(unique(missing_keys[[key]])), " ", 
-        key, " values that are present in the ", foreign_name,  " table"
+        primary_name, ": Primary key (", key, ") is missing ", 
+        length(unique(missing_keys[[key]])), " value(s) present in the ", 
+        foreign_name,  " table"
     )
     if (nrow(missing_keys) > 0) warning(msg, call. = FALSE)
 }
@@ -143,7 +144,8 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' 
 #' Prints a warning if any of the specied formatting rules don't pass (silent otherwise). 
 #' Table-specific versions are convenience functions that call data_check_table() 
-#' with appropriate defaults. 
+#' with appropriate defaults. The \code{\link{data_check}} function is a wrapper
+#' that calls all 3 versions (cust, lic, sale) together.
 #' 
 #' Developer note: data_check_table() is itself a wrapper 
 #' for several internal functions (see \code{\link{data_internal}}).
@@ -155,7 +157,6 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' @param required_vars character: variables that should be included
 #' @param allowed_values list: named list with allowed values for specific variables
 #' @family functions to check data format
-#' @keywords internal
 #' @import dplyr
 #' @export
 #' @examples

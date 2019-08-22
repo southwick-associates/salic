@@ -1,5 +1,10 @@
 # license history functions
 
+# Note: These functions make extensive use of package data.table for performance. 
+# For usage info:
+# - wiki: https://github.com/Rdatatable/data.table/wiki
+# - getting started: https://github.com/Rdatatable/data.table/wiki/Getting-started
+
 # Preparing Sale ----------------------------------------------------------
 
 #' Filter sales to 1 row per customer per year.
@@ -123,12 +128,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' \item \emph{R3}: R3 group this year (1=carried, 2=renewed, 3=reactivated, 4=recruited).  
 #' Only included if more than 5 years are present.
 #' }
-#' Development Note: make_history() uses several \code{\link{history_internal}}
-#' functions, all of which make use of package data.table for performance, 
-#' see \href{https://github.com/Rdatatable/data.table/wiki}{data.table wiki} &
-#' \href{https://github.com/Rdatatable/data.table/wiki/Getting-started}{getting started vignette}
-#' for more information.
-#' 
+#'
 #' @param sale_ranked data frame: Sales table from which license history will be made; 
 #' must include at least 3 variables (cust_id, year, duration)
 #' @param yrs numeric: Years in sales data (column 'year') from which
@@ -259,11 +259,11 @@ make_R3 <- function(dt, yrs) {
 #' These functions can be called following \code{\link{make_history}} with 
 #' show_diagnostics = TRUE.
 #' \itemize{
-#' \item \emph{check_history_sample}: View a sample of customers from history table 
+#' \item \emph{history_check_sample}: View a sample of customers from history table 
 #' to check year over year dynamics (outputs a list split by customer ID).
-#' \item \emph{check_lapse}: Produces a count summary of customers by lapse value
+#' \item \emph{history_check_lapse}: Produces a count summary of customers by lapse value
 #' (outputs a list).
-#' \item \emph{check_R3}: Produce a count summary of customers by R3, yrs_since, 
+#' \item \emph{history_check_R3}: Produce a count summary of customers by R3, yrs_since, 
 #' & duration_run_lag (outputs a data frame).
 #' }
 #' 
@@ -285,14 +285,14 @@ make_R3 <- function(dt, yrs) {
 #'     rank_sale() %>%
 #'     make_history(yrs, "res", show_diagnostics = TRUE)
 #' 
-#' check_history_sample(history)
-#' check_lapse(history)
-#' check_R3(history, 2008:2018)
+#' history_check_sample(history)
+#' history_check_lapse(history)
+#' history_check_R3(history, 2008:2018)
 NULL
 
 #' @rdname history_check
 #' @export
-check_history_sample <- function(history, n_samp = 3, buy_min = 3, buy_max = 8) {
+history_check_sample <- function(history, n_samp = 3, buy_min = 3, buy_max = 8) {
     show_cols <- c("cust_id", "year", "duration_run", "lapse", "R3", "res", "month")
     output_cols <- dplyr::intersect(colnames(history), show_cols)
     
@@ -308,10 +308,10 @@ check_history_sample <- function(history, n_samp = 3, buy_min = 3, buy_max = 8) 
 
 #' @rdname history_check
 #' @export
-check_R3 <- function(history, yrs) {
+history_check_R3 <- function(history, yrs) {
     if (!"yrs_since" %in% names(history)) {
         warning(
-            "yrs_since variable needed for check_R3 ", 
+            "yrs_since variable needed for history_check_R3 ", 
             "(see ?make_history(show_diagnostics = TRUE)", call. = FALSE
         )
         return(invisible())
@@ -325,7 +325,7 @@ check_R3 <- function(history, yrs) {
 
 #' @rdname history_check
 #' @export
-check_lapse <- function(history) {
+history_check_lapse <- function(history) {
     # get lead year for checking
     dt <- data.table(history)
     dt[order(year), next_year := shift(year, 1, type = "lead"), by = cust_id]
