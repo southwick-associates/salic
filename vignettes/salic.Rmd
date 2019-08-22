@@ -42,39 +42,43 @@ Salic documents each table's formatting expectations (see `?cust`, `?sale`, `?li
 
 ![](relations.png)
 
+### Primary Keys
+
+The `cust$cust_id` and `lic$lic_id` variables represent primary key columns (i.e., they must uniquely identify rows in the table):
+
+```{r}
+# load sample data
+data(cust, lic, sale) 
+
+# check customer ID
+length(unique(cust$cust_id)) == nrow(cust)
+
+# check license type ID
+length(unique(lic$lic_id)) == nrow(lic)
+```
+
+*Note that although keys can be stored as type character, numeric values will yield better performance.*
+
 ### Checking Formatting Rules
 
 Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
-data(cust, lic, sale)       # load sample data
-data_check(cust, lic, sale) # prints no warnings
+# prints no warnings
+data_check(cust, lic, sale) 
 
-# introduce some rule-breaking changes
+# introduce 1 rule-breaking change
+cust_tmp <- cust
+cust_tmp$birth_year <- NULL
+data_check(cust_tmp, lic, sale)
+
+# introduce a change that breaks 2 rules
 cust_tmp <- cust
 cust_tmp$cust_id[1:2] <- 1
-cust_tmp$birth_year <- NULL
 data_check(cust_tmp, lic, sale)
 ```
 
 ### Categorical Variables
-
-Codes bla di bla...
-
-```{r}
-
-```
-
-### Customers (cust)
-
-Three customer columns are needed; "cust_id" being the most important. The cust_id should uniquely identify every row in the table (i.e., it's a primary key).
-
-```{r}
-data(cust)
-glimpse(cust)
-
-length(unique(cust$cust_id)) == nrow(cust)
-```
 
 Salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1, 2, or NA). You can view the corresponding labels using `salic::label_categories`.
 
@@ -84,94 +88,61 @@ count(cust, sex)
 label_categories(cust) %>% count(sex)
 ```
 
-To assist standardization, salic includes functions to check your data against the formatting rules (see `?data_check_table`). The function call is silent if all checks pass; warnings will be printed for every failed check.
-
-```{r}
-data_check_cust(cust) 
-
-# introduce some problems
-tmp <- cust
-tmp$cust_id[2] <- 1
-tmp$birth_year <- NULL
-data_check_cust(tmp)
-```
-
-### License Types (lic)
-
-Three license type columns are needed. Similar to customers, license types should be uniquely identified using "lic_id".
-
-```{r}
-data(lic)
-glimpse(lic)
-
-length(unique(lic$lic_id)) == nrow(lic)
-```
-
-Unlike the customer table, no missing values are allowed in the license types table:
-
-```{r}
-tmp <- lic
-tmp$type[1] <- NA
-tmp$duration[1] <- NA
-data_check_lic(tmp)
-```
-
-The "type" column specifies whether a license provides a hunting privilege ("hunt"), a fishing privilege ("fish"), or both ("combo").
-
-```{r}
-count(lic, type)
-```
-
-The "duration" column is necessary for building a license history. Specifically:
-
-- Multi-year license are identified with values > 1 (e.g., 2 = 2-year, 3 = 3-year, etc.).
-- Lifetimes are identified using a special value: 99.
-- All other license types should = 1.
-
-```{r}
-count(lic, duration)
-```
-
-### License Sales (sale)
-
-The license sales table includes 5 variables. No primary key is needed; the table links to customers and license types using foreign keys.
-
-```{r}
-data(sale)
-glimpse(sale)
-```
+### sale: year & month
 
 The "year" and "month" variables indicate the date of purchase (1 = Jan, 2 = Feb, etc.). The month variable is needed for building "mid-year" dashboards, which present a year-to-year view for the first six months of sales.
 
 ```{r}
-# all customers per year
-filter(sale, year >= 2015) %>%
+# all customers per year after 2015
+filter(sale, year > 2015) %>%
     distinct(cust_id, year) %>% 
     count(year)
 
-# customers in the first six months
-filter(sale, year >= 2015, month <= 6) %>%
+# customers in the first six months only
+filter(sale, year > 2015, month <= 6) %>%
     distinct(cust_id, year) %>%
     count(year)
 ```
 
-You can also make use of "type" to focus on hunters or anglers specifically. Note, that since the data contain combination licenses, we can't use a `group_by` operation directly for this purpose.
+### lic: type
+
+The lic table includes two columns important for customer trending. The "type" column specifies whether a license provides:
+
+- a hunting privilege: "hunt"
+- a fishing privilege: "fish" 
+- or both: "combo"
 
 ```{r}
+count(lic, type)
+
+# count hunters for select years
 filter(lic, type %in% c("hunt", "combo")) %>%
     inner_join(sale, by = "lic_id") %>%
-    filter(year >= 2015) %>%
-    distinct(cust_id, year) %>% 
+    filter(year > 2015) %>%
+    distinct(cust_id, year) %>%
     count(year)
 ```
 
-The "res" variable identifies state residency for the customer. Storing this info at the transaction level provides additional flexibility since a person's residency status could conceivably change over time.
+### lic: duration
+
+The "duration" column is necessary for building a license history. License types can be organized into 3 groups with respect to this variable:
+
+- Multi-years: duration > 1 (2 = 2-year, 3 = 3-year, etc.)
+- Lifetimes: duration = 99
+- All others: duration = 1
 
 ```{r}
-count(sale, res)
+count(lic, duration)
 
-label_categories(sale) %>% count(res)
+# customers who buy 3-year licenses
+cust_3yr <- filter(lic, duration == 3) %>%
+    inner_join(sale, by = "lic_id") %>%
+    filter(year > 2015) %>%
+    distinct(cust_id, year)
+count(cust_3yr, year)
 ```
+
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. The next section goes over building a license history table to facilitate on-the-fly trending & automated summarization. 
 
 ## License History
 

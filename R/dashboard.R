@@ -81,18 +81,18 @@ check_threshold <- function(
 #' est_part(history)
 #' 
 #' # by segment
-#' est_part(history, "agecat")
-#' est_part(history, "agecat", test_threshold = 15) # produce a warning
+#' est_part(history, "agecat") # produces a warning
+#' est_part(history, "agecat", test_threshold = 25)
 #' 
 #' # new recruits
 #' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
 #' est_recruit(history_new)
 #' 
-#' # apply over multiple segments
+#' # apply over multiple segments 
 #' segs <- c("tot", "res", "sex", "agecat")
-#' sapply(segs, function(x) est_part(history, x), simplify = FALSE)
+#' part <- sapply(segs, function(x) est_part(history, x), simplify = FALSE)
 #' 
-#' # specify test thesholds by segment
+#' # specify test thesholds by segment to suppress warnings
 #' tests <- c(tot = 20, res = 45, sex = 30, agecat = 40)
 #' part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 est_part <- function(
@@ -235,9 +235,7 @@ scaleup_part <- function(
     part_segment, part_total, test_threshold = 10, show_test_stat = FALSE,
     outvar = "participants"
 ) {
-    # TODO this could potentially be part of defined data format checks
-    # and placed at the top of these functions that have very strict format rules
-    if (!outvar %in% colnames(part_segment) | !outvar %in% colnames(part_segment)) {
+    if (!outvar %in% colnames(part_segment) | !outvar %in% colnames(part_total)) {
         stop("Missing '", outvar, "' from at least one of the input tables", call. = FALSE)
     }
     if (sum(part_segment[[outvar]]) == sum(part_total[[outvar]])) {
@@ -274,8 +272,8 @@ scaleup_part <- function(
         select(-.data$scale_factor)
     
     # a final check of the scaled total
-    # TODO - might not need this if function is tested thoroughly, will leave for now
-    #      - probably better to consider what problem it catches and write a test
+    # TODO: might not need this if function is tested thoroughly, will leave for now
+    # - i don't recall what problem this caught...so not sure what unit test to write
     diff <- abs(sum(out[[outvar]]) - sum(part_total2$total))
     if (diff > 50) { # allows for a small amount of rounding error
         warning("Something might have gone wrong in scaling since the segment sum of ",

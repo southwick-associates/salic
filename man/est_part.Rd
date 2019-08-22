@@ -53,18 +53,18 @@ history <- history \%>\%
 est_part(history)
 
 # by segment
-est_part(history, "agecat")
-est_part(history, "agecat", test_threshold = 15) # produce a warning
+est_part(history, "agecat") # produces a warning
+est_part(history, "agecat", test_threshold = 25)
 
 # new recruits
 history_new <- filter(history, !is.na(R3), R3 == "Recruit")
 est_recruit(history_new)
 
-# apply over multiple segments
+# apply over multiple segments 
 segs <- c("tot", "res", "sex", "agecat")
-sapply(segs, function(x) est_part(history, x), simplify = FALSE)
+part <- sapply(segs, function(x) est_part(history, x), simplify = FALSE)
 
-# specify test thesholds by segment
+# specify test thesholds by segment to suppress warnings
 tests <- c(tot = 20, res = 45, sex = 30, agecat = 40)
 part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 }

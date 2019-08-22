@@ -7,9 +7,9 @@
 data_check(cust, lic, sale)
 }
 \arguments{
-\item{cust}{data frame: customer table (key = "cust_id")}
+\item{cust}{data frame: customer table (primary key = "cust_id")}
 
-\item{lic}{data frame: license types table (key = "lic_id")}
+\item{lic}{data frame: license types table (primary key = "lic_id")}
 
 \item{sale}{data frame: transactions table (foreign keys = "lic_id", "cust_id")}
 }

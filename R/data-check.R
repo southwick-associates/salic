@@ -237,8 +237,8 @@ data_check_sale <- function(
 #'   sale$cust_id can be found in cust$cust_id)
 #' }
 #' 
-#' @param cust data frame: customer table (key = "cust_id")
-#' @param lic data frame: license types table (key = "lic_id")
+#' @param cust data frame: customer table (primary key = "cust_id")
+#' @param lic data frame: license types table (primary key = "lic_id")
 #' @param sale data frame: transactions table (foreign keys = "lic_id", "cust_id")
 #' @family functions to check data format
 #' @import dplyr
