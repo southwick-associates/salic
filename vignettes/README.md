@@ -1,6 +1,8 @@
+# Introduction to Salic
 -   [Overview](#overview)
 -   [Standardized License Data](#standardized-license-data)
-    -   [Checking the formatting](#checking-the-formatting)
+    -   [Formatting Rules](#formatting-rules)
+    -   [Categorical Variables](#categorical-variables)
     -   [Customers (cust)](#customers-cust)
     -   [License Types (lic)](#license-types-lic)
     -   [License Sales (sale)](#license-sales-sale)
@@ -31,7 +33,7 @@ Salic includes documentation about each table's formatting expectations (see `?c
 
 ![](relations.png)
 
-### Checking the formatting
+### Formatting Rules
 
 Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
 
@@ -48,6 +50,10 @@ data_check(cust, lic, sale)
 #> sale table
 #> Warning: lic: 1 Missing variable(s): type
 ```
+
+### Categorical Variables
+
+Codes bla di bla...
 
 ### Customers (cust)
 

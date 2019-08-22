@@ -5,11 +5,14 @@ This R package includes a set of functions for summarizing agency data for dashb
 
 ## Installation
 
-You'll need a version of R installed (version 3.5.0 or greater). Binary installers are included (here)
+You'll need a version of [R Software](https://www.r-project.org/) installed (version 3.5.0 or greater). Package salic can be installed directly from source, or by using one of the included binary installers:
+
+- Windows: `install.packages("bla bla")`
+- Mac: `install.packages("bla bla")`
 
 ## Usage
 
-I recommend starting with [Introduction to salic](/vignettes/README.md) (also available by running `vignette("salic")` from the R console).
+A guide is included in the [Introduction to salic](/vignettes/README.md) vignette (also available by running `vignette("salic")` from the R console).
 
 ## Background (temp)
 

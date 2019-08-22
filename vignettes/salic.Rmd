@@ -55,6 +55,13 @@ lic$type <- NULL
 data_check(cust, lic, sale)
 ```
 
+### Categorical Variables
+
+Codes bla di bla...
+
+```{r}
+
+```
 
 ### Customers (cust)
 
