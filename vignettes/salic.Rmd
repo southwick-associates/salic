@@ -36,9 +36,9 @@ can be accessed by running `?salic` from the R console; it's organization mirror
 
 ## Standardized License Data
 
-To facilitate a generalized workflow, salic is strict about data formatting, and some up-front effort is needed to standardize the relevant state-level data. That said, the dashboard data needs are fairly light (9 variables total in 3 tables).
+To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light (9 variables total).
 
-Salic documents each table's formatting expectations (see `?cust`, `?sale`, `?lic` for details). The 3 tables should be related by 2 key columns (cust_id, lic_id):
+Salic specifies each table's formatting expectations (see `cust`, `sale`, and `lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
 ![](relations.png)
 
@@ -57,11 +57,9 @@ length(unique(cust$cust_id)) == nrow(cust)
 length(unique(lic$lic_id)) == nrow(lic)
 ```
 
-*Note that although keys can be stored as type character, numeric values will yield better performance.*
-
 ### Checking Formatting Rules
 
-Salic helps you follow it's formatting rules with an included function (see `?data_check`). The function call is silent if all checks pass; warnings will be printed for every failed check.
+Salic helps you follow its formatting rules with an included `data_check` function. The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
 # prints no warnings
@@ -80,15 +78,16 @@ data_check(cust_tmp, lic, sale)
 
 ### Categorical Variables
 
-Salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1, 2, or NA). You can view the corresponding labels using `salic::label_categories`.
+Salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1, 2, or NA):
 
 ```{r}
 count(cust, sex)
 
-label_categories(cust) %>% count(sex)
+# view corresponding labels
+count(cust, sex) %>% label_categories()
 ```
 
-### sale: year & month
+### Sales: year & month
 
 The "year" and "month" variables indicate the date of purchase (1 = Jan, 2 = Feb, etc.). The month variable is needed for building "mid-year" dashboards, which present a year-to-year view for the first six months of sales.
 
@@ -104,9 +103,9 @@ filter(sale, year > 2015, month <= 6) %>%
     count(year)
 ```
 
-### lic: type
+### Licenses: type
 
-The lic table includes two columns important for customer trending. The "type" column specifies whether a license provides:
+The license table includes two columns important for customer trending. The "type" column specifies whether a license provides:
 
 - a hunting privilege: "hunt"
 - a fishing privilege: "fish" 
@@ -123,7 +122,7 @@ filter(lic, type %in% c("hunt", "combo")) %>%
     count(year)
 ```
 
-### lic: duration
+### Licenses: duration
 
 The "duration" column is necessary for building a license history. License types can be organized into 3 groups with respect to this variable:
 
@@ -142,28 +141,131 @@ cust_3yr <- filter(lic, duration == 3) %>%
 count(cust_3yr, year)
 ```
 
-The presence of multi-year buyers means that an extra step is needed to produce customer trends. The next section goes over building a license history table to facilitate on-the-fly trending & automated summarization. 
-
 ## License History
 
-START HERE
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling 2 functions in sequence.
 
-Also think about whether the above is too much of a data dump...it might be good to show the workflow that is needed earlier. There is a risk that people will begin reading and just give up.
+### Sale Ranking
 
-### rank_sale
+The `rank_sale` function is used as a preliminary step to reduce the sale table to 1 row per customer-year. It picks the row with the maximum duration value & optionally includes the earliest month value (used for mid-year dashboards).
 
+```{r}
+# all hunting (non-combo) sales in 2016
+sale_2016 <- inner_join(
+    filter(sale, year == 2016),
+    filter(lic, type == "hunt"),
+    by = "lic_id"
+)
+count(sale_2016, duration, year)
 
-### make_history
+# ranked hunting (non-combo) sales in 2016
+rank_sale(sale_2016) %>%
+    count(duration, year)
+```
 
-#### R3
+### Making the History Table
 
-#### Lapse
+The `make_history` function creates a larger table with 1 row for every year a license is held (i.e., both purchase years and "carried-over" license years are included). 
 
+```{r}
+# customers who purchased in 2016
+sale_ranked <- inner_join(sale, lic, by = "lic_id") %>%
+    rank_sale()
+filter(sale_ranked, year > 2015) %>%
+    count(year)
+
+# customers who held a license in 2016
+history <- make_history(sale_ranked, 2008:2018)
+filter(history, year > 2015) %>%
+    count(year)
+```
+
+### Lapse
+
+A license history table makes it easier to look ahead (e.g., who lapsed?) or behind (e.g., who is a recruit?) at the customer level. The `make_history` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
+
+```{r}
+# build hunting privilege history
+hunt <- filter(lic, type %in% c("hunt", "combo")) %>%
+    inner_join(sale, by = "lic_id") %>%
+    rank_sale() %>%
+    make_history(2008:2018)
+    
+# hunters in 2016, what % lapsed in 2017? (i.e., churned)
+filter(hunt, year == 2016) %>%
+    summarize(churn_rate = mean(lapse) * 100)
+```
+
+### R3
+
+The R3 measure is used to group license holders based on how recently they bought licenses:
+
+- Renewed: R3 = 1 (duration_run > 1 last year) or R3 = 2 (duration_run == 1 last year)
+- Reactivated: R3 = 3 (no license held last year, but did more recently than 5 years ago)
+- Recruited: R3 = 4 (no license held within previous 5 years)
+
+```{r}
+# hunters in 2016, what % are in each R3 group?
+filter(hunt, year == 2016) %>%
+    mutate(R3_label = factor_R3(R3)) %>%
+    count(R3, R3_label) %>%
+    mutate(pct = n / sum(n) * 100)
+
+# what percentage of hunting recruits lapsed in 2017?
+filter(hunt, year == 2016, R3 == 4) %>%
+    summarize(churn_rate = mean(lapse) * 100)
+```
+
+### Other Variables
+
+Customer-level variables can be joined after running `make_history`. This allows us to further drill down in the data:
+
+```{r}
+# hunter recruit churn in 2017 - men vs. women
+# female recruits renewed at a higher rate; could be worth investigating
+filter(hunt, year == 2016, R3 == 4) %>%
+    left_join(cust, by = "cust_id") %>%
+    label_categories() %>%
+    filter(!is.na(sex)) %>%
+    group_by(sex) %>%
+    summarise(churn_rate = mean(lapse) * 100)
+```
+
+Sale-level variables require an extra step...Carry vars are sale-specific variables from multi-year/lifetimes...
+
+```{r}
+# month & res
+
+```
 
 ## Dashboard Metrics
 
+The license history table provides a flexible data structure for summarizing customer trends. A set of specific summaries are needed for the AFWA national/regional dashboard; these can be produced with the following salic functions.
+
+### Data Preparation
+
+Some data preparation is needed...
+
 - filter by age
 - `label_categories()` & `recode_agecat()`
-- `est_part()`, `est_recruit()`, `est_churn()`
 
-## Summary Output
+### Participants
+
+- `est_part()`
+
+### Recruits
+
+`est_recruit()`
+
+### Churn
+
+`est_churn()`
+
+### Formatting the Summary Output
+
+For input into the dashboard software...
+
+```{r}
+
+```
+
