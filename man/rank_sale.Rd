@@ -49,6 +49,8 @@ left_join(
 )
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other license history functions: \code{\link{history_check}},
   \code{\link{make_history}}
 }

@@ -46,6 +46,8 @@ segs <- c("tot", "res", "sex", "agecat")
 churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other dashboard functions: \code{\link{check_threshold}},
   \code{\link{est_part}}, \code{\link{format_result}},
   \code{\link{scaleup_part}}

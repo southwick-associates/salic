@@ -69,6 +69,8 @@ tests <- c(tot = 20, res = 45, sex = 30, agecat = 40)
 part <- sapply(segs, function(x) est_part(history, x, tests[x]), simplify = FALSE)
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other dashboard functions: \code{\link{check_threshold}},
   \code{\link{est_churn}}, \code{\link{format_result}},
   \code{\link{scaleup_part}}

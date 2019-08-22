@@ -30,6 +30,8 @@ data(history)
 x <- recode_agecat(history, suppress_check = FALSE)
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other functions for working with category variables: \code{\link{df_factor_var}},
   \code{\link{factor_var}}, \code{\link{label_categories}}
 }

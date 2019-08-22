@@ -66,6 +66,7 @@ check_threshold <- function(
 #' @return Returns a data frame with 3 variables (segment, "year", outvar), and
 #' optionally with 2 extra variables ("change", "pct_change") if show_test_stat = TRUE
 #' @family dashboard functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @import dplyr
 #' @export
 #' @examples
@@ -136,6 +137,7 @@ est_recruit <- function(
 #' It also runs a validation test: pct change per year.
 #' @inheritParams est_part
 #' @family dashboard functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @import dplyr
 #' @export
 #' @examples
@@ -198,6 +200,7 @@ est_churn <- function(
 #' the breakouts aren't representative (e.g., if not missing at random).
 #' @inheritParams est_part
 #' @family dashboard functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @import dplyr
 #' @export
 #' @examples
@@ -311,6 +314,7 @@ scaleup_recruit <- function(
 #' @param rename_input character: generic names for input variables as they
 #' will appear in the output
 #' @family dashboard functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
 #' @examples
 #' library(dplyr)

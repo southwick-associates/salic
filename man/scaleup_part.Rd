@@ -66,6 +66,8 @@ part_segment
 scaleup_recruit(part_segment, part_total)
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other dashboard functions: \code{\link{check_threshold}},
   \code{\link{est_churn}}, \code{\link{est_part}},
   \code{\link{format_result}}

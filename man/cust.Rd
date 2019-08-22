@@ -15,6 +15,8 @@ as character, but this is less efficient.}
 Sample Data: 30,000 Customers
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other Sample Data: \code{\link{dashboard}},
   \code{\link{data_salic}}, \code{\link{history}},
   \code{\link{lic}}, \code{\link{metrics}},

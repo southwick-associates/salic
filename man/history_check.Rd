@@ -31,7 +31,7 @@ show_diagnostics = TRUE.
 \itemize{
 \item \emph{history_check_sample}: View a sample of customers from history table 
 to check year over year dynamics (outputs a list split by customer ID).
-\item \emph{history_check_lapse}: Produces a count summary of customers by lapse value
+\item \emph{history_check_lapse}: Produce a count summary of customers by lapse value
 (outputs a list).
 \item \emph{history_check_R3}: Produce a count summary of customers by R3, yrs_since, 
 & duration_run_lag (outputs a data frame).
@@ -51,6 +51,8 @@ history_check_lapse(history)
 history_check_R3(history, 2008:2018)
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other license history functions: \code{\link{make_history}},
   \code{\link{rank_sale}}
 }

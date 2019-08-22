@@ -50,6 +50,8 @@ bind_rows(
 )
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other dashboard functions: \code{\link{check_threshold}},
   \code{\link{est_churn}}, \code{\link{est_part}},
   \code{\link{scaleup_part}}

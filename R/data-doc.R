@@ -22,6 +22,7 @@
 #' 
 #' @name data_salic
 #' @family Sample Data
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 #' Sample Data: 30,000 Customers
@@ -37,6 +38,7 @@ NULL
 #' \item{birth_year}{Year of Birth (numeric) (yyyy, NA=Unknown)}
 #' }
 #' @family Sample Data
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 #' Sample Data: License Types
@@ -54,6 +56,7 @@ NULL
 #' 99 = lifetime)}
 #' }
 #' @family Sample Data
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 #' Sample Data: Sales 2008 thru 2018
@@ -71,6 +74,7 @@ NULL
 #' NA = Unknown)}
 #' }
 #' @family Sample Data
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 # Derived License Data ----------------------------------------------------
@@ -96,7 +100,7 @@ NULL
 #' \item{lapse}{Lapsed next Year? (numeric) (1=lapse, 0=renew)}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{rank_sale}} \code{\link{make_history}}
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 #' Sample Data: Dashboard Metrics
@@ -117,7 +121,7 @@ NULL
 #' \item{churn}{Churn (i.e., turnover) per Year}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{est_part}} \code{\link{est_churn}}
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 #' Sample Data: Metrics formatted for Dashboard Input
@@ -142,7 +146,7 @@ NULL
 #' \item{value}{Value of metric for given dimension}
 #' }
 #' @family Sample Data
-#' @seealso \code{\link{format_result}}
+#' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
 # Additional Data ---------------------------------------------------------

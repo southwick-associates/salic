@@ -21,7 +21,7 @@ This is a table that corresponds to the "all_sports" permission for the included
 license sample data; containing 1 row per customer per year a license was held.
 }
 \seealso{
-\code{\link{rank_sale}} \code{\link{make_history}}
+Salic Function Reference: \code{\link{salic}}
 
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{data_salic}},

@@ -25,6 +25,7 @@
 #' @importFrom utils tail
 #' @importFrom utils head
 #' @family license history functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
 #' @examples
 #' library(dplyr)
@@ -142,6 +143,7 @@ prep_yrs <- function(yrs, df, func_name) {
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
 #' @examples
 #' library(dplyr)
@@ -261,7 +263,7 @@ make_R3 <- function(dt, yrs) {
 #' \itemize{
 #' \item \emph{history_check_sample}: View a sample of customers from history table 
 #' to check year over year dynamics (outputs a list split by customer ID).
-#' \item \emph{history_check_lapse}: Produces a count summary of customers by lapse value
+#' \item \emph{history_check_lapse}: Produce a count summary of customers by lapse value
 #' (outputs a list).
 #' \item \emph{history_check_R3}: Produce a count summary of customers by R3, yrs_since, 
 #' & duration_run_lag (outputs a data frame).
@@ -273,6 +275,7 @@ make_R3 <- function(dt, yrs) {
 #' @param buy_max numeric: maximum number of license purchases for customers to include
 #' @inheritParams make_history
 #' @family license history functions
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @import dplyr
 #' @rawNamespace import(data.table, except = c(first, between, last))
 #' @name history_check

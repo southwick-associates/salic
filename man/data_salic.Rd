@@ -21,6 +21,8 @@ Salic provides sample data for each stage of dashboard production:
 }
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{history}},
   \code{\link{lic}}, \code{\link{metrics}},

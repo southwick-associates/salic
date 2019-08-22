@@ -31,7 +31,8 @@ library(salic)
 library(dplyr)
 ```
 
-This vignette walks through salic functionality using provided sample data (see `?data_salic` for details).
+This vignette walks through salic functionality using provided sample data. A function reference
+can be accessed by running `?salic` from the R console; it's organization approximately mirrors this vignette.
 
 ## Standardized License Data
 

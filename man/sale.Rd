@@ -17,6 +17,8 @@ NA = Unknown)}
 Sample Data: Sales 2008 thru 2018
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{data_salic}},
   \code{\link{history}}, \code{\link{lic}},

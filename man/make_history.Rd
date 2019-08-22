@@ -51,6 +51,8 @@ history <- make_history(sale_ranked, 2008:2018, "res")
 left_join(count(history, year), count(sale_ranked, year), by = "year")
 }
 \seealso{
+Salic Function Reference: \code{\link{salic}}
+
 Other license history functions: \code{\link{history_check}},
   \code{\link{rank_sale}}
 }

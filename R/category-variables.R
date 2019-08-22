@@ -15,6 +15,7 @@
 #' @param suppress_check logical: If TRUE, does not print a coding summary
 #' @import dplyr
 #' @family functions for working with category variables
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
 #' @examples 
 #' library(dplyr)
@@ -56,6 +57,7 @@ recode_agecat <- function(
 #' @param ... additional arguments passed to \code{\link{df_factor_var}}
 #' @export
 #' @family functions for working with category variables
+#' @seealso Salic Function Reference: \code{\link{salic}}
 #' @examples 
 #' library(dplyr)
 #' data(history)

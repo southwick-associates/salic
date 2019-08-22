@@ -22,7 +22,7 @@ All Hunters & Anglers (group = "all_sports"), Hunters (group = "hunt"), and
 Anglers (group = "fish") .
 }
 \seealso{
-\code{\link{format_result}}
+Salic Function Reference: \code{\link{salic}}
 
 Other Sample Data: \code{\link{cust}},
   \code{\link{data_salic}}, \code{\link{history}},
