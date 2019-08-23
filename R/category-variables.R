@@ -128,7 +128,7 @@ factor_res <- function(x, levels = c(1,0), labels = c("Resident", "Nonresident")
 #' @rdname factor_var
 #' @export
 factor_R3 <- function(x, levels = 1:4,  
-                      labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...) {
+                      labels = c("Carry", "Renew", "Reactivate", "Recruit"), ...) {
     factor_var(x, levels = levels, labels = labels, ...)
 }
 
@@ -181,7 +181,7 @@ df_factor_res <- function(df, var = "res", levels = c(1,0),
 #' @rdname df_factor_var
 #' @export
 df_factor_R3 <- function(df, var = "R3", levels = 1:4, 
-                         labels = c("Carry", "Retain", "Reactivate", "Recruit"), ...
+                         labels = c("Carry", "Renew", "Reactivate", "Recruit"), ...
 ) {
     df_factor_var(df, var, levels, labels, ...)
 }

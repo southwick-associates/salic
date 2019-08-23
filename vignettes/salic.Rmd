@@ -205,7 +205,9 @@ filter(hunt, year == 2016) %>%
 
 The R3 measure is used to group license holders based on how recently they bought licenses. For the national/regional dashboards, the recruited group is of particular interest.
 
-- Carried/Retained: R3 = 1 or 2 (held a license last year)
+- Retained: (held a license last year)
+    + R3 = 1 (carried over a license from last year, i.e., didn't purchase this year)
+    + R3 = 2 (didn't carry over a license)
 - Reactivated: R3 = 3 (no license held last year, but did more recently than 5 years ago)
 - Recruited: R3 = 4 (no license held within previous 5 years)
 

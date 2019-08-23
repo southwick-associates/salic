@@ -18,7 +18,7 @@ factor_sex(x, levels = 1:2, labels = c("Male", "Female"), ...)
 factor_res(x, levels = c(1, 0), labels = c("Resident", "Nonresident"),
   ...)
 
-factor_R3(x, levels = 1:4, labels = c("Carry", "Retain", "Reactivate",
+factor_R3(x, levels = 1:4, labels = c("Carry", "Renew", "Reactivate",
   "Recruit"), ...)
 }
 \arguments{
