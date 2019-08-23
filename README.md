@@ -1,6 +1,6 @@
 # salic: An R Package to Prepare Agency Dashboard Data
 
-This R package includes a set of functions for summarizing agency data for dashboards, particularly for use in AFWA's national/regional dashboard effort.  It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
+This R package includes a set of functions for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
 
 ## Installation
 
