@@ -3,9 +3,6 @@ title: "Introduction to salic"
 output: 
     rmarkdown::html_vignette:
         toc: TRUE
-    md_document:
-        toc: TRUE
-        variant: markdown_github
 vignette: >
   %\VignetteIndexEntry{Introduction to salic}
   %\VignetteEncoding{UTF-8}
@@ -24,7 +21,7 @@ library(salic)
 
 ## Overview
 
-Salic provides a set of functions to progress from state license data to dashboard summaries. It also includes package dplyr on installation (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
+Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow relies heavily on dplyr  (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
 
 ```{r}
 library(salic)
@@ -40,6 +37,7 @@ To facilitate a generalized workflow salic is strict about data formatting, and 
 
 Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
+<br>
 ![](relations.png)
 
 <br>

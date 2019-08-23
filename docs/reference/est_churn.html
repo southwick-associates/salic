@@ -188,7 +188,87 @@ setting show_test_stat = TRUE.</p></td>
 #&gt; 10 All    2018 0.488</div><div class='input'>
 <span class='co'># apply across all segments</span>
 <span class='no'>segs</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='st'>"tot"</span>, <span class='st'>"res"</span>, <span class='st'>"sex"</span>, <span class='st'>"agecat"</span>)
-<span class='no'>churn</span> <span class='kw'>&lt;-</span> <span class='fu'>sapply</span>(<span class='no'>segs</span>, <span class='kw'>function</span>(<span class='no'>x</span>) <span class='fu'>est_churn</span>(<span class='no'>history</span>, <span class='no'>x</span>), <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</div></pre>
+<span class='fu'>sapply</span>(<span class='no'>segs</span>, <span class='kw'>function</span>(<span class='no'>x</span>) <span class='fu'>est_churn</span>(<span class='no'>history</span>, <span class='no'>x</span>), <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</div><div class='output co'>#&gt; $tot
+#&gt; # A tibble: 10 x 3
+#&gt;    tot    year churn
+#&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 All    2009 0.403
+#&gt;  2 All    2010 0.435
+#&gt;  3 All    2011 0.444
+#&gt;  4 All    2012 0.419
+#&gt;  5 All    2013 0.430
+#&gt;  6 All    2014 0.411
+#&gt;  7 All    2015 0.458
+#&gt;  8 All    2016 0.480
+#&gt;  9 All    2017 0.481
+#&gt; 10 All    2018 0.488
+#&gt; 
+#&gt; $res
+#&gt; # A tibble: 20 x 3
+#&gt;    res          year churn
+#&gt;    &lt;fct&gt;       &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 Resident     2009 0.353
+#&gt;  2 Resident     2010 0.379
+#&gt;  3 Resident     2011 0.382
+#&gt;  4 Resident     2012 0.355
+#&gt;  5 Resident     2013 0.360
+#&gt;  6 Resident     2014 0.357
+#&gt;  7 Resident     2015 0.396
+#&gt;  8 Resident     2016 0.423
+#&gt;  9 Resident     2017 0.418
+#&gt; 10 Resident     2018 0.428
+#&gt; 11 Nonresident  2009 0.627
+#&gt; 12 Nonresident  2010 0.629
+#&gt; 13 Nonresident  2011 0.646
+#&gt; 14 Nonresident  2012 0.632
+#&gt; 15 Nonresident  2013 0.660
+#&gt; 16 Nonresident  2014 0.618
+#&gt; 17 Nonresident  2015 0.658
+#&gt; 18 Nonresident  2016 0.661
+#&gt; 19 Nonresident  2017 0.673
+#&gt; 20 Nonresident  2018 0.667
+#&gt; 
+#&gt; $sex
+#&gt; # A tibble: 20 x 3
+#&gt;    sex     year churn
+#&gt;    &lt;fct&gt;  &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 Male    2009 0.370
+#&gt;  2 Male    2010 0.407
+#&gt;  3 Male    2011 0.405
+#&gt;  4 Male    2012 0.388
+#&gt;  5 Male    2013 0.398
+#&gt;  6 Male    2014 0.374
+#&gt;  7 Male    2015 0.425
+#&gt;  8 Male    2016 0.439
+#&gt;  9 Male    2017 0.446
+#&gt; 10 Male    2018 0.454
+#&gt; 11 Female  2009 0.533
+#&gt; 12 Female  2010 0.548
+#&gt; 13 Female  2011 0.597
+#&gt; 14 Female  2012 0.543
+#&gt; 15 Female  2013 0.555
+#&gt; 16 Female  2014 0.551
+#&gt; 17 Female  2015 0.580
+#&gt; 18 Female  2016 0.637
+#&gt; 19 Female  2017 0.609
+#&gt; 20 Female  2018 0.607
+#&gt; 
+#&gt; $agecat
+#&gt; # A tibble: 50 x 3
+#&gt;    agecat  year churn
+#&gt;    &lt;fct&gt;  &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 18-24   2009 0.519
+#&gt;  2 18-24   2010 0.543
+#&gt;  3 18-24   2011 0.546
+#&gt;  4 18-24   2012 0.527
+#&gt;  5 18-24   2013 0.517
+#&gt;  6 18-24   2014 0.499
+#&gt;  7 18-24   2015 0.528
+#&gt;  8 18-24   2016 0.578
+#&gt;  9 18-24   2017 0.587
+#&gt; 10 18-24   2018 0.575
+#&gt; # ... with 40 more rows
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

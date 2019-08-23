@@ -198,7 +198,8 @@ optionally with 2 extra variables ("change", "pct_change") if show_test_stat = T
 #&gt; 10 All    2017         7045
 #&gt; 11 All    2018         6701</div><div class='input'>
 <span class='co'># by segment</span>
-<span class='fu'>est_part</span>(<span class='no'>history</span>, <span class='st'>"agecat"</span>) <span class='co'># produces a warning</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Threshold of 20 for pct_change exceeded:</span>
+<span class='co'># produces a warning</span>
+<span class='fu'>est_part</span>(<span class='no'>history</span>, <span class='st'>"agecat"</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: Threshold of 20 for pct_change exceeded:</span>
 #&gt; <span class='warning'>  agecat year participants change pct_change</span>
 #&gt; <span class='warning'>1  55-64 2009         1323    244   22.61353</span></div><div class='output co'>#&gt; # A tibble: 55 x 3
 #&gt;    agecat  year participants
@@ -213,20 +214,10 @@ optionally with 2 extra variables ("change", "pct_change") if show_test_stat = T
 #&gt;  8 18-24   2015          963
 #&gt;  9 18-24   2016          968
 #&gt; 10 18-24   2017          884
-#&gt; # ... with 45 more rows</div><div class='input'><span class='fu'>est_part</span>(<span class='no'>history</span>, <span class='st'>"agecat"</span>, <span class='kw'>test_threshold</span> <span class='kw'>=</span> <span class='fl'>25</span>)</div><div class='output co'>#&gt; # A tibble: 55 x 3
-#&gt;    agecat  year participants
-#&gt;    &lt;fct&gt;  &lt;int&gt;        &lt;int&gt;
-#&gt;  1 18-24   2008          709
-#&gt;  2 18-24   2009          827
-#&gt;  3 18-24   2010          835
-#&gt;  4 18-24   2011          805
-#&gt;  5 18-24   2012          849
-#&gt;  6 18-24   2013          864
-#&gt;  7 18-24   2014          948
-#&gt;  8 18-24   2015          963
-#&gt;  9 18-24   2016          968
-#&gt; 10 18-24   2017          884
 #&gt; # ... with 45 more rows</div><div class='input'>
+<span class='co'># suppress warning</span>
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>est_part</span>(<span class='no'>history</span>, <span class='st'>"agecat"</span>, <span class='kw'>test_threshold</span> <span class='kw'>=</span> <span class='fl'>25</span>)
+
 <span class='co'># new recruits</span>
 <span class='no'>history_new</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>history</span>, !<span class='fu'>is.na</span>(<span class='no'>R3</span>), <span class='no'>R3</span> <span class='kw'>==</span> <span class='st'>"Recruit"</span>)
 <span class='fu'>est_recruit</span>(<span class='no'>history_new</span>)</div><div class='output co'>#&gt; # A tibble: 6 x 3

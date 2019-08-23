@@ -1,46 +1,26 @@
 
 ## Version 2.0 (2019-08-xx)
 
-This release corresponded to making salic easily available for state agencies and other partners. It included many added functions and a number of improvements to the codebase.
+This release corresponds to sharing salic with state agencies and other partners. It includes a number of new functions and major changes to the codebase. 
 
-### Added Functionality
+### Additions
 
-- New functions:
-    + join_firt_month() to maek it easier to produce mid-year results
-    + dashboard functions (est_part, etc.)
-    + others...
-    
+- Dashboard summary functions
+- Functions to check formatting rules of standardized data (cust, lic, sale)
+- Tests for all license-history & dashboard summary functions
+- An introduction vignette
+
+### Minor Changes
+
+- Sample data has been changed to more directly tie into the needs of national/regional dashboards
+- Examples have been re-written for most functions
+
 ### Breaking Changes
 
-Functions are (almost) completely backward compatible with previous 1.x versions. The exceptions occur with how some checking works in building license history (as a result of reducing output columns):
-- check_identify_R3() should now be called as part of identify_R3(summary = TRUE)
-- check_identify_lapse()
+- The functions for building license history have been completely re-written to be somewhat simpler, and much more performant. Code based on previous versions are no longer compatible. These functions have also been renamed, so accidental use of old code should produce informative errors quickly.
 
-#### A. Changes that Do Impact Function behavior
-
-- (maybe) certain variables have been dropped from the output of license history funtions. The only purpose of these variables was for use in downstream checks; their calculation now is part of the relevant checking functions:
-    + make_lic_history() >> drops ...
-    + check_identify_R3() will no longer work in old workflows (but will produce a warning rather than error to allow code to run)
-    + identify_lapse() (same as check_identify_R3)
-- salic no longer includes functionality to setup new projects with template code. Corresponding functions (and template code) have been moved to saproj:
-    + new_dashboard()
-    + update_dashboard()
-
-#### B. Changes that Don't Impact Function behavior
-
-- sample data has been changed to more directly tie into the needs of national/regional dashboards
-- examples have been updated for most functions
-
-### Improvements
-
-- Decreased R package dependencies:
-    + removed saproj dependency
-    + changed lubridate to suggested (recode_month() uses lubridate)
-    + tidyr (will see...might want this for the dashboard formatting step)
-- Brought code into compliance with R CMD check
-- Added test conditions for functions to build history and calculate metrics. This helps ensure that the functions return the expected results.
-
+- Southwick script templates have been removed. These will most likely be included in a future version of the saproj package.
 
 ## Version 1.x
 
-The 1.0 release corresponds to the stable version that was shared internally among Southwick Associates in 2018. Subsequent 1.x versions included only minor changes, mostly with regard to template code for settingup new dashboard projects.
+The 1.0 release corresponds to the stable version that was shared internally among Southwick Associates in 2018. Subsequent 1.x versions included only minor changes, mostly with regard to template code for setting up new dashboard projects.

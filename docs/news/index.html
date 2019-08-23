@@ -107,69 +107,31 @@
     <div id="version-2-0-2019-08-xx" class="section level2">
 <h2 class="hasAnchor">
 <a href="#version-2-0-2019-08-xx" class="anchor"></a>Version 2.0 (2019-08-xx)</h2>
-<p>This release corresponded to making salic easily available for state agencies and other partners. It included many added functions and a number of improvements to the codebase.</p>
-<div id="added-functionality" class="section level3">
+<p>This release corresponds to sharing salic with state agencies and other partners. It includes a number of new functions and major changes to the codebase.</p>
+<div id="additions" class="section level3">
 <h3 class="hasAnchor">
-<a href="#added-functionality" class="anchor"></a>Added Functionality</h3>
+<a href="#additions" class="anchor"></a>Additions</h3>
 <ul>
-<li>New functions:
-<ul>
-<li>join_firt_month() to maek it easier to produce mid-year results</li>
-<li>dashboard functions (est_part, etc.)</li>
-<li>others…</li>
+<li>Dashboard summary functions</li>
+<li>Functions to check formatting rules of standardized data (cust, lic, sale)</li>
+<li>Tests for all license-history &amp; dashboard summary functions</li>
+<li>An introduction vignette</li>
 </ul>
-</li>
+</div>
+<div id="minor-changes" class="section level3">
+<h3 class="hasAnchor">
+<a href="#minor-changes" class="anchor"></a>Minor Changes</h3>
+<ul>
+<li>Sample data has been changed to more directly tie into the needs of national/regional dashboards</li>
+<li>Examples have been re-written for most functions</li>
 </ul>
 </div>
 <div id="breaking-changes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#breaking-changes" class="anchor"></a>Breaking Changes</h3>
-<p>Functions are (almost) completely backward compatible with previous 1.x versions. The exceptions occur with how some checking works in building license history (as a result of reducing output columns):</p>
 <ul>
-<li>check_identify_R3() should now be called as part of identify_R3(summary = TRUE)</li>
-<li>check_identify_lapse()</li>
-</ul>
-<div id="a--changes-that-do-impact-function-behavior" class="section level4">
-<h4 class="hasAnchor">
-<a href="#a--changes-that-do-impact-function-behavior" class="anchor"></a>A. Changes that Do Impact Function behavior</h4>
-<ul>
-<li>(maybe) certain variables have been dropped from the output of license history funtions. The only purpose of these variables was for use in downstream checks; their calculation now is part of the relevant checking functions:
-<ul>
-<li>make_lic_history() &gt;&gt; drops …</li>
-<li>check_identify_R3() will no longer work in old workflows (but will produce a warning rather than error to allow code to run)</li>
-<li>identify_lapse() (same as check_identify_R3)</li>
-</ul>
-</li>
-<li>salic no longer includes functionality to setup new projects with template code. Corresponding functions (and template code) have been moved to saproj:
-<ul>
-<li>new_dashboard()</li>
-<li>update_dashboard()</li>
-</ul>
-</li>
-</ul>
-</div>
-<div id="b--changes-that-dont-impact-function-behavior" class="section level4">
-<h4 class="hasAnchor">
-<a href="#b--changes-that-dont-impact-function-behavior" class="anchor"></a>B. Changes that Don’t Impact Function behavior</h4>
-<ul>
-<li>sample data has been changed to more directly tie into the needs of national/regional dashboards</li>
-<li>examples have been updated for most functions</li>
-</ul>
-</div>
-</div>
-<div id="improvements" class="section level3">
-<h3 class="hasAnchor">
-<a href="#improvements" class="anchor"></a>Improvements</h3>
-<ul>
-<li>Decreased R package dependencies:
-<ul>
-<li>removed saproj dependency</li>
-<li>changed lubridate to suggested (recode_month() uses lubridate)</li>
-<li>tidyr (will see…might want this for the dashboard formatting step)</li>
-</ul>
-</li>
-<li>Brought code into compliance with R CMD check</li>
-<li>Added test conditions for functions to build history and calculate metrics. This helps ensure that the functions return the expected results.</li>
+<li><p>The functions for building license history have been completely re-written to be somewhat simpler, and much more performant. Code based on previous versions are no longer compatible. These functions have also been renamed, so accidental use of old code should produce informative errors quickly.</p></li>
+<li><p>Southwick script templates have been removed. These will most likely be included in a future version of the saproj package.</p></li>
 </ul>
 </div>
 </div>

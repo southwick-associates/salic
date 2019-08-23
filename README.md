@@ -2,16 +2,14 @@
 
 This package includes a set of functions for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
 
-The package website: https://southwick-associates.github.io/salic/
-
 ## Installation
 
 First ensure dependencies are installed: 
 
-- [R](https://www.r-project.org/) >= version 3.5.0
-- Two R packages: `install.packages("dplyr", "data.table")`
+- R >= 3.5.0: https://www.r-project.org/
+- Two R packages: `install.packages(c("dplyr", "data.table"))`
 
-Package salic can be installed directly from source using the devtools package:  `devtools::install_github("southwick-associates/salic")`. Alternatively, you can use one of the included binary installers:
+Salic can be installed from source using devtools: `devtools::install_github("southwick-associates/salic")`. Alternatively, you can use one of the included binary installers:
 
 - Windows: `install.packages("bla bla")`
 - Mac: `install.packages("bla bla")`

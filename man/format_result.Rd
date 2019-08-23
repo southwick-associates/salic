@@ -31,6 +31,7 @@ data(metrics)
 
 # format a table
 metrics$participants$res
+
 x <- format_result(metrics$participants$res, "full-year", "all_sports")
 x
 

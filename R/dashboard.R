@@ -81,8 +81,11 @@ check_threshold <- function(
 #' est_part(history)
 #' 
 #' # by segment
-#' est_part(history, "agecat") # produces a warning
-#' est_part(history, "agecat", test_threshold = 25)
+#' # produces a warning
+#' est_part(history, "agecat") 
+#' 
+#' # suppress warning
+#' x <- est_part(history, "agecat", test_threshold = 25)
 #' 
 #' # new recruits
 #' history_new <- filter(history, !is.na(R3), R3 == "Recruit")
@@ -151,7 +154,7 @@ est_recruit <- function(
 #' 
 #' # apply across all segments
 #' segs <- c("tot", "res", "sex", "agecat")
-#' churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
+#' sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
 est_churn <- function(
     history, segment = "tot", test_threshold = 30, show_test_stat = FALSE,
     suppress_warning = FALSE, outvar = "churn"
@@ -320,6 +323,7 @@ scaleup_recruit <- function(
 #' 
 #' # format a table
 #' metrics$participants$res
+#' 
 #' x <- format_result(metrics$participants$res, "full-year", "all_sports")
 #' x
 #' 

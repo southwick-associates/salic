@@ -53,8 +53,11 @@ history <- history \%>\%
 est_part(history)
 
 # by segment
-est_part(history, "agecat") # produces a warning
-est_part(history, "agecat", test_threshold = 25)
+# produces a warning
+est_part(history, "agecat") 
+
+# suppress warning
+x <- est_part(history, "agecat", test_threshold = 25)
 
 # new recruits
 history_new <- filter(history, !is.na(R3), R3 == "Recruit")

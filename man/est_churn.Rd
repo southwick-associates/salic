@@ -43,7 +43,7 @@ est_churn(history)
 
 # apply across all segments
 segs <- c("tot", "res", "sex", "agecat")
-churn <- sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
+sapply(segs, function(x) est_churn(history, x), simplify = FALSE)
 }
 \seealso{
 Salic Function Reference: \code{\link{salic}}

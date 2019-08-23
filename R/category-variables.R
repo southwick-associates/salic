@@ -158,6 +158,7 @@ df_factor_var <- function(df, var, levels, labels, suppress_check = TRUE, ...) {
     if (!suppress_check) {
         count(df, new = .data[[var]], old = var_old) %>% 
             print(n = Inf)
+        cat("\n")
     }
     select(df, -var_old)
 }
