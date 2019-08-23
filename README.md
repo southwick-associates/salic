@@ -4,11 +4,12 @@ This R package includes a set of functions for summarizing agency data, particul
 
 ## Installation
 
-You'll need a version of [R Software](https://www.r-project.org/) installed (version 3.5.0 or greater). Package salic can be installed directly from source, or by using one of the included binary installers:
+Package salic has a few dependencies: You'll need a version of [R Software](https://www.r-project.org/) installed (version 3.5.0 or greater), and two R packages (dplyr, data.table): `install.packages("dplyr", "data.table")`.
+
+Package salic can be installed directly from source (e.g., using the devtools package: `devtools::install_github("https://github.com/southwick-associates/salic")`). Alternatively you can one of the included binary installers:
 
 - Windows: `install.packages("bla bla")`
 - Mac: `install.packages("bla bla")`
-- alternatively install with devtools: 
 
 ## Usage
 
