@@ -2,6 +2,8 @@
 
 This package includes a set of functions for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
 
+The package website: https://southwick-associates.github.io/salic/
+
 ## Installation
 
 First ensure dependencies are installed: 
@@ -16,7 +18,7 @@ Package salic can be installed directly from source using the devtools package: 
 
 ## Usage
 
-A guide is included in the [Introduction to salic](/vignettes/README.md) vignette (also available by running `vignette("salic")` from the R console).
+A guide is included in the [Introduction to salic](https://southwick-associates.github.io/salic/articles/salic.html) vignette (also available by running `vignette("salic")` from the R console).
 
 ## News
 

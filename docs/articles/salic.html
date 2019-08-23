@@ -86,7 +86,7 @@
 <p>Salic provides a set of functions to progress from state license data to dashboard summaries. It also includes package dplyr on installation (see <a href="https://dplyr.tidyverse.org/">the dplyr intro</a>). You’ll want to load both packages when using salic:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
-<p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed by running <code><a href="../reference/salic.html">?salic</a></code> from the R console; it’s organization mirrors this vignette.</p>
+<p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
 </div>
 <div id="standardized-license-data" class="section level2">
 <h2 class="hasAnchor">
@@ -96,7 +96,7 @@
 <div class="figure">
 <img src="relations.png">
 </div>
-<p><em>Note that residency (res) is a customer-level variable, but one that could conceivably change from year-to-year; hence the recommended sale-level specification.</em></p>
+<p><br><em>Note that although residency (res) is a customer-level variable, it could conceivably change from year-to-year; hence the recommended sale-level specification.</em></p>
 <div id="primary-keys" class="section level3">
 <h3 class="hasAnchor">
 <a href="#primary-keys" class="anchor"></a>Primary Keys</h3>
@@ -115,7 +115,7 @@
 <div id="checking-formatting-rules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#checking-formatting-rules" class="anchor"></a>Checking Formatting Rules</h3>
-<p>Salic helps you follow its formatting rules with an included <code><a href="../reference/data_check.html">data_check()</a></code> function. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
+<p>Salic helps you follow its formatting rules with <code><a href="../reference/data_check.html">data_check()</a></code>. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># prints no warnings</span>
 <span class="kw"><a href="../reference/data_check.html">data_check</a></span>(cust, lic, sale) 
 
@@ -237,7 +237,7 @@ cust_3yr &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, durat
 <div id="license-history" class="section level2">
 <h2 class="hasAnchor">
 <a href="#license-history" class="anchor"></a>License History</h2>
-<p>The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling 2 functions in sequence (<code><a href="../reference/rank_sale.html">rank_sale()</a></code> &amp; <code><a href="../reference/make_history.html">make_history()</a></code>).</p>
+<p>The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling <code><a href="../reference/rank_sale.html">rank_sale()</a></code> &amp; <code><a href="../reference/make_history.html">make_history()</a></code> in sequence.</p>
 <div id="ranking-sales" class="section level3">
 <h3 class="hasAnchor">
 <a href="#ranking-sales" class="anchor"></a>Ranking Sales</h3>
@@ -294,7 +294,7 @@ sale_ranked &lt;-<span class="st"> </span><span class="kw">inner_join</span>(sal
 <span class="co">#&gt; 1  2016  9161</span>
 <span class="co">#&gt; 2  2017  9389</span>
 <span class="co">#&gt; 3  2018  9206</span></code></pre></div>
-<p>Certain variables (e.g., sale$res) need to be included in the <code>carry_vars</code> argument of <code><a href="../reference/make_history.html">make_history()</a></code> to ensure inclusion in carried-over license years.</p>
+<p>Certain variables (e.g., sale$res) need to be included in the “carry_vars” argument of <code><a href="../reference/make_history.html">make_history()</a></code> to ensure inclusion in carried-over license years.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># no residency information is included in the output by default</span>
 history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/make_history.html">make_history</a></span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>)
 <span class="kw">names</span>(history)
@@ -339,17 +339,7 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <span class="co">#&gt;    year lapse     n   pct</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;</span>
 <span class="co">#&gt; 1  2016     0  3415  81.3</span>
-<span class="co">#&gt; 2  2016     1   787  18.7</span>
-
-<span class="co"># calculating churn directly</span>
-<span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">group_by</span>(year) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">summarize</span>(<span class="dt">churn_rate =</span> <span class="kw">mean</span>(lapse) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">year =</span> year <span class="op">+</span><span class="st"> </span><span class="dv">1</span>)
-<span class="co">#&gt; # A tibble: 1 x 2</span>
-<span class="co">#&gt;    year churn_rate</span>
-<span class="co">#&gt;   &lt;dbl&gt;      &lt;dbl&gt;</span>
-<span class="co">#&gt; 1  2017       18.7</span></code></pre></div>
+<span class="co">#&gt; 2  2016     1   787  18.7</span></code></pre></div>
 </div>
 <div id="r3" class="section level3">
 <h3 class="hasAnchor">
@@ -401,7 +391,7 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <div id="preparation" class="section level3">
 <h3 class="hasAnchor">
 <a href="#preparation" class="anchor"></a>Preparation</h3>
-<p>Some initial preparation is needed to produce the summaries.</p>
+<p>Some initial preparation is needed to produce the summaries. Functions <code><a href="../reference/label_categories.html">label_categories()</a></code> &amp; <code><a href="../reference/recode_agecat.html">recode_agecat()</a></code> are included for this purpose.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(history)
 
 history &lt;-<span class="st"> </span>history <span class="op">%&gt;%</span>
@@ -487,38 +477,34 @@ part &lt;-<span class="st"> </span><span class="kw">sapply</span>(
     <span class="dt">simplify =</span> <span class="ot">FALSE</span>
 )
 
-<span class="co"># view the first 3 rows of each segment</span>
+<span class="co"># view the first 2 rows of each segment</span>
 <span class="cf">for</span> (i <span class="cf">in</span> segments) {
-    <span class="kw">head</span>(part[[i]], <span class="dv">3</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>()
+    <span class="kw">head</span>(part[[i]], <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>()
     <span class="kw">cat</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>) <span class="co"># include a blank row between printed tables</span>
 }
-<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
 <span class="co">#&gt;   tot    year participants</span>
 <span class="co">#&gt;   &lt;chr&gt; &lt;int&gt;        &lt;int&gt;</span>
 <span class="co">#&gt; 1 All    2008         5834</span>
 <span class="co">#&gt; 2 All    2009         6775</span>
-<span class="co">#&gt; 3 All    2010         6820</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
 <span class="co">#&gt;   res       year participants</span>
 <span class="co">#&gt;   &lt;fct&gt;    &lt;int&gt;        &lt;int&gt;</span>
 <span class="co">#&gt; 1 Resident  2008         4768</span>
 <span class="co">#&gt; 2 Resident  2009         5264</span>
-<span class="co">#&gt; 3 Resident  2010         5223</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
 <span class="co">#&gt;   sex    year participants</span>
 <span class="co">#&gt;   &lt;fct&gt; &lt;int&gt;        &lt;int&gt;</span>
 <span class="co">#&gt; 1 Male   2008         4647</span>
 <span class="co">#&gt; 2 Male   2009         5391</span>
-<span class="co">#&gt; 3 Male   2010         5370</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
 <span class="co">#&gt;   agecat  year participants</span>
 <span class="co">#&gt;   &lt;fct&gt;  &lt;int&gt;        &lt;int&gt;</span>
 <span class="co">#&gt; 1 18-24   2008          709</span>
-<span class="co">#&gt; 2 18-24   2009          827</span>
-<span class="co">#&gt; 3 18-24   2010          835</span></code></pre></div>
+<span class="co">#&gt; 2 18-24   2009          827</span></code></pre></div>
 </div>
 <div id="formatting-the-summary-output" class="section level3">
 <h3 class="hasAnchor">

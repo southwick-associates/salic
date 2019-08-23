@@ -32,7 +32,7 @@ library(dplyr)
 ```
 
 This vignette walks through salic functionality using provided sample data. A function reference
-can be accessed by running `?salic` from the R console; it's organization mirrors this vignette.
+can be accessed from `?salic`; it's organization mirrors this vignette.
 
 ## Standardized License Data
 
@@ -62,7 +62,7 @@ length(unique(lic$lic_id)) == nrow(lic)
 
 ### Checking Formatting Rules
 
-Salic helps you follow its formatting rules with an included `data_check()` function. The function call is silent if all checks pass; warnings will be printed for every failed check.
+Salic helps you follow its formatting rules with `data_check()`. The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
 # prints no warnings
@@ -142,7 +142,7 @@ count(cust_3yr, year)
 
 ## License History
 
-The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling 2 functions in sequence (`rank_sale()` & `make_history()`).
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling `rank_sale()` & `make_history()` in sequence.
 
 ### Ranking Sales
 
@@ -181,7 +181,7 @@ make_history(sale_ranked, 2008:2018) %>%
     count(year)
 ```
 
-Certain variables (e.g., sale$res) need to be included in the `carry_vars` argument of `make_history()` to ensure inclusion in carried-over license years. 
+Certain variables (e.g., sale$res) need to be included in the "carry_vars" argument of `make_history()` to ensure inclusion in carried-over license years. 
 
 ```{r}
 # no residency information is included in the output by default
@@ -213,12 +213,6 @@ hunt <- filter(lic, type %in% c("hunt", "combo")) %>%
 filter(hunt, year == 2016) %>%
     count(year, lapse) %>%
     mutate(pct = n / sum(n) * 100)
-
-# calculating churn directly
-filter(hunt, year == 2016) %>%
-    group_by(year) %>%
-    summarize(churn_rate = mean(lapse) * 100) %>%
-    mutate(year = year + 1)
 ```
 
 ### R3
@@ -252,7 +246,7 @@ The license history table provides a flexible data structure for summarizing cus
 
 ### Preparation
 
-Some initial preparation is needed to produce the summaries.
+Some initial preparation is needed to produce the summaries. Functions `label_categories()` & `recode_agecat()` are included for this purpose.
 
 ```{r}
 data(history)
@@ -311,9 +305,9 @@ part <- sapply(
     simplify = FALSE
 )
 
-# view the first 3 rows of each segment
+# view the first 2 rows of each segment
 for (i in segments) {
-    head(part[[i]], 3) %>% print()
+    head(part[[i]], 2) %>% print()
     cat("\n") # include a blank row between printed tables
 }
 ```
