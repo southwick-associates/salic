@@ -42,7 +42,8 @@ Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and 
 
 ![](relations.png)
 
-*Note that residency (res) is a customer-level variable, but one that could conceivably change from year-to-year; hence the recommended sale-level specification.*
+<br>
+*Note that although residency (res) is a customer-level variable, it could conceivably change from year-to-year; hence the recommended sale-level specification.*
 
 ### Primary Keys
 
