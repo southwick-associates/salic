@@ -38,9 +38,11 @@ can be accessed by running `?salic` from the R console; it's organization mirror
 
 To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light (9 variables total).
 
-Salic specifies each table's formatting expectations (see `cust`, `sale`, and `lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
+Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
 ![](relations.png)
+
+*Note that residency (res) is a customer-level variable, but one that could conceivably change from year-to-year; hence the recommended sale-level specification.*
 
 ### Primary Keys
 
@@ -59,7 +61,7 @@ length(unique(lic$lic_id)) == nrow(lic)
 
 ### Checking Formatting Rules
 
-Salic helps you follow its formatting rules with an included `data_check` function. The function call is silent if all checks pass; warnings will be printed for every failed check.
+Salic helps you follow its formatting rules with an included `data_check()` function. The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
 # prints no warnings
@@ -139,11 +141,11 @@ count(cust_3yr, year)
 
 ## License History
 
-The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling 2 functions in sequence (`rank_sale` & `make_history`).
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling 2 functions in sequence (`rank_sale()` & `make_history()`).
 
 ### Ranking Sales
 
-The `rank_sale` function is used as a preliminary step to reduce the sale table to 1 row per customer-year. It picks the row with the maximum duration value & optionally includes the earliest month value (for mid-year dashboards).
+The `rank_sale()` function is used as a preliminary step to reduce the sale table to 1 row per customer-year. It picks the row with the maximum duration value & optionally includes the earliest month value (for mid-year dashboards).
 
 ```{r}
 # all hunting (non-combo) sales in 2016
@@ -161,7 +163,7 @@ rank_sale(sale_2016) %>%
 
 ### Making License History
 
-The `make_history` function creates a larger table with 1 row for every year a license is held (i.e., both purchase years and "carried-over" license years are included). 
+The `make_history()` function creates a larger table with 1 row for every year a license is held (i.e., both purchase years and "carried-over" license years are included). 
 
 ```{r}
 # rank all sales
@@ -178,9 +180,26 @@ make_history(sale_ranked, 2008:2018) %>%
     count(year)
 ```
 
+Certain variables (e.g., sale$res) need to be included in the `carry_vars` argument of `make_history()` to ensure inclusion in carried-over license years. 
+
+```{r}
+# no residency information is included in the output by default
+history <- make_history(sale_ranked, 2008:2018)
+names(history)
+
+# include residency
+history <- make_history(sale_ranked, 2008:2018, carry_vars = "res")
+filter(history, year == 2018) %>% count(res)
+
+# customer-specific variables can be joined after make_history is run
+left_join(history, cust, by = "cust_id") %>%
+    filter(year == 2018) %>%
+    count(sex)
+```
+
 ### Lapse
 
-A license history table makes it easier to look ahead (e.g., who lapsed?) or behind (e.g., who is a recruit?) at the customer level. The `make_history` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
+A license history table makes it easier to look ahead (e.g., who lapsed?) or behind (e.g., who is a recruit?) at the customer level. The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
 
 ```{r}
 # build hunting privilege history
@@ -203,13 +222,13 @@ filter(hunt, year == 2016) %>%
 
 ### R3
 
-The R3 measure is used to group license holders based on how recently they bought licenses. For the national/regional dashboards, the recruited group is of particular interest.
+The R3 measure is used to group license holders based on how recently they bought licenses:
 
-- Retained: (held a license last year)
-    + R3 = 1 (carried over a license from last year, i.e., didn't purchase this year)
-    + R3 = 2 (didn't carry over a license)
-- Reactivated: R3 = 3 (no license held last year, but did more recently than 5 years ago)
-- Recruited: R3 = 4 (no license held within previous 5 years)
+- Retained: held a license last year
+    + 1: carried over a license
+    + 2: no carry-over
+- 3: Reactivated: no license last year, but did hold one within past 5 years
+- 4: Recruited: no license held within previous 5 years
 
 ```{r}
 # hunters in 2016, what % are in each R3 group?
@@ -249,7 +268,7 @@ filter(history, cust_id == 6120)
 
 ### Summarize Participants
 
-The `est_part` function produces a simple count of participants by year, either overall or broken out by a segment.
+The `est_part()` function produces a simple count of participants by year, either overall or broken out by a segment.
 
 ```{r}
 # overall
@@ -261,7 +280,7 @@ part_sex <- est_part(history, "sex")
 filter(part_sex, year > 2015)
 ```
 
-Because segments usually contain missing values, the `scaleup_part` function is provided to peg segment percentages to total values.
+Because segments usually contain missing values, the `scaleup_part()` function is provided to peg segment percentages to total values.
 
 ```{r}
 scaleup_part(part_sex, part) %>%
@@ -270,7 +289,7 @@ scaleup_part(part_sex, part) %>%
 
 ### Summarize Churn
 
-A similar function (`est_churn`) is included for summarizing year-to-year turnover.
+A similar function, `est_churn()`, is included for summarizing year-to-year turnover.
 
 ```{r}
 filter(history, year > 2015) %>%
@@ -300,7 +319,7 @@ for (i in segments) {
 
 ### Formatting the Summary Output
 
-The apply-based approach produces lists, but we need a single table of summary data for input into the dashboard. The `format_result` function is included to facilitate this.
+The apply-based approach produces lists, but we need a single table of summary data for input into the dashboard. The `format_result()` function is included to facilitate this.
 
 ```{r}
 # pull overall participants from sample data

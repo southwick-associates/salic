@@ -2,12 +2,10 @@
 ^\.Rproj\.user$
 ^\.Rprofile$
 ^snapshot-library\.csv$
-^Developing\.md$
 ^README\.md$
 ^NEWS\.md$
-^TODO\.md$
 ^R/README\.md$
 ^vignettes/README\.md$
 ^docs$
-^tmp$
+^development$
 ^\.gitignore$

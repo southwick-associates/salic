@@ -7,5 +7,5 @@ snapshot-library.csv
 salic.Rproj
 TODO.md
 Developing.md
-/tmp/*
+/development/*
 inst/doc
