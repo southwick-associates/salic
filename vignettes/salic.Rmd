@@ -169,13 +169,13 @@ The `make_history()` function creates a larger table with 1 row for every year a
 sale_ranked <- inner_join(sale, lic, by = "lic_id") %>%
     rank_sale()
 
-# count customers who purchased a license in 2016
-filter(sale_ranked, year > 2015) %>%
+# count customers who purchased licenses
+filter(sale_ranked, year %in% 2008:2010) %>%
     count(year)
 
-# count customers who held a license in 2016
+# count customers who held licenses
 make_history(sale_ranked, 2008:2018) %>%
-    filter(year > 2015) %>%
+    filter(year %in% 2008:2010) %>%
     count(year)
 ```
 
@@ -189,11 +189,6 @@ names(history)
 # include residency
 history <- make_history(sale_ranked, 2008:2018, carry_vars = "res")
 filter(history, year == 2018) %>% count(res)
-
-# customer-specific variables can be joined after make_history is run
-left_join(history, cust, by = "cust_id") %>%
-    filter(year == 2018) %>%
-    count(sex)
 ```
 
 ### Lapse
@@ -217,17 +212,14 @@ filter(hunt, year == 2016) %>%
 
 The R3 measure is used to group license holders based on how recently they bought licenses:
 
-- Retained: held a license last year
-    + 1: carried over a license
-    + 2: no carry-over
-- 3: Reactivated: no license last year, but did hold one within past 5 years
-- 4: Recruited: no license held within previous 5 years
+- Retained (1,2): held a license last year, (1: carried over a license), (2: no carry over)
+- Reactivated (3): no license last year, but did hold one within past 5 years
+- Recruited (4): no license held within previous 5 years
 
 ```{r}
 # hunters in 2016, what % are in each R3 group?
 filter(hunt, year == 2016) %>%
-    mutate(R3_label = factor_R3(R3)) %>%
-    count(R3, R3_label) %>%
+    count(R3) %>%
     mutate(pct = n / sum(n) * 100)
 ```
 
@@ -282,7 +274,7 @@ scaleup_part(part_sex, part) %>%
 
 ### Summarize Churn
 
-A similar function, `est_churn()`, is included for summarizing year-to-year turnover.
+The `est_churn()`, function summarizes year-to-year turnover.
 
 ```{r}
 filter(history, year > 2015) %>%
@@ -291,7 +283,7 @@ filter(history, year > 2015) %>%
 
 ### Automating with apply
 
-These summarization functions are designed with R's apply looping in mind:
+All of the dashboard summary functions are designed with R's apply looping functionality in mind:
 
 ```{r}
 segments <- c("tot", "res", "sex", "agecat")
@@ -303,10 +295,10 @@ part <- sapply(
     simplify = FALSE
 )
 
-# view the first 2 rows of each segment
+# print the first 2 rows of each segment table
 for (i in segments) {
     head(part[[i]], 2) %>% print()
-    cat("\n") # include a blank row between printed tables
+    cat("\n")
 }
 ```
 
