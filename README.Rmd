@@ -1,14 +1,23 @@
-
+---
+output: github_document
+---
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-salic <a href='https://www.southwickassociates.com'><img src='man/figures/logo.jpg' align="right" height="70" /></a>
-====================================================================================================================
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# salic <a href='https://www.southwickassociates.com'><img src='man/figures/logo.jpg' align="right" height="70" /></a>
 
 The salic package includes a set of functions prepared by Southwick Associates for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
 
-Installation
-------------
+## Installation
 
-Ensure a verson of R (&gt;= 3.5.0) is installed: <https://www.r-project.org/>
+Ensure a verson of R (>= 3.5.0) is installed: https://www.r-project.org/
 
 ``` r
 # Install dependencies
@@ -23,18 +32,17 @@ install.packages("devtools")
 devtools::install_github("southwick-associates/salic")
 ```
 
-Usage
------
+## Usage
 
 See [Introduction to salic](https://southwick-associates.github.io/salic/articles/salic.html) (`vignette("salic")` from the R console).
 
-A template workflow for national/regional dashboards is available at <https://github.com/southwick-associates/dashboard-template>
+A template workflow for national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
 
 ### Example: fishing participants
 
 Using `rank_sale()`, `make_history()`, `est_part()` from `?salic`.
 
-``` r
+```{r, message=FALSE}
 library(dplyr)
 library(salic)
 data(cust, lic, sale)
@@ -49,18 +57,4 @@ history <- lic %>%
 recode_agecat(history) %>%
     filter(!agecat %in% c("0-17", "65+")) %>%
     est_part()
-#> # A tibble: 11 x 3
-#>    tot    year participants
-#>    <chr> <int>        <int>
-#>  1 All    2008         5449
-#>  2 All    2009         6352
-#>  3 All    2010         6403
-#>  4 All    2011         6297
-#>  5 All    2012         6514
-#>  6 All    2013         6348
-#>  7 All    2014         6794
-#>  8 All    2015         6718
-#>  9 All    2016         6675
-#> 10 All    2017         6645
-#> 11 All    2018         6318
 ```

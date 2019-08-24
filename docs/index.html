@@ -19,7 +19,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -69,11 +69,17 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-    <div id="salic-an-r-package-to-prepare-agency-dashboard-data" class="section level1">
+  <div class="col-md-9 contents">
+    
+
+    
+    
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+<div id="salic" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#salic-an-r-package-to-prepare-agency-dashboard-data" class="anchor"></a>salic: An R package to prepare agency dashboard data</h1></div>
-<p>This package includes a set of functions for summarizing agency data, particularly for use in AFWA’s national/regional dashboard effort. It’s intended to simplify/standardize this process by providing a set of easy-to-use functions.</p>
+<a href="#salic" class="anchor"></a>salic <a href="https://www.southwickassociates.com"><img src="reference/figures/logo.jpg" align="right" height="70"></a>
+</h1></div>
+<p>The salic package includes a set of functions prepared by Southwick Associates for summarizing agency data, particularly for use in AFWA’s national/regional dashboard effort. It’s intended to simplify/standardize this process by providing a set of easy-to-use functions.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -92,14 +98,11 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <div id="usage" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h2>
-<p>See <a href="https://southwick-associates.github.io/salic/articles/salic.html">Introduction to salic</a> - <code><a href="articles/salic.html">vignette("salic")</a></code> from R</p>
-<p>A template workflow for national/regional dashboards is available here:</p>
-<ul>
-<li><a href="https://github.com/southwick-associates/dashboard-template" class="uri">https://github.com/southwick-associates/dashboard-template</a></li>
-</ul>
-<div id="example-fishing-participants" class="section level4">
-<h4 class="hasAnchor">
-<a href="#example-fishing-participants" class="anchor"></a>Example: fishing participants</h4>
+<p>See <a href="https://southwick-associates.github.io/salic/articles/salic.html">Introduction to salic</a> (<code><a href="articles/salic.html">vignette("salic")</a></code> from the R console).</p>
+<p>A template workflow for national/regional dashboards is available at <a href="https://github.com/southwick-associates/dashboard-template" class="uri">https://github.com/southwick-associates/dashboard-template</a></p>
+<div id="example-fishing-participants" class="section level3">
+<h3 class="hasAnchor">
+<a href="#example-fishing-participants" class="anchor"></a>Example: fishing participants</h3>
 <p>Using <code><a href="reference/rank_sale.html">rank_sale()</a></code>, <code><a href="reference/make_history.html">make_history()</a></code>, <code><a href="reference/est_part.html">est_part()</a></code> from <code><a href="reference/salic.html">?salic</a></code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
 <span class="kw">library</span>(salic)
@@ -114,13 +117,27 @@ history &lt;-<span class="st"> </span>lic <span class="op">%&gt;%</span><span cl
     
 <span class="kw"><a href="reference/recode_agecat.html">recode_agecat</a></span>(history) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span>agecat <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"0-17"</span>, <span class="st">"65+"</span>)) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw"><a href="reference/est_part.html">est_part</a></span>()</code></pre></div>
+<span class="st">    </span><span class="kw"><a href="reference/est_part.html">est_part</a></span>()
+<span class="co">#&gt; # A tibble: 11 x 3</span>
+<span class="co">#&gt;    tot    year participants</span>
+<span class="co">#&gt;    &lt;chr&gt; &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt;  1 All    2008         5449</span>
+<span class="co">#&gt;  2 All    2009         6352</span>
+<span class="co">#&gt;  3 All    2010         6403</span>
+<span class="co">#&gt;  4 All    2011         6297</span>
+<span class="co">#&gt;  5 All    2012         6514</span>
+<span class="co">#&gt;  6 All    2013         6348</span>
+<span class="co">#&gt;  7 All    2014         6794</span>
+<span class="co">#&gt;  8 All    2015         6718</span>
+<span class="co">#&gt;  9 All    2016         6675</span>
+<span class="co">#&gt; 10 All    2017         6645</span>
+<span class="co">#&gt; 11 All    2018         6318</span></code></pre></div>
 </div>
 </div>
 </div>
   </div>
 
-  <div class="col-md-3" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
@@ -145,7 +162,8 @@ history &lt;-<span class="st"> </span>lic <span class="op">%&gt;%</span><span cl
 </ul>
 </div>
 
-  </div>
+      </div>
+
 </div>
 
 

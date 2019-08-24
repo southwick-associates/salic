@@ -6,6 +6,7 @@
 ^NEWS\.md$
 ^LICENSE\.md$
 ^R/README\.md$
+^R/README\.Rmd$
 ^vignettes/README\.md$
 ^docs$
 ^development$
