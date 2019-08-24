@@ -83,7 +83,7 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow relies heavily on dplyr (see <a href="https://dplyr.tidyverse.org/">the dplyr intro</a>). You’ll want to load both packages when using salic:</p>
+<p>Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an intro). You’ll want to load both packages when using salic:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
 <p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
@@ -272,26 +272,26 @@ sale_<span class="dv">2016</span> &lt;-<span class="st"> </span><span class="kw"
 sale_ranked &lt;-<span class="st"> </span><span class="kw">inner_join</span>(sale, lic, <span class="dt">by =</span> <span class="st">"lic_id"</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw"><a href="../reference/rank_sale.html">rank_sale</a></span>()
 
-<span class="co"># count customers who purchased a license in 2016</span>
-<span class="kw">filter</span>(sale_ranked, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
+<span class="co"># count customers who purchased licenses</span>
+<span class="kw">filter</span>(sale_ranked, year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2010</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">count</span>(year)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
 <span class="co">#&gt;    year     n</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
-<span class="co">#&gt; 1  2016  7568</span>
-<span class="co">#&gt; 2  2017  7673</span>
-<span class="co">#&gt; 3  2018  7281</span>
+<span class="co">#&gt; 1  2008  6393</span>
+<span class="co">#&gt; 2  2009  7428</span>
+<span class="co">#&gt; 3  2010  7475</span>
 
-<span class="co"># count customers who held a license in 2016</span>
+<span class="co"># count customers who held licenses</span>
 <span class="kw"><a href="../reference/make_history.html">make_history</a></span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">filter</span>(year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2010</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">count</span>(year)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
 <span class="co">#&gt;    year     n</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
-<span class="co">#&gt; 1  2016  9161</span>
-<span class="co">#&gt; 2  2017  9389</span>
-<span class="co">#&gt; 3  2018  9206</span></code></pre></div>
+<span class="co">#&gt; 1  2008  6393</span>
+<span class="co">#&gt; 2  2009  7591</span>
+<span class="co">#&gt; 3  2010  7775</span></code></pre></div>
 <p>Certain variables (e.g., sale$res) need to be included in the “carry_vars” argument of <code><a href="../reference/make_history.html">make_history()</a></code> to ensure inclusion in carried-over license years.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># no residency information is included in the output by default</span>
 history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/make_history.html">make_history</a></span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>)
@@ -306,18 +306,7 @@ history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mak
 <span class="co">#&gt;     res     n</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
 <span class="co">#&gt; 1     0  2036</span>
-<span class="co">#&gt; 2     1  7170</span>
-
-<span class="co"># customer-specific variables can be joined after make_history is run</span>
-<span class="kw">left_join</span>(history, cust, <span class="dt">by =</span> <span class="st">"cust_id"</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">filter</span>(year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">count</span>(sex)
-<span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;     sex     n</span>
-<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
-<span class="co">#&gt; 1     1  7081</span>
-<span class="co">#&gt; 2     2  1978</span>
-<span class="co">#&gt; 3    NA   147</span></code></pre></div>
+<span class="co">#&gt; 2     1  7170</span></code></pre></div>
 </div>
 <div id="lapse" class="section level3">
 <h3 class="hasAnchor">
@@ -344,27 +333,21 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <a href="#r3" class="anchor"></a>R3</h3>
 <p>The R3 measure is used to group license holders based on how recently they bought licenses:</p>
 <ul>
-<li>Retained: held a license last year
-<ul>
-<li>1: carried over a license</li>
-<li>2: no carry-over</li>
-</ul>
-</li>
-<li>3: Reactivated: no license last year, but did hold one within past 5 years</li>
-<li>4: Recruited: no license held within previous 5 years</li>
+<li>Retained (1,2): held a license last year, (1: carried over a license), (2: no carry over)</li>
+<li>Reactivated (3): no license last year, but did hold one within past 5 years</li>
+<li>Recruited (4): no license held within previous 5 years</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># hunters in 2016, what % are in each R3 group?</span>
 <span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">R3_label =</span> <span class="kw"><a href="../reference/factor_var.html">factor_R3</a></span>(R3)) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">count</span>(R3, R3_label) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(R3) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">pct =</span> n <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(n) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)
-<span class="co">#&gt; # A tibble: 4 x 4</span>
-<span class="co">#&gt;      R3 R3_label       n   pct</span>
-<span class="co">#&gt;   &lt;int&gt; &lt;fct&gt;      &lt;int&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1     1 Carry       1552 36.9 </span>
-<span class="co">#&gt; 2     2 Renew       1737 41.3 </span>
-<span class="co">#&gt; 3     3 Reactivate   324  7.71</span>
-<span class="co">#&gt; 4     4 Recruit      589 14.0</span></code></pre></div>
+<span class="co">#&gt; # A tibble: 4 x 3</span>
+<span class="co">#&gt;      R3     n   pct</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;</span>
+<span class="co">#&gt; 1     1  1552 36.9 </span>
+<span class="co">#&gt; 2     2  1737 41.3 </span>
+<span class="co">#&gt; 3     3   324  7.71</span>
+<span class="co">#&gt; 4     4   589 14.0</span></code></pre></div>
 <p>Note that R3 is set to missing for the first 5 years for a consistent definition of recruitment across time.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">filter</span>(hunt, year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2013</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">count</span>(year, R3)
@@ -453,7 +436,7 @@ part_sex &lt;-<span class="st"> </span><span class="kw"><a href="../reference/es
 <div id="summarize-churn" class="section level3">
 <h3 class="hasAnchor">
 <a href="#summarize-churn" class="anchor"></a>Summarize Churn</h3>
-<p>A similar function, <code><a href="../reference/est_churn.html">est_churn()</a></code>, is included for summarizing year-to-year turnover.</p>
+<p>The <code><a href="../reference/est_churn.html">est_churn()</a></code>, function summarizes year-to-year turnover.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">filter</span>(history, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw"><a href="../reference/est_churn.html">est_churn</a></span>(<span class="st">"tot"</span>)
 <span class="co">#&gt; # A tibble: 2 x 3</span>
@@ -465,7 +448,7 @@ part_sex &lt;-<span class="st"> </span><span class="kw"><a href="../reference/es
 <div id="automating-with-apply" class="section level3">
 <h3 class="hasAnchor">
 <a href="#automating-with-apply" class="anchor"></a>Automating with apply</h3>
-<p>These summarization functions are designed with R’s apply looping in mind:</p>
+<p>All of the dashboard summary functions are designed with R’s apply looping functionality in mind:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">segments &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">"tot"</span>, <span class="st">"res"</span>, <span class="st">"sex"</span>, <span class="st">"agecat"</span>)
 
 <span class="co"># store participant counts in a list of length 4 (1 per segment)</span>
@@ -475,10 +458,10 @@ part &lt;-<span class="st"> </span><span class="kw">sapply</span>(
     <span class="dt">simplify =</span> <span class="ot">FALSE</span>
 )
 
-<span class="co"># view the first 2 rows of each segment</span>
+<span class="co"># print the first 2 rows of each segment table</span>
 <span class="cf">for</span> (i <span class="cf">in</span> segments) {
     <span class="kw">head</span>(part[[i]], <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>()
-    <span class="kw">cat</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>) <span class="co"># include a blank row between printed tables</span>
+    <span class="kw">cat</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)
 }
 <span class="co">#&gt; # A tibble: 2 x 3</span>
 <span class="co">#&gt;   tot    year participants</span>
@@ -567,7 +550,7 @@ part &lt;-<span class="st"> </span>metrics<span class="op">$</span>participants<
 
 
       <footer><div class="copyright">
-  <p>Developed by Dan Kary.</p>
+  <p>Developed by Dan Kary, Southwick Associates.</p>
 </div>
 
 <div class="pkgdown">

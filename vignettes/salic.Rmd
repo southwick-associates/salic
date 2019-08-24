@@ -21,7 +21,7 @@ library(salic)
 
 ## Overview
 
-Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow relies heavily on dplyr  (see [the dplyr intro](https://dplyr.tidyverse.org/)). You'll want to load both packages when using salic:
+Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an intro). You'll want to load both packages when using salic:
 
 ```{r}
 library(salic)

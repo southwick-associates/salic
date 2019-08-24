@@ -2,7 +2,10 @@ Package: salic
 Type: Package
 Title: Prepare Agency Dashboard Data
 Version: 1.4.1
-Authors@R: c(person("Dan", "Kary", , "Rsoftware@SouthwickAssociates.com", role = c("aut", "cre")))
+Authors@R: c(
+    person("Dan", "Kary", , "Rsoftware@SouthwickAssociates.com", role = c("aut", "cre")),
+    person("Southwick Associates", role = c("cph", "fnd"))
+    )
 Description: A set of functions for summarizing agency data for dashboards, 
     developed under the leadership of the Association of Fish and Wildlife Agencies.
 License: MIT + file LICENSE
