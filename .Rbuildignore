@@ -4,6 +4,7 @@
 ^snapshot-library\.csv$
 ^README\.md$
 ^NEWS\.md$
+^LICENSE\.md$
 ^R/README\.md$
 ^vignettes/README\.md$
 ^docs$

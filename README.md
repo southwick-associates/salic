@@ -4,18 +4,44 @@ This package includes a set of functions for summarizing agency data, particular
 
 ## Installation
 
-First ensure dependencies are installed: 
+Ensure a verson of R (>= 3.5.0) is installed: https://www.r-project.org/
 
-- R >= 3.5.0: https://www.r-project.org/
-- Two R packages: `install.packages(c("dplyr", "data.table"))`
+``` r
+# Install dependencies
+install.packages(c("dplyr", "data.table"))
 
-Salic can be installed from source using devtools: `devtools::install_github("southwick-associates/salic")`. Alternatively, you can use one of the included binary installers:
+# Install salic from binary executables
+install.packages("bla bla") # for Windows
+install.packages("bla bla") # for Mac
 
-- Windows: `install.packages("bla bla")`
-- Mac: `install.packages("bla bla")`
+# Alternatively, install salic from source
+install.packages("devtools")
+devtools::install_github("southwick-associates/salic")
+```
 
 ## Usage
 
-A guide is included in the [Introduction to salic](https://southwick-associates.github.io/salic/articles/salic.html) vignette (also available by running `vignette("salic")` from the R console).
+See [Introduction to salic](https://southwick-associates.github.io/salic/articles/salic.html) (`vignette("salic")` from the R console).
 
-A template workflow for producing national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
+A template workflow for national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
+
+### Example: fishing participants
+
+Using `rank_sale()`, `make_history()`, `est_part()` from `?salic`.
+
+``` r
+library(dplyr)
+library(salic)
+data(cust, lic, sale)
+
+history <- lic %>% 
+    filter(type %in% c("fish", "combo")) %>% 
+    inner_join(sale, by = "lic_id") %>% 
+    rank_sale() %>% 
+    make_history(2008:2018, carry_vars = "res") %>% 
+    left_join(cust, by = "cust_id")
+    
+recode_agecat(history) %>%
+    filter(!agecat %in% c("0-17", "65+")) %>%
+    est_part()
+```

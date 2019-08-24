@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">salic</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.4.1</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.0</span>
       </span>
     </div>
 
@@ -77,26 +77,45 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p>First ensure dependencies are installed:</p>
-<ul>
-<li>R &gt;= 3.5.0: <a href="https://www.r-project.org/" class="uri">https://www.r-project.org/</a>
-</li>
-<li>Two R packages: <code>install.packages(c("dplyr", "data.table"))</code>
-</li>
-</ul>
-<p>Salic can be installed from source using devtools: <code><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">devtools::install_github("southwick-associates/salic")</a></code>. Alternatively, you can use one of the included binary installers:</p>
-<ul>
-<li>Windows: <code>install.packages("bla bla")</code>
-</li>
-<li>Mac: <code>install.packages("bla bla")</code>
-</li>
-</ul>
+<p>Ensure a verson of R (&gt;= 3.5.0) is installed: <a href="https://www.r-project.org/" class="uri">https://www.r-project.org/</a></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install dependencies</span>
+<span class="kw">install.packages</span>(<span class="kw">c</span>(<span class="st">"dplyr"</span>, <span class="st">"data.table"</span>))
+
+<span class="co"># Install salic from binary executables</span>
+<span class="kw">install.packages</span>(<span class="st">"bla bla"</span>) <span class="co"># for Windows</span>
+<span class="kw">install.packages</span>(<span class="st">"bla bla"</span>) <span class="co"># for Mac</span>
+
+<span class="co"># Alternatively, install salic from source</span>
+<span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
+devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"southwick-associates/salic"</span>)</code></pre></div>
 </div>
 <div id="usage" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h2>
-<p>A guide is included in the <a href="https://southwick-associates.github.io/salic/articles/salic.html">Introduction to salic</a> vignette (also available by running <code><a href="articles/salic.html">vignette("salic")</a></code> from the R console).</p>
-<p>A template workflow for producing national/regional dashboards is available at <a href="https://github.com/southwick-associates/dashboard-template" class="uri">https://github.com/southwick-associates/dashboard-template</a></p>
+<p>See <a href="https://southwick-associates.github.io/salic/articles/salic.html">Introduction to salic</a> - <code><a href="articles/salic.html">vignette("salic")</a></code> from R</p>
+<p>A template workflow for national/regional dashboards is available here:</p>
+<ul>
+<li><a href="https://github.com/southwick-associates/dashboard-template" class="uri">https://github.com/southwick-associates/dashboard-template</a></li>
+</ul>
+<div id="example-fishing-participants" class="section level4">
+<h4 class="hasAnchor">
+<a href="#example-fishing-participants" class="anchor"></a>Example: fishing participants</h4>
+<p>Using <code><a href="reference/rank_sale.html">rank_sale()</a></code>, <code><a href="reference/make_history.html">make_history()</a></code>, <code><a href="reference/est_part.html">est_part()</a></code> from <code><a href="reference/salic.html">?salic</a></code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(salic)
+<span class="kw">data</span>(cust, lic, sale)
+
+history &lt;-<span class="st"> </span>lic <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(type <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"fish"</span>, <span class="st">"combo"</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">"lic_id"</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw"><a href="reference/rank_sale.html">rank_sale</a></span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw"><a href="reference/make_history.html">make_history</a></span>(<span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>, <span class="dt">carry_vars =</span> <span class="st">"res"</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">left_join</span>(cust, <span class="dt">by =</span> <span class="st">"cust_id"</span>)
+    
+<span class="kw"><a href="reference/recode_agecat.html">recode_agecat</a></span>(history) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span>agecat <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"0-17"</span>, <span class="st">"65+"</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw"><a href="reference/est_part.html">est_part</a></span>()</code></pre></div>
+</div>
 </div>
 </div>
   </div>
@@ -107,16 +126,15 @@
 <ul class="list-unstyled">
 <li>Browse source code at <br><a href="https://github.com/southwick-associates/salic">https://​github.com/​southwick-associates/​salic</a>
 </li>
-<li>Report a bug at <br><a href="NA">NA</a>
+<li>Report a bug at <br><a href="https://github.com/southwick-associates/salic/issues">https://​github.com/​southwick-associates/​salic/​issues</a>
 </li>
 </ul>
 </div>
 <div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
-<li>
-<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
 <div class="developers">
