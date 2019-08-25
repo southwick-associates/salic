@@ -21,7 +21,7 @@ library(salic)
 
 ## Overview
 
-Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). You'll want to load both packages when using salic:
+salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). You'll want to load both packages when using salic:
 
 ```{r}
 library(salic)
@@ -35,7 +35,7 @@ can be accessed from `?salic`; it's organization mirrors this vignette.
 
 To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.
 
-Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
+salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
 <br>
 ![](relations.png)
@@ -60,7 +60,7 @@ length(unique(lic$lic_id)) == nrow(lic)
 
 ### Checking Formatting Rules
 
-Salic helps you follow its formatting rules with `data_check()`. The function call is silent if all checks pass; warnings will be printed for every failed check.
+salic helps you follow its formatting rules with `data_check()`. The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
 # prints no warnings
@@ -75,7 +75,7 @@ data_check(cust_tmp, lic, sale)
 
 ### Categorical Variables
 
-Salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):
+salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):
 
 ```{r}
 count(cust, sex)

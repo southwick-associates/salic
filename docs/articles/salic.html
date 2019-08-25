@@ -83,7 +83,7 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). You’ll want to load both packages when using salic:</p>
+<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). You’ll want to load both packages when using salic:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
 <p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
@@ -92,7 +92,7 @@
 <h2 class="hasAnchor">
 <a href="#standardized-license-data" class="anchor"></a>Standardized License Data</h2>
 <p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.</p>
-<p>Salic specifies each table’s formatting expectations (see <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, and <code><a href="../reference/lic.html">?lic</a></code>). The 3 tables should be related by 2 key columns (cust_id, lic_id):</p>
+<p>salic specifies each table’s formatting expectations (see <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, and <code><a href="../reference/lic.html">?lic</a></code>). The 3 tables should be related by 2 key columns (cust_id, lic_id):</p>
 <p><br><img src="relations.png"></p>
 <p><br><em>Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.</em></p>
 <div id="primary-keys" class="section level3">
@@ -113,7 +113,7 @@
 <div id="checking-formatting-rules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#checking-formatting-rules" class="anchor"></a>Checking Formatting Rules</h3>
-<p>Salic helps you follow its formatting rules with <code><a href="../reference/data_check.html">data_check()</a></code>. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
+<p>salic helps you follow its formatting rules with <code><a href="../reference/data_check.html">data_check()</a></code>. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># prints no warnings</span>
 <span class="kw"><a href="../reference/data_check.html">data_check</a></span>(cust, lic, sale) 
 
@@ -128,7 +128,7 @@ cust_tmp<span class="op">$</span>sex[<span class="dv">1</span>] &lt;-<span class
 <div id="categorical-variables" class="section level3">
 <h3 class="hasAnchor">
 <a href="#categorical-variables" class="anchor"></a>Categorical Variables</h3>
-<p>Salic expects specific numeric codes for categorical variables. For example, “sex” must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):</p>
+<p>salic expects specific numeric codes for categorical variables. For example, “sex” must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(cust, sex)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
 <span class="co">#&gt;     sex     n</span>
