@@ -3,11 +3,12 @@
 ^\.Rprofile$
 ^snapshot-library\.csv$
 ^README\.md$
+^README\.Rmd$
 ^NEWS\.md$
 ^LICENSE\.md$
 ^R/README\.md$
-^R/README\.Rmd$
 ^vignettes/README\.md$
 ^docs$
 ^development$
 ^\.gitignore$
+^_pkgdown\.yml$

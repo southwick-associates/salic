@@ -21,7 +21,7 @@ library(salic)
 
 ## Overview
 
-Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an intro). You'll want to load both packages when using salic:
+Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). You'll want to load both packages when using salic:
 
 ```{r}
 library(salic)
@@ -33,7 +33,7 @@ can be accessed from `?salic`; it's organization mirrors this vignette.
 
 ## Standardized License Data
 
-To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light (9 variables total).
+To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.
 
 Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
 
@@ -41,7 +41,7 @@ Salic specifies each table's formatting expectations (see `?cust`, `?sale`, and 
 ![](relations.png)
 
 <br>
-*Note that although residency (res) is a customer-level variable, it could conceivably change from year-to-year; hence the recommended sale-level specification.*
+*Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.*
 
 ### Primary Keys
 

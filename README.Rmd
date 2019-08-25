@@ -6,18 +6,18 @@ output: github_document
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
+  comment = "#>"
 )
 ```
 
-# salic <a href='https://www.southwickassociates.com'><img src='man/figures/logo.jpg' align="right" height="70" /></a>
+# salic
 
-The salic package includes a set of functions prepared by Southwick Associates for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
+The salic R package lays out a workflow to prepare and summarize agency data. In particular, it aims to simplify the production of national/regional dashboards with a set of functions that work across state agencies.
 
 ## Installation
 
-Ensure a verson of R (>= 3.5.0) is installed: https://www.r-project.org/
+- First, install R: https://www.r-project.org/
+- Then install salic and it's R package dependencies:
 
 ``` r
 # Install dependencies
@@ -38,23 +38,28 @@ See [Introduction to salic](https://southwick-associates.github.io/salic/article
 
 A template workflow for national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
 
-### Example: fishing participants
+### Example: fishing churn rate
 
-Using `rank_sale()`, `make_history()`, `est_part()` from `?salic`.
+Using `rank_sale()`, `make_history()`, `est_part()`, and `format_result()` from `?salic`.
 
 ```{r, message=FALSE}
 library(dplyr)
 library(salic)
+
+# load standardized data
 data(cust, lic, sale)
 
+# build a license history
 history <- lic %>% 
     filter(type %in% c("fish", "combo")) %>% 
     inner_join(sale, by = "lic_id") %>% 
     rank_sale() %>% 
-    make_history(2008:2018, carry_vars = "res") %>% 
+    make_history(yrs = 2008:2018) %>% 
     left_join(cust, by = "cust_id")
-    
+
+# summarize participation for use in a dashboard
 recode_agecat(history) %>%
     filter(!agecat %in% c("0-17", "65+")) %>%
-    est_part()
+    est_churn() %>%
+    format_result(timeframe = "full-year", group = "fish")
 ```

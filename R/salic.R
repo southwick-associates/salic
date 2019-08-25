@@ -2,7 +2,7 @@
 
 #' salic: Prepare Agency Dashboard Data
 #' 
-#' Run vignette("salic") from the R console for an introduction to salic. See
+#' Run vignette("salic") from the R console for an introduction. See
 #' below for a summary of the core functions. 
 #' 
 #' @section Standardized Data:

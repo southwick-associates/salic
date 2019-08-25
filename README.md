@@ -1,14 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-salic <a href='https://www.southwickassociates.com'><img src='man/figures/logo.jpg' align="right" height="70" /></a>
-====================================================================================================================
+salic
+=====
 
-The salic package includes a set of functions prepared by Southwick Associates for summarizing agency data, particularly for use in AFWA's national/regional dashboard effort. It's intended to simplify/standardize this process by providing a set of easy-to-use functions.
+The salic R package lays out a workflow to prepare and summarize agency data. In particular, it aims to simplify the production of national/regional dashboards with a set of functions that work across state agencies.
 
 Installation
 ------------
 
-Ensure a verson of R (&gt;= 3.5.0) is installed: <https://www.r-project.org/>
+-   First, install R: <https://www.r-project.org/>
+-   Then install salic and it's R package dependencies:
 
 ``` r
 # Install dependencies
@@ -30,37 +31,41 @@ See [Introduction to salic](https://southwick-associates.github.io/salic/article
 
 A template workflow for national/regional dashboards is available at <https://github.com/southwick-associates/dashboard-template>
 
-### Example: fishing participants
+### Example: fishing churn rate
 
-Using `rank_sale()`, `make_history()`, `est_part()` from `?salic`.
+Using `rank_sale()`, `make_history()`, `est_part()`, and `format_result()` from `?salic`.
 
 ``` r
 library(dplyr)
 library(salic)
+
+# load standardized data
 data(cust, lic, sale)
 
+# build a license history
 history <- lic %>% 
     filter(type %in% c("fish", "combo")) %>% 
     inner_join(sale, by = "lic_id") %>% 
     rank_sale() %>% 
-    make_history(2008:2018, carry_vars = "res") %>% 
+    make_history(yrs = 2008:2018) %>% 
     left_join(cust, by = "cust_id")
-    
+
+# summarize participation for use in a dashboard
 recode_agecat(history) %>%
     filter(!agecat %in% c("0-17", "65+")) %>%
-    est_part()
-#> # A tibble: 11 x 3
-#>    tot    year participants
-#>    <chr> <int>        <int>
-#>  1 All    2008         5449
-#>  2 All    2009         6352
-#>  3 All    2010         6403
-#>  4 All    2011         6297
-#>  5 All    2012         6514
-#>  6 All    2013         6348
-#>  7 All    2014         6794
-#>  8 All    2015         6718
-#>  9 All    2016         6675
-#> 10 All    2017         6645
-#> 11 All    2018         6318
+    est_churn() %>%
+    format_result(timeframe = "full-year", group = "fish")
+#> # A tibble: 10 x 7
+#>    timeframe group segment  year category metric value
+#>    <chr>     <chr> <chr>   <dbl> <chr>    <chr>  <dbl>
+#>  1 full-year fish  All      2009 All      churn  0.411
+#>  2 full-year fish  All      2010 All      churn  0.442
+#>  3 full-year fish  All      2011 All      churn  0.453
+#>  4 full-year fish  All      2012 All      churn  0.432
+#>  5 full-year fish  All      2013 All      churn  0.440
+#>  6 full-year fish  All      2014 All      churn  0.422
+#>  7 full-year fish  All      2015 All      churn  0.472
+#>  8 full-year fish  All      2016 All      churn  0.493
+#>  9 full-year fish  All      2017 All      churn  0.493
+#> 10 full-year fish  All      2018 All      churn  0.501
 ```

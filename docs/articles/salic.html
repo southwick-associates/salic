@@ -83,7 +83,7 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an intro). You’ll want to load both packages when using salic:</p>
+<p>Salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). You’ll want to load both packages when using salic:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
 <p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
@@ -91,10 +91,10 @@
 <div id="standardized-license-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#standardized-license-data" class="anchor"></a>Standardized License Data</h2>
-<p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light (9 variables total).</p>
+<p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.</p>
 <p>Salic specifies each table’s formatting expectations (see <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, and <code><a href="../reference/lic.html">?lic</a></code>). The 3 tables should be related by 2 key columns (cust_id, lic_id):</p>
 <p><br><img src="relations.png"></p>
-<p><br><em>Note that although residency (res) is a customer-level variable, it could conceivably change from year-to-year; hence the recommended sale-level specification.</em></p>
+<p><br><em>Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.</em></p>
 <div id="primary-keys" class="section level3">
 <h3 class="hasAnchor">
 <a href="#primary-keys" class="anchor"></a>Primary Keys</h3>
@@ -550,7 +550,7 @@ part &lt;-<span class="st"> </span>metrics<span class="op">$</span>participants<
 
 
       <footer><div class="copyright">
-  <p>Developed by Dan Kary, Southwick Associates.</p>
+  <p>Developed by <a href="https://www.southwickassociates.com/our-staff/dan-kary/">Dan Kary</a>, <a href="https://www.southwickassociates.com"><img src="man/figures/logo.jpg" height="30"></a>.</p>
 </div>
 
 <div class="pkgdown">

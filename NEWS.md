@@ -1,5 +1,5 @@
 
-## Version 2.0 (2019-08-xx)
+## Version 2.0 (2019-08-25)
 
 This release corresponds to sharing salic with state agencies and other partners. It includes a number of new functions and major changes to the codebase. 
 
