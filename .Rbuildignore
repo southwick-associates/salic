@@ -12,4 +12,4 @@
 ^development$
 ^\.gitignore$
 ^_pkgdown\.yml$
-^README-development\.md$
+^README-develpment\.md$

@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">salic</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.0.0</span>
       </span>
     </div>
 
@@ -90,12 +90,13 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install dependencies</span>
 <span class="kw">install.packages</span>(<span class="kw">c</span>(<span class="st">"dplyr"</span>, <span class="st">"data.table"</span>))
 
-<span class="co"># Install salic from binary executables</span>
-<span class="co"># TEMP </span><span class="al">NOTE</span><span class="co">: I'll replace these with actual links before sending to partners</span>
-<span class="kw">install.packages</span>(<span class="st">"bla bla"</span>) <span class="co"># for Windows </span>
-<span class="kw">install.packages</span>(<span class="st">"bla bla"</span>) <span class="co"># for Mac</span>
+<span class="co"># Install salic release</span>
+f &lt;-<span class="st"> "https://github.com/southwick-associates/dashboard-template/releases/latest/download/salic_2.0.0"</span>
+<span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".zip"</span>))   <span class="co"># for Windows</span>
+<span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".tgz"</span>))   <span class="co"># for Mac</span>
+<span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">"tar.gz"</span>)) <span class="co"># or from source</span>
 
-<span class="co"># Alternatively, install salic from source</span>
+<span class="co"># Alternatively, install development version</span>
 <span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
 devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"southwick-associates/salic"</span>)</code></pre></div>
 </div>

@@ -15,26 +15,25 @@ Installation
 # Install dependencies
 install.packages(c("dplyr", "data.table"))
 
-# Install salic from binary executables
-# TEMP NOTE: I'll replace these with actual links before sending to partners
-install.packages("bla bla") # for Windows 
-install.packages("bla bla") # for Mac
+# Install salic
+fdir <- "https://github.com/southwick-associates/dashboard-template/releases/latest/download"
 
-# Alternatively, install salic from source
-install.packages("devtools")
-devtools::install_github("southwick-associates/salic")
+# use 1 of these 3 methods (depending on your system)
+install.packages(file.path(fdir, "salic_2.0.0.zip"))    # with Windows binary
+install.packages(file.path(fdir, "salic_2.0.0.tgz"))    # with Mac binary
+install.packages(file.path(fdir, "salic_2.0.0.tar.gz")) # from source
 ```
 
 Usage
 -----
 
-See `vignette("salic")` for an introduction.
+See [the vignette](https://southwick-associates.github.io/salic/articles/salic.html) for an introduction.
 
 A template workflow for national/regional dashboards is available at <https://github.com/southwick-associates/dashboard-template>
 
 ### Example: fishing participation
 
-Using `rank_sale()`, `make_history()`, and `est_part()` from `?salic`.
+Using `rank_sale()`, `make_history()`, and `est_part()`
 
 ``` r
 library(dplyr)

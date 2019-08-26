@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Introduction to salic</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to salic</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#standardized-license-data">Standardized License Data</a><ul>
+<li><a href="#checking-formatting-rules">Checking Formatting Rules</a></li>
+<li><a href="#primary-keys">Primary Keys</a></li>
+<li><a href="#categorical-variables">Categorical Variables</a></li>
+<li><a href="#sales-year-month">Sales: year &amp; month</a></li>
+<li><a href="#licenses-type">Licenses: type</a></li>
+<li><a href="#licenses-duration">Licenses: duration</a></li>
+</ul></li>
+<li><a href="#license-history">License History</a><ul>
+<li><a href="#ranking-sales">Ranking Sales</a></li>
+<li><a href="#making-license-history">Making License History</a></li>
+<li><a href="#lapse">Lapse</a></li>
+<li><a href="#r3">R3</a></li>
+</ul></li>
+<li><a href="#dashboard-metrics">Dashboard Metrics</a><ul>
+<li><a href="#preparation">Preparation</a></li>
+<li><a href="#summarize-participants">Summarize Participants</a></li>
+<li><a href="#summarize-churn">Summarize Churn</a></li>
+<li><a href="#automating-with-apply">Automating with apply</a></li>
+<li><a href="#formatting-the-summary-output">Formatting the Summary Output</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). Loading both packages is recommended:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
+<span class="kw">library</span>(dplyr)</code></pre></div>
+<p>This vignette walks through salic functionality using included sample data. A function reference is available at <code>?salic</code>.</p>
+</div>
+<div id="standardized-license-data" class="section level2">
+<h2>Standardized License Data</h2>
+<p>To facilitate a generalized workflow salic is strict about data formatting. For this reason, up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.</p>
+<p>Formatting rules are available at <code>?cust</code>, <code>?sale</code>, <code>?lic</code>. The 3 tables should be related by 2 key columns:</p>
+<div class="figure">
+<img src="data:image/png;base64,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" />
+
+</div>
+<p><br> <em>Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.</em></p>
+<div id="checking-formatting-rules" class="section level3">
+<h3>Checking Formatting Rules</h3>
+<p>salic helps you follow its formatting rules with <code>data_check()</code>. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load sample data</span>
+<span class="kw">data</span>(cust, lic, sale) 
+
+<span class="co"># prints no warnings</span>
+<span class="kw">data_check</span>(cust, lic, sale) 
+
+<span class="co"># introduce rule-breaking changes</span>
+cust_tmp &lt;-<span class="st"> </span>cust
+cust_tmp<span class="op">$</span>birth_year &lt;-<span class="st"> </span><span class="ot">NULL</span>
+cust_tmp<span class="op">$</span>sex[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">3</span>
+<span class="kw">data_check</span>(cust_tmp, lic, sale)
+<span class="co">#&gt; Warning: cust: 1 Missing variable(s): birth_year</span>
+<span class="co">#&gt; Warning: cust$sex: Contains values that aren't allowed: 3</span></code></pre></div>
+</div>
+<div id="primary-keys" class="section level3">
+<h3>Primary Keys</h3>
+<p>The <code>cust$cust_id</code> and <code>lic$lic_id</code> variables represent primary key columns (i.e., they must uniquely identify rows in the corresponding table):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># check customer ID</span>
+<span class="kw">length</span>(<span class="kw">unique</span>(cust<span class="op">$</span>cust_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(cust)
+<span class="co">#&gt; [1] TRUE</span>
+
+<span class="co"># check license ID</span>
+<span class="kw">length</span>(<span class="kw">unique</span>(lic<span class="op">$</span>lic_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(lic)
+<span class="co">#&gt; [1] TRUE</span></code></pre></div>
+</div>
+<div id="categorical-variables" class="section level3">
+<h3>Categorical Variables</h3>
+<p>salic expects specific numeric codes for categorical variables. For example, “sex” must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(cust, sex)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;     sex     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1     1 21965</span>
+<span class="co">#&gt; 2     2  7498</span>
+<span class="co">#&gt; 3    NA   537</span></code></pre></div>
+</div>
+<div id="sales-year-month" class="section level3">
+<h3>Sales: year &amp; month</h3>
+<p>The “year” and “month” variables indicate the date of purchase (1 = Jan, 2 = Feb, etc.).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># sales by month in 2016</span>
+<span class="kw">filter</span>(sale, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year, month)
+<span class="co">#&gt; # A tibble: 12 x 3</span>
+<span class="co">#&gt;     year month     n</span>
+<span class="co">#&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt;  1  2016     1   205</span>
+<span class="co">#&gt;  2  2016     2   289</span>
+<span class="co">#&gt;  3  2016     3   943</span>
+<span class="co">#&gt;  4  2016     4   904</span>
+<span class="co">#&gt;  5  2016     5   799</span>
+<span class="co">#&gt;  6  2016     6  1057</span>
+<span class="co">#&gt;  7  2016     7  1867</span>
+<span class="co">#&gt;  8  2016     8  2205</span>
+<span class="co">#&gt;  9  2016     9  2686</span>
+<span class="co">#&gt; 10  2016    10  1392</span>
+<span class="co">#&gt; 11  2016    11  1180</span>
+<span class="co">#&gt; 12  2016    12   539</span></code></pre></div>
+<p>The month variable is needed for building “mid-year” dashboards, which present a year-to-year view for the first six months of sales.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># count of customers (by year) who purchased in the first 6 months</span>
+<span class="kw">filter</span>(sale, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>, month <span class="op">&lt;=</span><span class="st"> </span><span class="dv">6</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">distinct</span>(cust_id, year) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;    year     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2016  3461</span>
+<span class="co">#&gt; 2  2017  3490</span>
+<span class="co">#&gt; 3  2018  3220</span></code></pre></div>
+</div>
+<div id="licenses-type" class="section level3">
+<h3>Licenses: type</h3>
+<p>The license table includes two columns important for customer trending. The “type” column specifies whether a license provides:</p>
+<ul>
+<li>a hunting privilege: “hunt”</li>
+<li>a fishing privilege: “fish”</li>
+<li>or both: “combo”</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(lic, type)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;   type      n</span>
+<span class="co">#&gt;   &lt;chr&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1 combo    18</span>
+<span class="co">#&gt; 2 fish     36</span>
+<span class="co">#&gt; 3 hunt     82</span>
+
+<span class="co"># count hunters for select years</span>
+<span class="kw">filter</span>(lic, type <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;hunt&quot;</span>, <span class="st">&quot;combo&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">&quot;lic_id&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">distinct</span>(cust_id, year) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;    year     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2016  2868</span>
+<span class="co">#&gt; 2  2017  3008</span>
+<span class="co">#&gt; 3  2018  2925</span></code></pre></div>
+</div>
+<div id="licenses-duration" class="section level3">
+<h3>Licenses: duration</h3>
+<p>The “duration” column is necessary for building a license history. License types can be organized into 3 groups with respect to this variable:</p>
+<ul>
+<li>Multi-years: duration &gt; 1 (2 = 2-year, 3 = 3-year, etc.)</li>
+<li>Lifetimes: duration = 99</li>
+<li>All others: duration = 1</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">count</span>(lic, duration)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;   duration     n</span>
+<span class="co">#&gt;      &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1        1   102</span>
+<span class="co">#&gt; 2        3    20</span>
+<span class="co">#&gt; 3       99    14</span>
+
+<span class="co"># customers who buy 3-year licenses</span>
+cust_3yr &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, duration <span class="op">==</span><span class="st"> </span><span class="dv">3</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">&quot;lic_id&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">distinct</span>(cust_id, year)
+<span class="kw">count</span>(cust_3yr, year)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;    year     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2016   351</span>
+<span class="co">#&gt; 2  2017   360</span>
+<span class="co">#&gt; 3  2018   371</span></code></pre></div>
+</div>
+</div>
+<div id="license-history" class="section level2">
+<h2>License History</h2>
+<p>The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished by calling <code>rank_sale()</code> and <code>make_history()</code> in sequence.</p>
+<div id="ranking-sales" class="section level3">
+<h3>Ranking Sales</h3>
+<p>The <code>rank_sale()</code> function is used as a preliminary step to reduce the sale table to 1 row per customer-year. It picks the row with the maximum duration value &amp; optionally includes the earliest month value (for mid-year dashboards).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># all hunting (non-combo) sales in 2016</span>
+sale_<span class="dv">2016</span> &lt;-<span class="st"> </span><span class="kw">inner_join</span>(
+    <span class="kw">filter</span>(sale, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>),
+    <span class="kw">filter</span>(lic, type <span class="op">==</span><span class="st"> &quot;hunt&quot;</span>),
+    <span class="dt">by =</span> <span class="st">&quot;lic_id&quot;</span>
+)
+<span class="kw">count</span>(sale_<span class="dv">2016</span>, duration, year)
+<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt;   duration  year     n</span>
+<span class="co">#&gt;      &lt;int&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1        1  2016  5786</span>
+<span class="co">#&gt; 2        3  2016    19</span>
+<span class="co">#&gt; 3       99  2016     4</span>
+
+<span class="co"># ranked hunting (non-combo) sales in 2016</span>
+<span class="kw">rank_sale</span>(sale_<span class="dv">2016</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(duration, year)
+<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt;   duration  year     n</span>
+<span class="co">#&gt;      &lt;int&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1        1  2016  2392</span>
+<span class="co">#&gt; 2        3  2016    10</span>
+<span class="co">#&gt; 3       99  2016     4</span></code></pre></div>
+</div>
+<div id="making-license-history" class="section level3">
+<h3>Making License History</h3>
+<p>The <code>make_history()</code> function creates a larger table with 1 row for every year a license is held (i.e., both purchase years and “carried-over” license years are included).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># rank all sales</span>
+sale_ranked &lt;-<span class="st"> </span><span class="kw">inner_join</span>(sale, lic, <span class="dt">by =</span> <span class="st">&quot;lic_id&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">rank_sale</span>()
+
+<span class="co"># count customers who purchased licenses</span>
+<span class="kw">filter</span>(sale_ranked, year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2010</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;    year     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2008  6393</span>
+<span class="co">#&gt; 2  2009  7428</span>
+<span class="co">#&gt; 3  2010  7475</span>
+
+<span class="co"># count customers who held licenses</span>
+<span class="kw">make_history</span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2010</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year)
+<span class="co">#&gt; # A tibble: 3 x 2</span>
+<span class="co">#&gt;    year     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2008  6393</span>
+<span class="co">#&gt; 2  2009  7591</span>
+<span class="co">#&gt; 3  2010  7775</span></code></pre></div>
+<p>Certain variables (e.g., sale$res) need to be included in the “carry_vars” argument of <code>make_history()</code> to ensure inclusion in carried-over license years.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># no residency information is included in the output by default</span>
+history &lt;-<span class="st"> </span><span class="kw">make_history</span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>)
+<span class="kw">names</span>(history)
+<span class="co">#&gt; [1] &quot;cust_id&quot;      &quot;year&quot;         &quot;duration_run&quot; &quot;lapse&quot;       </span>
+<span class="co">#&gt; [5] &quot;R3&quot;</span>
+
+<span class="co"># include residency</span>
+history &lt;-<span class="st"> </span><span class="kw">make_history</span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>, <span class="dt">carry_vars =</span> <span class="st">&quot;res&quot;</span>)
+<span class="kw">names</span>(history)
+<span class="co">#&gt; [1] &quot;cust_id&quot;      &quot;year&quot;         &quot;res&quot;          &quot;duration_run&quot;</span>
+<span class="co">#&gt; [5] &quot;lapse&quot;        &quot;R3&quot;</span></code></pre></div>
+</div>
+<div id="lapse" class="section level3">
+<h3>Lapse</h3>
+<p>A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, backward: who is a recruit?). The <code>make_history()</code> function appends 2 measures for this purpose. The “lapse” variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># build hunting privilege history</span>
+hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;hunt&quot;</span>, <span class="st">&quot;combo&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">&quot;lic_id&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">rank_sale</span>() <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">make_history</span>(<span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>)
+    
+<span class="co"># hunters in 2016, what % lapsed (i.e., churned) in 2017? </span>
+<span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year, lapse) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">pct =</span> n <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(n) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)
+<span class="co">#&gt; # A tibble: 2 x 4</span>
+<span class="co">#&gt;    year lapse     n   pct</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;</span>
+<span class="co">#&gt; 1  2016     0  3415  81.3</span>
+<span class="co">#&gt; 2  2016     1   787  18.7</span></code></pre></div>
+</div>
+<div id="r3" class="section level3">
+<h3>R3</h3>
+<p>The R3 measure groups license holders based on how recently they held a license previously:</p>
+<ul>
+<li>Retained (1,2): held a license last year (1: carried over a multi-year license), (2: no carry over)</li>
+<li>Reactivated (3): no license last year, but did hold one within the past 5 years</li>
+<li>Recruited (4): no license held within the previous 5 years</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># hunters in 2016, what % are in each R3 group?</span>
+<span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(R3) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">pct =</span> n <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(n) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)
+<span class="co">#&gt; # A tibble: 4 x 3</span>
+<span class="co">#&gt;      R3     n   pct</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;</span>
+<span class="co">#&gt; 1     1  1552 36.9 </span>
+<span class="co">#&gt; 2     2  1737 41.3 </span>
+<span class="co">#&gt; 3     3   324  7.71</span>
+<span class="co">#&gt; 4     4   589 14.0</span></code></pre></div>
+<p>Note that R3 is set to missing for the first 5 years. This provides a consistent definition of recruitment over time.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">filter</span>(hunt, year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2013</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">count</span>(year, R3)
+<span class="co">#&gt; # A tibble: 9 x 3</span>
+<span class="co">#&gt;    year    R3     n</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1  2008    NA  2581</span>
+<span class="co">#&gt; 2  2009    NA  3044</span>
+<span class="co">#&gt; 3  2010    NA  3234</span>
+<span class="co">#&gt; 4  2011    NA  3418</span>
+<span class="co">#&gt; 5  2012    NA  3548</span>
+<span class="co">#&gt; 6  2013     1   990</span>
+<span class="co">#&gt; 7  2013     2  1896</span>
+<span class="co">#&gt; 8  2013     3   322</span>
+<span class="co">#&gt; 9  2013     4   629</span></code></pre></div>
+</div>
+</div>
+<div id="dashboard-metrics" class="section level2">
+<h2>Dashboard Metrics</h2>
+<p>The license history table provides a flexible data structure for summarizing customer trends. A set of specific summaries are needed for the national/regional dashboard; the following functions are included for this purpose.</p>
+<div id="preparation" class="section level3">
+<h3>Preparation</h3>
+<p>Some initial preparation is needed to produce the summaries. Functions <code>label_categories()</code> and <code>recode_agecat()</code> are included for this purpose.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(history)
+
+history &lt;-<span class="st"> </span>history <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">label_categories</span>() <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">recode_agecat</span>() <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span>agecat <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;0-17&quot;</span>, <span class="st">&quot;65+&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">select</span>(cust_id, year, res, sex, agecat, R3, lapse)
+
+<span class="co"># view history for 1 customer</span>
+<span class="kw">filter</span>(history, cust_id <span class="op">==</span><span class="st"> </span><span class="dv">6120</span>)
+<span class="co">#&gt; # A tibble: 7 x 7</span>
+<span class="co">#&gt;   cust_id  year res         sex   agecat R3    lapse</span>
+<span class="co">#&gt;     &lt;int&gt; &lt;int&gt; &lt;fct&gt;       &lt;fct&gt; &lt;fct&gt;  &lt;fct&gt; &lt;int&gt;</span>
+<span class="co">#&gt; 1    6120  2008 Nonresident Male  45-54  &lt;NA&gt;      0</span>
+<span class="co">#&gt; 2    6120  2009 Nonresident Male  45-54  &lt;NA&gt;      1</span>
+<span class="co">#&gt; 3    6120  2011 Nonresident Male  45-54  &lt;NA&gt;      0</span>
+<span class="co">#&gt; 4    6120  2012 Nonresident Male  45-54  &lt;NA&gt;      0</span>
+<span class="co">#&gt; 5    6120  2013 Nonresident Male  45-54  Renew     0</span>
+<span class="co">#&gt; 6    6120  2014 Nonresident Male  55-64  Renew     0</span>
+<span class="co">#&gt; 7    6120  2015 Nonresident Male  55-64  Renew     1</span></code></pre></div>
+</div>
+<div id="summarize-participants" class="section level3">
+<h3>Summarize Participants</h3>
+<p>The <code>est_part()</code> function produces a simple count of participants by year, either overall or broken out by a segment (e.g., gender).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># overall</span>
+part &lt;-<span class="st"> </span><span class="kw">est_part</span>(history, <span class="st">&quot;tot&quot;</span>)
+<span class="kw">filter</span>(part, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>)
+<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt;   tot    year participants</span>
+<span class="co">#&gt;   &lt;chr&gt; &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 All    2016         7095</span>
+<span class="co">#&gt; 2 All    2017         7045</span>
+<span class="co">#&gt; 3 All    2018         6701</span>
+
+<span class="co"># by gender</span>
+part_sex &lt;-<span class="st"> </span><span class="kw">est_part</span>(history, <span class="st">&quot;sex&quot;</span>)
+<span class="kw">filter</span>(part_sex, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>)
+<span class="co">#&gt; # A tibble: 6 x 3</span>
+<span class="co">#&gt;   sex     year participants</span>
+<span class="co">#&gt;   &lt;fct&gt;  &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 Male    2016         5485</span>
+<span class="co">#&gt; 2 Male    2017         5433</span>
+<span class="co">#&gt; 3 Male    2018         5183</span>
+<span class="co">#&gt; 4 Female  2016         1496</span>
+<span class="co">#&gt; 5 Female  2017         1510</span>
+<span class="co">#&gt; 6 Female  2018         1412</span></code></pre></div>
+<p>Because segments usually contain missing values, the <code>scaleup_part()</code> function is provided to peg segment percentages to total values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">scaleup_part</span>(part_sex, part) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>)
+<span class="co">#&gt; # A tibble: 6 x 3</span>
+<span class="co">#&gt;   sex     year participants</span>
+<span class="co">#&gt;   &lt;fct&gt;  &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 Male    2016         5575</span>
+<span class="co">#&gt; 2 Male    2017         5513</span>
+<span class="co">#&gt; 3 Male    2018         5266</span>
+<span class="co">#&gt; 4 Female  2016         1520</span>
+<span class="co">#&gt; 5 Female  2017         1532</span>
+<span class="co">#&gt; 6 Female  2018         1435</span></code></pre></div>
+</div>
+<div id="summarize-churn" class="section level3">
+<h3>Summarize Churn</h3>
+<p>The <code>est_churn()</code>, function summarizes year-to-year turnover.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">filter</span>(history, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">est_churn</span>(<span class="st">&quot;tot&quot;</span>)
+<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt;   tot    year churn</span>
+<span class="co">#&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 All    2017 0.481</span>
+<span class="co">#&gt; 2 All    2018 0.488</span></code></pre></div>
+</div>
+<div id="automating-with-apply" class="section level3">
+<h3>Automating with apply</h3>
+<p>All of the dashboard summary functions are designed with R’s apply looping functionality in mind:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">segments &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;tot&quot;</span>, <span class="st">&quot;res&quot;</span>, <span class="st">&quot;sex&quot;</span>, <span class="st">&quot;agecat&quot;</span>)
+
+<span class="co"># store participant counts in a list of length 4 (1 per segment)</span>
+part &lt;-<span class="st"> </span><span class="kw">sapply</span>(
+    segments, 
+    <span class="cf">function</span>(i) <span class="kw">est_part</span>(history, i, <span class="dt">test_threshold =</span> <span class="dv">45</span>), 
+    <span class="dt">simplify =</span> <span class="ot">FALSE</span>
+)
+
+<span class="co"># print the first 2 rows of each segment table</span>
+<span class="cf">for</span> (i <span class="cf">in</span> segments) {
+    <span class="kw">head</span>(part[[i]], <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>()
+    <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
+}
+<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt;   tot    year participants</span>
+<span class="co">#&gt;   &lt;chr&gt; &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 All    2008         5834</span>
+<span class="co">#&gt; 2 All    2009         6775</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt;   res       year participants</span>
+<span class="co">#&gt;   &lt;fct&gt;    &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 Resident  2008         4768</span>
+<span class="co">#&gt; 2 Resident  2009         5264</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt;   sex    year participants</span>
+<span class="co">#&gt;   &lt;fct&gt; &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 Male   2008         4647</span>
+<span class="co">#&gt; 2 Male   2009         5391</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt;   agecat  year participants</span>
+<span class="co">#&gt;   &lt;fct&gt;  &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 18-24   2008          709</span>
+<span class="co">#&gt; 2 18-24   2009          827</span></code></pre></div>
+</div>
+<div id="formatting-the-summary-output" class="section level3">
+<h3>Formatting the Summary Output</h3>
+<p>The apply-based approach produces lists, but we need a single table of summary data for input into the dashboard. The <code>format_result()</code> function is included to facilitate this.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># pull overall participants from sample data</span>
+<span class="kw">data</span>(metrics)
+part &lt;-<span class="st"> </span>metrics<span class="op">$</span>participants<span class="op">$</span>tot
+<span class="kw">head</span>(part, <span class="dv">3</span>)
+<span class="co">#&gt; # A tibble: 3 x 3</span>
+<span class="co">#&gt;   tot    year participants</span>
+<span class="co">#&gt;   &lt;chr&gt; &lt;int&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 All    2008         5834</span>
+<span class="co">#&gt; 2 All    2009         6775</span>
+<span class="co">#&gt; 3 All    2010         6820</span>
+
+<span class="kw">format_result</span>(part, <span class="dt">timeframe =</span> <span class="st">&quot;full-year&quot;</span>, <span class="dt">group =</span> <span class="st">&quot;all_sports&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">head</span>(<span class="dv">3</span>)
+<span class="co">#&gt; # A tibble: 3 x 7</span>
+<span class="co">#&gt;   timeframe group      segment  year category metric       value</span>
+<span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;</span>
+<span class="co">#&gt; 1 full-year all_sports All      2008 All      participants  5834</span>
+<span class="co">#&gt; 2 full-year all_sports All      2009 All      participants  6775</span>
+<span class="co">#&gt; 3 full-year all_sports All      2010 All      participants  6820</span></code></pre></div>
+<p>We can use apply to automate this final formatting:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">all_part &lt;-<span class="st"> </span>metrics<span class="op">$</span>participants
+<span class="kw">lapply</span>(all_part, <span class="cf">function</span>(x) <span class="kw">format_result</span>(x, <span class="st">&quot;full-year&quot;</span>, <span class="st">&quot;all_sports&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">bind_rows</span>()
+<span class="co">#&gt; # A tibble: 110 x 7</span>
+<span class="co">#&gt;    timeframe group      segment  year category metric       value</span>
+<span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;</span>
+<span class="co">#&gt;  1 full-year all_sports All      2008 All      participants  5834</span>
+<span class="co">#&gt;  2 full-year all_sports All      2009 All      participants  6775</span>
+<span class="co">#&gt;  3 full-year all_sports All      2010 All      participants  6820</span>
+<span class="co">#&gt;  4 full-year all_sports All      2011 All      participants  6734</span>
+<span class="co">#&gt;  5 full-year all_sports All      2012 All      participants  6964</span>
+<span class="co">#&gt;  6 full-year all_sports All      2013 All      participants  6801</span>
+<span class="co">#&gt;  7 full-year all_sports All      2014 All      participants  7253</span>
+<span class="co">#&gt;  8 full-year all_sports All      2015 All      participants  7153</span>
+<span class="co">#&gt;  9 full-year all_sports All      2016 All      participants  7095</span>
+<span class="co">#&gt; 10 full-year all_sports All      2017 All      participants  7045</span>
+<span class="co">#&gt; # ... with 100 more rows</span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

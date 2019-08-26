@@ -1,0 +1,324 @@
+---
+title: "Introduction to salic"
+output: 
+    rmarkdown::html_vignette:
+        toc: TRUE
+vignette: >
+  %\VignetteIndexEntry{Introduction to salic}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7
+)
+library(dplyr)
+library(salic)
+```
+
+## Overview
+
+salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). Loading both packages is recommended:
+
+```{r}
+library(salic)
+library(dplyr)
+```
+
+This vignette walks through salic functionality using included sample data. A function reference is available at `?salic`.
+
+## Standardized License Data
+
+To facilitate a generalized workflow salic is strict about data formatting. For this reason, up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.
+
+Formatting rules are available at `?cust`, `?sale`, `?lic`. The 3 tables should be related by 2 key columns:
+
+![](relations.png)
+
+<br>
+*Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.*
+
+### Checking Formatting Rules
+
+salic helps you follow its formatting rules with `data_check()`. The function call is silent if all checks pass; warnings will be printed for every failed check.
+
+```{r}
+# load sample data
+data(cust, lic, sale) 
+
+# prints no warnings
+data_check(cust, lic, sale) 
+
+# introduce rule-breaking changes
+cust_tmp <- cust
+cust_tmp$birth_year <- NULL
+cust_tmp$sex[1] <- 3
+data_check(cust_tmp, lic, sale)
+```
+
+### Primary Keys
+
+The `cust$cust_id` and `lic$lic_id` variables represent primary key columns (i.e., they must uniquely identify rows in the corresponding table):
+
+```{r}
+# check customer ID
+length(unique(cust$cust_id)) == nrow(cust)
+
+# check license ID
+length(unique(lic$lic_id)) == nrow(lic)
+```
+
+### Categorical Variables
+
+salic expects specific numeric codes for categorical variables. For example, "sex" must be 1 of 3 values for every customer (1=Male, 2=Female, NA=Unknown):
+
+```{r}
+count(cust, sex)
+```
+
+### Sales: year & month
+
+The "year" and "month" variables indicate the date of purchase (1 = Jan, 2 = Feb, etc.). 
+
+```{r}
+# sales by month in 2016
+filter(sale, year == 2016) %>%
+    count(year, month)
+```
+
+The month variable is needed for building "mid-year" dashboards, which present a year-to-year view for the first six months of sales.
+
+```{r}
+# count of customers (by year) who purchased in the first 6 months
+filter(sale, year > 2015, month <= 6) %>%
+    distinct(cust_id, year) %>%
+    count(year)
+```
+
+### Licenses: type
+
+The license table includes two columns important for customer trending. The "type" column specifies whether a license provides:
+
+- a hunting privilege: "hunt"
+- a fishing privilege: "fish" 
+- or both: "combo"
+
+```{r}
+count(lic, type)
+
+# count hunters for select years
+filter(lic, type %in% c("hunt", "combo")) %>%
+    inner_join(sale, by = "lic_id") %>%
+    filter(year > 2015) %>%
+    distinct(cust_id, year) %>%
+    count(year)
+```
+
+### Licenses: duration
+
+The "duration" column is necessary for building a license history. License types can be organized into 3 groups with respect to this variable:
+
+- Multi-years: duration > 1 (2 = 2-year, 3 = 3-year, etc.)
+- Lifetimes: duration = 99
+- All others: duration = 1
+
+```{r}
+count(lic, duration)
+
+# customers who buy 3-year licenses
+cust_3yr <- filter(lic, duration == 3) %>%
+    inner_join(sale, by = "lic_id") %>%
+    filter(year > 2015) %>%
+    distinct(cust_id, year)
+count(cust_3yr, year)
+```
+
+## License History
+
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished by calling `rank_sale()` and `make_history()` in sequence.
+
+### Ranking Sales
+
+The `rank_sale()` function is used as a preliminary step to reduce the sale table to 1 row per customer-year. It picks the row with the maximum duration value & optionally includes the earliest month value (for mid-year dashboards).
+
+```{r}
+# all hunting (non-combo) sales in 2016
+sale_2016 <- inner_join(
+    filter(sale, year == 2016),
+    filter(lic, type == "hunt"),
+    by = "lic_id"
+)
+count(sale_2016, duration, year)
+
+# ranked hunting (non-combo) sales in 2016
+rank_sale(sale_2016) %>%
+    count(duration, year)
+```
+
+### Making License History
+
+The `make_history()` function creates a larger table with 1 row for every year a license is held (i.e., both purchase years and "carried-over" license years are included). 
+
+```{r}
+# rank all sales
+sale_ranked <- inner_join(sale, lic, by = "lic_id") %>%
+    rank_sale()
+
+# count customers who purchased licenses
+filter(sale_ranked, year %in% 2008:2010) %>%
+    count(year)
+
+# count customers who held licenses
+make_history(sale_ranked, 2008:2018) %>%
+    filter(year %in% 2008:2010) %>%
+    count(year)
+```
+
+Certain variables (e.g., sale$res) need to be included in the "carry_vars" argument of `make_history()` to ensure inclusion in carried-over license years. 
+
+```{r}
+# no residency information is included in the output by default
+history <- make_history(sale_ranked, 2008:2018)
+names(history)
+
+# include residency
+history <- make_history(sale_ranked, 2008:2018, carry_vars = "res")
+names(history)
+```
+
+### Lapse
+
+A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, backward: who is a recruit?). The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
+
+```{r}
+# build hunting privilege history
+hunt <- filter(lic, type %in% c("hunt", "combo")) %>%
+    inner_join(sale, by = "lic_id") %>%
+    rank_sale() %>%
+    make_history(2008:2018)
+    
+# hunters in 2016, what % lapsed (i.e., churned) in 2017? 
+filter(hunt, year == 2016) %>%
+    count(year, lapse) %>%
+    mutate(pct = n / sum(n) * 100)
+```
+
+### R3
+
+The R3 measure groups license holders based on how recently they held a license previously:
+
+- Retained (1,2): held a license last year (1: carried over a multi-year license), (2: no carry over)
+- Reactivated (3): no license last year, but did hold one within the past 5 years
+- Recruited (4): no license held within the previous 5 years
+
+```{r}
+# hunters in 2016, what % are in each R3 group?
+filter(hunt, year == 2016) %>%
+    count(R3) %>%
+    mutate(pct = n / sum(n) * 100)
+```
+
+Note that R3 is set to missing for the first 5 years. This provides a consistent definition of recruitment over time.
+
+```{r}
+filter(hunt, year %in% 2008:2013) %>%
+    count(year, R3)
+```
+
+## Dashboard Metrics
+
+The license history table provides a flexible data structure for summarizing customer trends. A set of specific summaries are needed for the national/regional dashboard; the following functions are included for this purpose.
+
+### Preparation
+
+Some initial preparation is needed to produce the summaries. Functions `label_categories()` and `recode_agecat()` are included for this purpose.
+
+```{r}
+data(history)
+
+history <- history %>%
+    label_categories() %>%
+    recode_agecat() %>%
+    filter(!agecat %in% c("0-17", "65+")) %>%
+    select(cust_id, year, res, sex, agecat, R3, lapse)
+
+# view history for 1 customer
+filter(history, cust_id == 6120)
+```
+
+### Summarize Participants
+
+The `est_part()` function produces a simple count of participants by year, either overall or broken out by a segment (e.g., gender).
+
+```{r}
+# overall
+part <- est_part(history, "tot")
+filter(part, year > 2015)
+
+# by gender
+part_sex <- est_part(history, "sex")
+filter(part_sex, year > 2015)
+```
+
+Because segments usually contain missing values, the `scaleup_part()` function is provided to peg segment percentages to total values.
+
+```{r}
+scaleup_part(part_sex, part) %>%
+    filter(year > 2015)
+```
+
+### Summarize Churn
+
+The `est_churn()`, function summarizes year-to-year turnover.
+
+```{r}
+filter(history, year > 2015) %>%
+    est_churn("tot")
+```
+
+### Automating with apply
+
+All of the dashboard summary functions are designed with R's apply looping functionality in mind:
+
+```{r}
+segments <- c("tot", "res", "sex", "agecat")
+
+# store participant counts in a list of length 4 (1 per segment)
+part <- sapply(
+    segments, 
+    function(i) est_part(history, i, test_threshold = 45), 
+    simplify = FALSE
+)
+
+# print the first 2 rows of each segment table
+for (i in segments) {
+    head(part[[i]], 2) %>% print()
+    cat("\n")
+}
+```
+
+### Formatting the Summary Output
+
+The apply-based approach produces lists, but we need a single table of summary data for input into the dashboard. The `format_result()` function is included to facilitate this.
+
+```{r}
+# pull overall participants from sample data
+data(metrics)
+part <- metrics$participants$tot
+head(part, 3)
+
+format_result(part, timeframe = "full-year", group = "all_sports") %>%
+    head(3)
+```
+
+We can use apply to automate this final formatting:
+
+```{r}
+all_part <- metrics$participants
+lapply(all_part, function(x) format_result(x, "full-year", "all_sports")) %>%
+    bind_rows()
+```
+
