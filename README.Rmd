@@ -18,7 +18,7 @@ salic is an R package for preparing and summarizing agency data. In particular, 
 ## Installation
 
 - First, install R: https://www.r-project.org/
-- Then install salic and it's dependencies:
+- Then install [salic](https://github.com/southwick-associates/salic/releases) and it's dependencies from the R console:
 
 ``` r
 # Install dependencies
