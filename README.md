@@ -17,9 +17,9 @@ install.packages(c("dplyr", "data.table"))
 
 # Install salic release
 f <- "https://github.com/southwick-associates/salic/releases/download/2.0.0/salic_2.0.0"
-install.packages(paste0(f, ".zip"), repos = NULL)   # for Windows
-install.packages(paste0(f, ".tgz"), repos = NULL)   # for Mac
-install.packages(paste0(f, "tar.gz"), repos = NULL) # or from source
+install.packages(paste0(f, ".zip"), repos = NULL) # for Windows
+install.packages(paste0(f, ".tgz"), repos = NULL) # for Mac
+install.packages(paste0(f, ".tar.gz"), repos = NULL, type = "source") # or from source
 
 # Alternatively, install development version
 install.packages("devtools")
