@@ -3,7 +3,7 @@
 \docType{data}
 \name{sale}
 \alias{sale}
-\title{Sample Data: Sales 2008 thru 2018}
+\title{Sample Standardized Data: Sales 2008 thru 2018}
 \format{A data frame with 5 variables
 \describe{
 \item{cust_id}{Customer ID (foreign key)}
@@ -14,7 +14,7 @@
 NA = Unknown)}
 }}
 \description{
-Sample Data: Sales 2008 thru 2018
+Sample Standardized Data: Sales 2008 thru 2018
 }
 \seealso{
 Salic Function Reference: \code{\link{salic}}

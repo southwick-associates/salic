@@ -3,7 +3,7 @@
 \docType{data}
 \name{lic}
 \alias{lic}
-\title{Sample Data: License Types}
+\title{Sample Standardized Data: License Types}
 \format{A data frame with 3 variables
 \describe{
 \item{lic_id}{License ID (numeric) (primary key) - Note that IDs can be stored 
@@ -14,7 +14,7 @@ fishing license,  "combo" = combination hunting/fishing license)}
 99 = lifetime)}
 }}
 \description{
-Sample Data: License Types
+Sample Standardized Data: License Types
 }
 \seealso{
 Salic Function Reference: \code{\link{salic}}

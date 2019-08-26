@@ -2,7 +2,7 @@ authors:
   Dan Kary:
     href: https://www.southwickassociates.com/our-staff/dan-kary/
   Southwick Associates:
-    html: "<img src='https://github.com/southwick-associates/salic/tree/master/man/figures/sa.jpg' height='30'/>"
+    html: "<img src='man/figures/sa.jpg' alt='Southwick Associates' height='30'/>"
     href: https://www.southwickassociates.com
 
 reference:

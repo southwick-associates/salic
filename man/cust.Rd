@@ -3,7 +3,7 @@
 \docType{data}
 \name{cust}
 \alias{cust}
-\title{Sample Data: 30,000 Customers}
+\title{Sample Standardized Data: 30,000 Customers}
 \format{A data frame with 3 variables
 \describe{
 \item{cust_id}{Customer ID (numeric) (primary key) - Note that IDs can be stored 
@@ -12,7 +12,7 @@ as character, but this is less efficient.}
 \item{birth_year}{Year of Birth (numeric) (yyyy, NA=Unknown)}
 }}
 \description{
-Sample Data: 30,000 Customers
+Sample Standardized Data: 30,000 Customers
 }
 \seealso{
 Salic Function Reference: \code{\link{salic}}

@@ -25,7 +25,7 @@
 #' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
-#' Sample Data: 30,000 Customers
+#' Sample Standardized Data: 30,000 Customers
 #'
 #' @docType data
 #' @keywords datasets
@@ -41,7 +41,7 @@ NULL
 #' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
-#' Sample Data: License Types
+#' Sample Standardized Data: License Types
 #'
 #' @docType data
 #' @keywords datasets
@@ -59,7 +59,7 @@ NULL
 #' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
 
-#' Sample Data: Sales 2008 thru 2018
+#' Sample Standardized Data: Sales 2008 thru 2018
 #'
 #' @docType data
 #' @keywords datasets
