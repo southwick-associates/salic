@@ -15,13 +15,15 @@ Installation
 # Install dependencies
 install.packages(c("dplyr", "data.table"))
 
-# Install salic
-fdir <- "https://github.com/southwick-associates/dashboard-template/releases/latest/download"
+# Install salic release
+f <- "https://github.com/southwick-associates/dashboard-template/releases/latest/download/salic_2.0.0"
+install.packages(paste0(f, ".zip"))   # for Windows
+install.packages(paste0(f, ".tgz"))   # for Mac
+install.packages(paste0(f, "tar.gz")) # or from source
 
-# use 1 of these 3 methods (depending on your system)
-install.packages(file.path(fdir, "salic_2.0.0.zip"))    # with Windows binary
-install.packages(file.path(fdir, "salic_2.0.0.tgz"))    # with Mac binary
-install.packages(file.path(fdir, "salic_2.0.0.tar.gz")) # from source
+# Alternatively, install development version
+install.packages("devtools")
+devtools::install_github("southwick-associates/salic")
 ```
 
 Usage
