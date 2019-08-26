@@ -1,7 +1,7 @@
 
-## Version 2.0 (2019-08-26)
+## Version 2.0
 
-This release corresponds to sharing salic with state agencies and other partners. It includes a number of new functions and major changes to the codebase. 
+Released on 2019-08-26; aimed at sharing with state agencies and other partners. It includes a number of new functions and major changes to the codebase. 
 
 ### Additions
 

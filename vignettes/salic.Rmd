@@ -230,7 +230,7 @@ filter(hunt, year %in% 2008:2013) %>%
 
 ## Dashboard Metrics
 
-The license history table provides a flexible data structure for summarizing customer trends. A set of specific summaries are needed for the AFWA national/regional dashboard; the following functions are included for this purpose.
+The license history table provides a flexible data structure for summarizing customer trends. A set of specific summaries are needed for the national/regional dashboard; the following functions are included for this purpose.
 
 ### Preparation
 
