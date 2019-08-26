@@ -3,7 +3,7 @@
 salic
 =====
 
-Salic is an R package for preparing and summarizing agency data. In particular, it aims to simplify the production of national/regional dashboards by providing a set of functions that work across state agencies.
+salic is an R package for preparing and summarizing agency data. In particular, it aims to simplify the production of national/regional dashboards by providing a set of functions that work across state agencies.
 
 Installation
 ------------
@@ -16,7 +16,8 @@ Installation
 install.packages(c("dplyr", "data.table"))
 
 # Install salic from binary executables
-install.packages("bla bla") # for Windows
+# TEMP NOTE: I'll replace these with actual links before sending to partners
+install.packages("bla bla") # for Windows 
 install.packages("bla bla") # for Mac
 
 # Alternatively, install salic from source
@@ -33,7 +34,7 @@ A template workflow for national/regional dashboards is available at <https://gi
 
 ### Example: fishing participation
 
-Using `rank_sale()`, `make_history()`, `est_part()`, and `format_result()` from `?salic`.
+Using `rank_sale()`, `make_history()`, and `est_part()` from `?salic`.
 
 ``` r
 library(dplyr)

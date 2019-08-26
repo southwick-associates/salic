@@ -83,17 +83,19 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). Load both packages when using salic:</p>
+<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). Loading both packages is recommended:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
-<p>This vignette walks through salic functionality using included sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
+<p>This vignette walks through salic functionality using included sample data. A function reference is available at <code><a href="../reference/salic.html">?salic</a></code>.</p>
 </div>
 <div id="standardized-license-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#standardized-license-data" class="anchor"></a>Standardized License Data</h2>
-<p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.</p>
-<p>See <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, <code><a href="../reference/lic.html">?lic</a></code> for the formatting rules. The 3 tables should be related by 2 key columns:</p>
-<p><br><img src="relations.png"></p>
+<p>To facilitate a generalized workflow salic is strict about data formatting. For this reason, up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.</p>
+<p>Formatting rules are available at <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, <code><a href="../reference/lic.html">?lic</a></code>. The 3 tables should be related by 2 key columns:</p>
+<div class="figure">
+<img src="relations.png">
+</div>
 <p><br><em>Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.</em></p>
 <div id="checking-formatting-rules" class="section level3">
 <h3 class="hasAnchor">
@@ -308,7 +310,7 @@ history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mak
 <div id="lapse" class="section level3">
 <h3 class="hasAnchor">
 <a href="#lapse" class="anchor"></a>Lapse</h3>
-<p>A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, behind: who is a recruit?). The <code><a href="../reference/make_history.html">make_history()</a></code> function appends 2 measures for this purpose. The “lapse” variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):</p>
+<p>A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, backward: who is a recruit?). The <code><a href="../reference/make_history.html">make_history()</a></code> function appends 2 measures for this purpose. The “lapse” variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># build hunting privilege history</span>
 hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"hunt"</span>, <span class="st">"combo"</span>)) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">"lic_id"</span>) <span class="op">%&gt;%</span>

@@ -20,8 +20,8 @@ reference:
   - '`history`'
   - '`metrics`'
   - '`dashboard`'
-- title: Standardized Data
-  desc: "Functions to check formatting guidelines for agency data"
+- title: Data Formattting
+  desc: "Functions to check formatting guidelines for standardized data"
   contents:
   - '`data_check`'
   - '`data_check_table`'

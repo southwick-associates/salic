@@ -21,23 +21,21 @@ library(salic)
 
 ## Overview
 
-salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). Load both packages when using salic:
+salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). Loading both packages is recommended:
 
 ```{r}
 library(salic)
 library(dplyr)
 ```
 
-This vignette walks through salic functionality using included sample data. A function reference
-can be accessed from `?salic`; it's organization mirrors this vignette.
+This vignette walks through salic functionality using included sample data. A function reference is available at `?salic`.
 
 ## Standardized License Data
 
-To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.
+To facilitate a generalized workflow salic is strict about data formatting. For this reason, up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.
 
-See `?cust`, `?sale`, `?lic` for the formatting rules. The 3 tables should be related by 2 key columns:
+Formatting rules are available at `?cust`, `?sale`, `?lic`. The 3 tables should be related by 2 key columns:
 
-<br>
 ![](relations.png)
 
 <br>
@@ -193,7 +191,7 @@ names(history)
 
 ### Lapse
 
-A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, behind: who is a recruit?). The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
+A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, backward: who is a recruit?). The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
 
 ```{r}
 # build hunting privilege history
