@@ -26,7 +26,7 @@ Salic Function Reference: \code{\link{salic}}
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{data_salic}},
   \code{\link{lic}}, \code{\link{metrics}},
-  \code{\link{sale}}, \code{\link{state_abbreviations}}
+  \code{\link{sale}}
 }
 \concept{Sample Data}
 \keyword{datasets}

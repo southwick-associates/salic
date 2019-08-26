@@ -21,21 +21,21 @@ library(salic)
 
 ## Overview
 
-salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). You'll want to load both packages when using salic:
+salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr  (see the [dplyr website](https://dplyr.tidyverse.org/) for an introduction). Load both packages when using salic:
 
 ```{r}
 library(salic)
 library(dplyr)
 ```
 
-This vignette walks through salic functionality using provided sample data. A function reference
+This vignette walks through salic functionality using included sample data. A function reference
 can be accessed from `?salic`; it's organization mirrors this vignette.
 
 ## Standardized License Data
 
-To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.
+To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.
 
-salic specifies each table's formatting expectations (see `?cust`, `?sale`, and `?lic`). The 3 tables should be related by 2 key columns (cust_id, lic_id):
+See `?cust`, `?sale`, `?lic` for the formatting rules. The 3 tables should be related by 2 key columns:
 
 <br>
 ![](relations.png)
@@ -43,26 +43,14 @@ salic specifies each table's formatting expectations (see `?cust`, `?sale`, and 
 <br>
 *Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.*
 
-### Primary Keys
-
-The `cust$cust_id` and `lic$lic_id` variables represent primary key columns (i.e., they must uniquely identify rows in the table):
-
-```{r}
-# load sample data
-data(cust, lic, sale) 
-
-# check customer ID
-length(unique(cust$cust_id)) == nrow(cust)
-
-# check license ID
-length(unique(lic$lic_id)) == nrow(lic)
-```
-
 ### Checking Formatting Rules
 
 salic helps you follow its formatting rules with `data_check()`. The function call is silent if all checks pass; warnings will be printed for every failed check.
 
 ```{r}
+# load sample data
+data(cust, lic, sale) 
+
 # prints no warnings
 data_check(cust, lic, sale) 
 
@@ -71,6 +59,18 @@ cust_tmp <- cust
 cust_tmp$birth_year <- NULL
 cust_tmp$sex[1] <- 3
 data_check(cust_tmp, lic, sale)
+```
+
+### Primary Keys
+
+The `cust$cust_id` and `lic$lic_id` variables represent primary key columns (i.e., they must uniquely identify rows in the corresponding table):
+
+```{r}
+# check customer ID
+length(unique(cust$cust_id)) == nrow(cust)
+
+# check license ID
+length(unique(lic$lic_id)) == nrow(lic)
 ```
 
 ### Categorical Variables
@@ -140,7 +140,7 @@ count(cust_3yr, year)
 
 ## License History
 
-The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling `rank_sale()` & `make_history()` in sequence.
+The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished by calling `rank_sale()` and `make_history()` in sequence.
 
 ### Ranking Sales
 
@@ -188,12 +188,12 @@ names(history)
 
 # include residency
 history <- make_history(sale_ranked, 2008:2018, carry_vars = "res")
-filter(history, year == 2018) %>% count(res)
+names(history)
 ```
 
 ### Lapse
 
-A license history table makes it easier to look ahead (e.g., who lapsed?) or behind (e.g., who is a recruit?) at the customer level. The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
+A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, behind: who is a recruit?). The `make_history()` function appends 2 measures for this purpose. The "lapse" variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):
 
 ```{r}
 # build hunting privilege history
@@ -202,7 +202,7 @@ hunt <- filter(lic, type %in% c("hunt", "combo")) %>%
     rank_sale() %>%
     make_history(2008:2018)
     
-# hunters in 2016, what % lapsed in 2017? (i.e., churned)
+# hunters in 2016, what % lapsed (i.e., churned) in 2017? 
 filter(hunt, year == 2016) %>%
     count(year, lapse) %>%
     mutate(pct = n / sum(n) * 100)
@@ -210,11 +210,11 @@ filter(hunt, year == 2016) %>%
 
 ### R3
 
-The R3 measure is used to group license holders based on how recently they bought licenses:
+The R3 measure groups license holders based on how recently they held a license previously:
 
-- Retained (1,2): held a license last year, (1: carried over a license), (2: no carry over)
-- Reactivated (3): no license last year, but did hold one within past 5 years
-- Recruited (4): no license held within previous 5 years
+- Retained (1,2): held a license last year (1: carried over a multi-year license), (2: no carry over)
+- Reactivated (3): no license last year, but did hold one within the past 5 years
+- Recruited (4): no license held within the previous 5 years
 
 ```{r}
 # hunters in 2016, what % are in each R3 group?
@@ -223,7 +223,7 @@ filter(hunt, year == 2016) %>%
     mutate(pct = n / sum(n) * 100)
 ```
 
-Note that R3 is set to missing for the first 5 years for a consistent definition of recruitment across time.
+Note that R3 is set to missing for the first 5 years. This provides a consistent definition of recruitment over time.
 
 ```{r}
 filter(hunt, year %in% 2008:2013) %>%
@@ -236,7 +236,7 @@ The license history table provides a flexible data structure for summarizing cus
 
 ### Preparation
 
-Some initial preparation is needed to produce the summaries. Functions `label_categories()` & `recode_agecat()` are included for this purpose.
+Some initial preparation is needed to produce the summaries. Functions `label_categories()` and `recode_agecat()` are included for this purpose.
 
 ```{r}
 data(history)
@@ -253,7 +253,7 @@ filter(history, cust_id == 6120)
 
 ### Summarize Participants
 
-The `est_part()` function produces a simple count of participants by year, either overall or broken out by a segment.
+The `est_part()` function produces a simple count of participants by year, either overall or broken out by a segment (e.g., gender).
 
 ```{r}
 # overall

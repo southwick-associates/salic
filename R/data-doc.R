@@ -148,21 +148,3 @@ NULL
 #' @family Sample Data
 #' @seealso Salic Function Reference: \code{\link{salic}}
 NULL
-
-# Additional Data ---------------------------------------------------------
-
-#' Data: State/Province/Territory Abbreviations for US & Canada
-#'
-#' A data frame with 72 abbreviations, used in the \code{\link{recode_state}} function
-#'
-#' @docType data
-#' @keywords datasets
-#' @name state_abbreviations
-#' @format A data frame with 72 rows and 3 variables
-#' \describe{
-#' \item{name}{State/Province/Territory name}
-#' \item{state}{Abbreviation}
-#' \item{country}{Country Abbreviation where CN = Canada}
-#' }
-#' @family Sample Data
-NULL

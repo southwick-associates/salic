@@ -32,6 +32,7 @@ current/future years and 0 = Dec, -1 = Nov, ..., for previous years.
 # For Southwick analysts: see data preparation scripts
 }
 \seealso{
-Other functions for standardizing state license data: \code{\link{recode_state}}
+Other functions for standardizing state license data: \code{\link{recode_state}},
+  \code{\link{state_abbreviations}}
 }
 \concept{functions for standardizing state license data}

@@ -83,38 +83,26 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). You’ll want to load both packages when using salic:</p>
+<p>salic provides a set of functions to progress from state license data to dashboard summaries. The workflow uses package dplyr (see the <a href="https://dplyr.tidyverse.org/">dplyr website</a> for an introduction). Load both packages when using salic:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(salic)
 <span class="kw">library</span>(dplyr)</code></pre></div>
-<p>This vignette walks through salic functionality using provided sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
+<p>This vignette walks through salic functionality using included sample data. A function reference can be accessed from <code><a href="../reference/salic.html">?salic</a></code>; it’s organization mirrors this vignette.</p>
 </div>
 <div id="standardized-license-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#standardized-license-data" class="anchor"></a>Standardized License Data</h2>
-<p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. That said, the data needs are fairly light: Only 9 variables are needed, and all personally identifiable information can be excluded.</p>
-<p>salic specifies each table’s formatting expectations (see <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, and <code><a href="../reference/lic.html">?lic</a></code>). The 3 tables should be related by 2 key columns (cust_id, lic_id):</p>
+<p>To facilitate a generalized workflow salic is strict about data formatting, and up-front effort is necessary to standardize the relevant state-level data. However, only 9 variables are needed, and all personally identifiable information can be excluded.</p>
+<p>See <code><a href="../reference/cust.html">?cust</a></code>, <code><a href="../reference/sale.html">?sale</a></code>, <code><a href="../reference/lic.html">?lic</a></code> for the formatting rules. The 3 tables should be related by 2 key columns:</p>
 <p><br><img src="relations.png"></p>
 <p><br><em>Note that although residency (res) is a customer-level variable, it can change over time; hence the recommended sale-level specification.</em></p>
-<div id="primary-keys" class="section level3">
-<h3 class="hasAnchor">
-<a href="#primary-keys" class="anchor"></a>Primary Keys</h3>
-<p>The <code>cust$cust_id</code> and <code>lic$lic_id</code> variables represent primary key columns (i.e., they must uniquely identify rows in the table):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load sample data</span>
-<span class="kw">data</span>(cust, lic, sale) 
-
-<span class="co"># check customer ID</span>
-<span class="kw">length</span>(<span class="kw">unique</span>(cust<span class="op">$</span>cust_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(cust)
-<span class="co">#&gt; [1] TRUE</span>
-
-<span class="co"># check license ID</span>
-<span class="kw">length</span>(<span class="kw">unique</span>(lic<span class="op">$</span>lic_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(lic)
-<span class="co">#&gt; [1] TRUE</span></code></pre></div>
-</div>
 <div id="checking-formatting-rules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#checking-formatting-rules" class="anchor"></a>Checking Formatting Rules</h3>
 <p>salic helps you follow its formatting rules with <code><a href="../reference/data_check.html">data_check()</a></code>. The function call is silent if all checks pass; warnings will be printed for every failed check.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># prints no warnings</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load sample data</span>
+<span class="kw">data</span>(cust, lic, sale) 
+
+<span class="co"># prints no warnings</span>
 <span class="kw"><a href="../reference/data_check.html">data_check</a></span>(cust, lic, sale) 
 
 <span class="co"># introduce rule-breaking changes</span>
@@ -124,6 +112,18 @@ cust_tmp<span class="op">$</span>sex[<span class="dv">1</span>] &lt;-<span class
 <span class="kw"><a href="../reference/data_check.html">data_check</a></span>(cust_tmp, lic, sale)
 <span class="co">#&gt; Warning: cust: 1 Missing variable(s): birth_year</span>
 <span class="co">#&gt; Warning: cust$sex: Contains values that aren't allowed: 3</span></code></pre></div>
+</div>
+<div id="primary-keys" class="section level3">
+<h3 class="hasAnchor">
+<a href="#primary-keys" class="anchor"></a>Primary Keys</h3>
+<p>The <code>cust$cust_id</code> and <code>lic$lic_id</code> variables represent primary key columns (i.e., they must uniquely identify rows in the corresponding table):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># check customer ID</span>
+<span class="kw">length</span>(<span class="kw">unique</span>(cust<span class="op">$</span>cust_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(cust)
+<span class="co">#&gt; [1] TRUE</span>
+
+<span class="co"># check license ID</span>
+<span class="kw">length</span>(<span class="kw">unique</span>(lic<span class="op">$</span>lic_id)) <span class="op">==</span><span class="st"> </span><span class="kw">nrow</span>(lic)
+<span class="co">#&gt; [1] TRUE</span></code></pre></div>
 </div>
 <div id="categorical-variables" class="section level3">
 <h3 class="hasAnchor">
@@ -235,7 +235,7 @@ cust_3yr &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, durat
 <div id="license-history" class="section level2">
 <h2 class="hasAnchor">
 <a href="#license-history" class="anchor"></a>License History</h2>
-<p>The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished in salic by calling <code><a href="../reference/rank_sale.html">rank_sale()</a></code> &amp; <code><a href="../reference/make_history.html">make_history()</a></code> in sequence.</p>
+<p>The presence of multi-year buyers means that an extra step is needed to produce customer trends. This is accomplished by calling <code><a href="../reference/rank_sale.html">rank_sale()</a></code> and <code><a href="../reference/make_history.html">make_history()</a></code> in sequence.</p>
 <div id="ranking-sales" class="section level3">
 <h3 class="hasAnchor">
 <a href="#ranking-sales" class="anchor"></a>Ranking Sales</h3>
@@ -301,24 +301,21 @@ history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mak
 
 <span class="co"># include residency</span>
 history &lt;-<span class="st"> </span><span class="kw"><a href="../reference/make_history.html">make_history</a></span>(sale_ranked, <span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>, <span class="dt">carry_vars =</span> <span class="st">"res"</span>)
-<span class="kw">filter</span>(history, year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(res)
-<span class="co">#&gt; # A tibble: 2 x 2</span>
-<span class="co">#&gt;     res     n</span>
-<span class="co">#&gt;   &lt;int&gt; &lt;int&gt;</span>
-<span class="co">#&gt; 1     0  2036</span>
-<span class="co">#&gt; 2     1  7170</span></code></pre></div>
+<span class="kw">names</span>(history)
+<span class="co">#&gt; [1] "cust_id"      "year"         "res"          "duration_run"</span>
+<span class="co">#&gt; [5] "lapse"        "R3"</span></code></pre></div>
 </div>
 <div id="lapse" class="section level3">
 <h3 class="hasAnchor">
 <a href="#lapse" class="anchor"></a>Lapse</h3>
-<p>A license history table makes it easier to look ahead (e.g., who lapsed?) or behind (e.g., who is a recruit?) at the customer level. The <code><a href="../reference/make_history.html">make_history()</a></code> function appends 2 measures for this purpose. The “lapse” variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):</p>
+<p>A license history table makes it easier to look at customer dynamics over time (e.g., forward: who lapsed?, behind: who is a recruit?). The <code><a href="../reference/make_history.html">make_history()</a></code> function appends 2 measures for this purpose. The “lapse” variable indicates whether a customer held a privilege in the following year (1 = lapsed, 0 = renewed):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># build hunting privilege history</span>
 hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"hunt"</span>, <span class="st">"combo"</span>)) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">inner_join</span>(sale, <span class="dt">by =</span> <span class="st">"lic_id"</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw"><a href="../reference/rank_sale.html">rank_sale</a></span>() <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw"><a href="../reference/make_history.html">make_history</a></span>(<span class="dv">2008</span><span class="op">:</span><span class="dv">2018</span>)
     
-<span class="co"># hunters in 2016, what % lapsed in 2017? (i.e., churned)</span>
+<span class="co"># hunters in 2016, what % lapsed (i.e., churned) in 2017? </span>
 <span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">count</span>(year, lapse) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">pct =</span> n <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(n) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)
@@ -331,11 +328,11 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <div id="r3" class="section level3">
 <h3 class="hasAnchor">
 <a href="#r3" class="anchor"></a>R3</h3>
-<p>The R3 measure is used to group license holders based on how recently they bought licenses:</p>
+<p>The R3 measure groups license holders based on how recently they held a license previously:</p>
 <ul>
-<li>Retained (1,2): held a license last year, (1: carried over a license), (2: no carry over)</li>
-<li>Reactivated (3): no license last year, but did hold one within past 5 years</li>
-<li>Recruited (4): no license held within previous 5 years</li>
+<li>Retained (1,2): held a license last year (1: carried over a multi-year license), (2: no carry over)</li>
+<li>Reactivated (3): no license last year, but did hold one within the past 5 years</li>
+<li>Recruited (4): no license held within the previous 5 years</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># hunters in 2016, what % are in each R3 group?</span>
 <span class="kw">filter</span>(hunt, year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>) <span class="op">%&gt;%</span>
@@ -348,7 +345,7 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <span class="co">#&gt; 2     2  1737 41.3 </span>
 <span class="co">#&gt; 3     3   324  7.71</span>
 <span class="co">#&gt; 4     4   589 14.0</span></code></pre></div>
-<p>Note that R3 is set to missing for the first 5 years for a consistent definition of recruitment across time.</p>
+<p>Note that R3 is set to missing for the first 5 years. This provides a consistent definition of recruitment over time.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">filter</span>(hunt, year <span class="op">%in%</span><span class="st"> </span><span class="dv">2008</span><span class="op">:</span><span class="dv">2013</span>) <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">count</span>(year, R3)
 <span class="co">#&gt; # A tibble: 9 x 3</span>
@@ -372,7 +369,7 @@ hunt &lt;-<span class="st"> </span><span class="kw">filter</span>(lic, type <spa
 <div id="preparation" class="section level3">
 <h3 class="hasAnchor">
 <a href="#preparation" class="anchor"></a>Preparation</h3>
-<p>Some initial preparation is needed to produce the summaries. Functions <code><a href="../reference/label_categories.html">label_categories()</a></code> &amp; <code><a href="../reference/recode_agecat.html">recode_agecat()</a></code> are included for this purpose.</p>
+<p>Some initial preparation is needed to produce the summaries. Functions <code><a href="../reference/label_categories.html">label_categories()</a></code> and <code><a href="../reference/recode_agecat.html">recode_agecat()</a></code> are included for this purpose.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(history)
 
 history &lt;-<span class="st"> </span>history <span class="op">%&gt;%</span>
@@ -397,7 +394,7 @@ history &lt;-<span class="st"> </span>history <span class="op">%&gt;%</span>
 <div id="summarize-participants" class="section level3">
 <h3 class="hasAnchor">
 <a href="#summarize-participants" class="anchor"></a>Summarize Participants</h3>
-<p>The <code><a href="../reference/est_part.html">est_part()</a></code> function produces a simple count of participants by year, either overall or broken out by a segment.</p>
+<p>The <code><a href="../reference/est_part.html">est_part()</a></code> function produces a simple count of participants by year, either overall or broken out by a segment (e.g., gender).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># overall</span>
 part &lt;-<span class="st"> </span><span class="kw"><a href="../reference/est_part.html">est_part</a></span>(history, <span class="st">"tot"</span>)
 <span class="kw">filter</span>(part, year <span class="op">&gt;</span><span class="st"> </span><span class="dv">2015</span>)
@@ -550,7 +547,7 @@ part &lt;-<span class="st"> </span>metrics<span class="op">$</span>participants<
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="https://www.southwickassociates.com/our-staff/dan-kary/">Dan Kary</a>, <a href="https://www.southwickassociates.com"><img src="man/figures/logo.jpg" height="30"></a>.</p>
+  <p>Developed by <a href="https://www.southwickassociates.com/our-staff/dan-kary/">Dan Kary</a>, <a href="https://www.southwickassociates.com"><img src="https://github.com/southwick-associates/salic/tree/master/man/figures/sa.jpg" height="30"></a>.</p>
 </div>
 
 <div class="pkgdown">

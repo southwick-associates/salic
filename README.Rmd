@@ -6,25 +6,27 @@ output: github_document
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "man/figures/"
 )
 ```
 
 # salic
 
-The salic R package lays out a workflow to prepare and summarize agency data. In particular, it aims to simplify the production of national/regional dashboards with a set of functions that work across state agencies.
+salic is an R package for preparing and summarizing agency data. In particular, it aims to simplify the production of national/regional dashboards by providing a set of functions that work across state agencies.
 
 ## Installation
 
 - First, install R: https://www.r-project.org/
-- Then install salic and it's R package dependencies:
+- Then install salic and it's dependencies:
 
 ``` r
 # Install dependencies
 install.packages(c("dplyr", "data.table"))
 
 # Install salic from binary executables
-install.packages("bla bla") # for Windows
+# TEMP NOTE: I'll replace these with actual links before sending to partners
+install.packages("bla bla") # for Windows 
 install.packages("bla bla") # for Mac
 
 # Alternatively, install salic from source
@@ -34,32 +36,28 @@ devtools::install_github("southwick-associates/salic")
 
 ## Usage
 
-See [Introduction to salic](https://southwick-associates.github.io/salic/articles/salic.html) (`vignette("salic")` from the R console).
+See `vignette("salic")` for an introduction.
 
 A template workflow for national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
 
-### Example: fishing churn rate
+### Example: fishing participation
 
-Using `rank_sale()`, `make_history()`, `est_part()`, and `format_result()` from `?salic`.
+Using `rank_sale()`, `make_history()`, and `est_part()` from `?salic`.
 
 ```{r, message=FALSE}
 library(dplyr)
 library(salic)
 
-# load standardized data
-data(cust, lic, sale)
+# load data
+data(lic, sale)
 
-# build a license history
+# build license history
 history <- lic %>% 
     filter(type %in% c("fish", "combo")) %>% 
     inner_join(sale, by = "lic_id") %>% 
     rank_sale() %>% 
-    make_history(yrs = 2008:2018) %>% 
-    left_join(cust, by = "cust_id")
+    make_history(yrs = 2008:2018)
 
-# summarize participation for use in a dashboard
-recode_agecat(history) %>%
-    filter(!agecat %in% c("0-17", "65+")) %>%
-    est_churn() %>%
-    format_result(timeframe = "full-year", group = "fish")
+# count total participants
+est_part(history)
 ```

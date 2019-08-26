@@ -1,6 +1,59 @@
 authors:
-    Dan Kary:
-        href: https://www.southwickassociates.com/our-staff/dan-kary/
-    Southwick Associates:
-        html: "<img src='man/figures/logo.jpg' height='30'/>"
-        href: https://www.southwickassociates.com
+  Dan Kary:
+    href: https://www.southwickassociates.com/our-staff/dan-kary/
+  Southwick Associates:
+    html: "<img src='https://github.com/southwick-associates/salic/tree/master/man/figures/sa.jpg' height='30'/>"
+    href: https://www.southwickassociates.com
+
+reference:
+- title: Overview
+  desc: "Summary of core functions and sample data"
+  contents:
+  - '`salic`'
+  - '`data_salic`'
+- title: Sample Data
+  desc: "Example of state agency data"
+  contents:
+  - '`cust`'
+  - '`lic`'
+  - '`sale`'
+  - '`history`'
+  - '`metrics`'
+  - '`dashboard`'
+- title: Standardized Data
+  desc: "Functions to check formatting guidelines for agency data"
+  contents:
+  - '`data_check`'
+  - '`data_check_table`'
+  - '`data_foreign_key`'
+- title: License History
+  desc: "Functions to create a license history from standardized data"
+  contents:
+  - '`rank_sale`'
+  - '`make_history`'
+  - '`history_check`'
+- title: Dashboard Metrics
+  desc: "Functions to summarize dashboard metrics from license history"
+  contents:
+  - '`est_part`'
+  - '`scaleup_part`'
+  - '`est_churn`'
+  - '`format_result`'
+- title: Category Variables
+  desc: "Functions for coding and labelling category variables"
+  contents:
+  - '`recode_agecat`'
+  - '`label_categories`'
+  - '`df_factor_var`'
+  - '`factor_var`'
+- title: Southwick Processing
+  desc: "Functions/Data for Southwick-specific data preparation"
+  contents:
+  - '`check_dups`'
+  - '`count_lines_textfile`'
+  - '`recode_month`'
+  - '`recode_state`'
+  - '`summary_churn`'
+  - '`summary_initial`'
+  - '`summary_sale`'
+  - '`state_abbreviations`'

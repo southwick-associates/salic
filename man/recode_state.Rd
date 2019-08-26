@@ -25,6 +25,7 @@ dat <- data.frame(state = c("M0", "mo", "Mo", "MR", "YY"))
 recode_state(dat, state_abbreviations)
 }
 \seealso{
-Other functions for standardizing state license data: \code{\link{recode_month}}
+Other functions for standardizing state license data: \code{\link{recode_month}},
+  \code{\link{state_abbreviations}}
 }
 \concept{functions for standardizing state license data}
