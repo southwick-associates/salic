@@ -36,13 +36,13 @@ devtools::install_github("southwick-associates/salic")
 
 ## Usage
 
-See `vignette("salic")` for an introduction.
+See [the vignette](https://southwick-associates.github.io/salic/articles/salic.html) for an introduction.
 
 A template workflow for national/regional dashboards is available at https://github.com/southwick-associates/dashboard-template
 
 ### Example: fishing participation
 
-Using `rank_sale()`, `make_history()`, and `est_part()` from `?salic`.
+Using `rank_sale()`, `make_history()`, and `est_part()`
 
 ```{r, message=FALSE}
 library(dplyr)

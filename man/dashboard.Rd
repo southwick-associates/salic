@@ -24,6 +24,8 @@ Anglers (group = "fish") .
 \seealso{
 Salic Function Reference: \code{\link{salic}}
 
+Formatting Metrics: \code{\link{format_result}}
+
 Other Sample Data: \code{\link{cust}},
   \code{\link{data_salic}}, \code{\link{history}},
   \code{\link{lic}}, \code{\link{metrics}},

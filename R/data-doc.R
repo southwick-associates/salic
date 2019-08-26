@@ -101,6 +101,7 @@ NULL
 #' }
 #' @family Sample Data
 #' @seealso Salic Function Reference: \code{\link{salic}}
+#' @seealso Building License History: \code{\link{make_history}}
 NULL
 
 #' Sample Data: Dashboard Metrics
@@ -122,6 +123,7 @@ NULL
 #' }
 #' @family Sample Data
 #' @seealso Salic Function Reference: \code{\link{salic}}
+#' @seealso Calculating Metrics: \code{\link{est_part}}, \code{\link{est_churn}}
 NULL
 
 #' Sample Data: Metrics formatted for Dashboard Input
@@ -147,4 +149,5 @@ NULL
 #' }
 #' @family Sample Data
 #' @seealso Salic Function Reference: \code{\link{salic}}
+#' @seealso Formatting Metrics: \code{\link{format_result}}
 NULL

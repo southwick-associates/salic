@@ -23,6 +23,8 @@ license sample data; containing 1 row per customer per year a license was held.
 \seealso{
 Salic Function Reference: \code{\link{salic}}
 
+Building License History: \code{\link{make_history}}
+
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{data_salic}},
   \code{\link{lic}}, \code{\link{metrics}},

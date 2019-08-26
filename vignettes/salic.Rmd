@@ -319,7 +319,6 @@ We can use apply to automate this final formatting:
 ```{r}
 all_part <- metrics$participants
 lapply(all_part, function(x) format_result(x, "full-year", "all_sports")) %>%
-    bind_rows() %>%
-    filter(segment == "Gender")
+    bind_rows()
 ```
 

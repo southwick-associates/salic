@@ -20,6 +20,8 @@ data and corresponds to "All Hunters & Anglers" aged 18-64 each year. Each eleme
 \seealso{
 Salic Function Reference: \code{\link{salic}}
 
+Calculating Metrics: \code{\link{est_part}}, \code{\link{est_churn}}
+
 Other Sample Data: \code{\link{cust}},
   \code{\link{dashboard}}, \code{\link{data_salic}},
   \code{\link{history}}, \code{\link{lic}},
