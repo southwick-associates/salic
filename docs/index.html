@@ -90,15 +90,11 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install dependencies</span>
 <span class="kw">install.packages</span>(<span class="kw">c</span>(<span class="st">"dplyr"</span>, <span class="st">"data.table"</span>))
 
-<span class="co"># Install salic release</span>
+<span class="co"># Install salic</span>
 f &lt;-<span class="st"> "https://github.com/southwick-associates/salic/releases/download/2.0.0/salic_2.0.0"</span>
 <span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".zip"</span>), <span class="dt">repos =</span> <span class="ot">NULL</span>) <span class="co"># for Windows</span>
 <span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".tgz"</span>), <span class="dt">repos =</span> <span class="ot">NULL</span>) <span class="co"># for Mac</span>
-<span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".tar.gz"</span>), <span class="dt">repos =</span> <span class="ot">NULL</span>, <span class="dt">type =</span> <span class="st">"source"</span>) <span class="co"># or from source</span>
-
-<span class="co"># Alternatively, install development version</span>
-<span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"southwick-associates/salic"</span>)</code></pre></div>
+<span class="kw">install.packages</span>(<span class="kw">paste0</span>(f, <span class="st">".tar.gz"</span>), <span class="dt">repos =</span> <span class="ot">NULL</span>, <span class="dt">type =</span> <span class="st">"source"</span>) <span class="co"># or from source</span></code></pre></div>
 </div>
 <div id="usage" class="section level2">
 <h2 class="hasAnchor">
