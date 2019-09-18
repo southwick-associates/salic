@@ -1,11 +1,5 @@
 # functions for building dashboard summary data
 
-# TODO version 2.1
-# - add southwick-specific functions (line 376 of this file)
-# - maybe refactor with data.table for speed
-
-# For Nat/Reg Summaries --------------------------------------------------------
-
 #' Internal Function: Perform an action (e.g., warning, error) to flag records
 #' 
 #' The action is only triggered if any values in df[[test_variable]] exceed
@@ -265,7 +259,9 @@ scaleup_part <- function(
         )
     check_threshold(
         compare, test_threshold, "pct_na",
-        action = function(...) stop(..., call. = FALSE)
+        action = function(...) stop(..., call. = FALSE),
+        msg = paste0("Threshold of ", test_threshold, 
+                     " for pct_na exceeded for ", names(part_segment)[1], ":")
     )
     # scale to match the total
     compare <- select(compare, .data$year, .data$pct_na, .data$scale_factor)
