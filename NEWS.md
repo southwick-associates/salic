@@ -1,4 +1,11 @@
 
+## Version 2.0.1
+
+Introduced small non-breaking changes to two functions:
+
+- scaleup_part(): more informative threshold error message
+- format_result(): slightly more generalized for use by Southwick internally
+
 ## Version 2.0.0
 
 Released on 2019-08-26; aimed at sharing with state agencies and other partners. It includes a number of new functions and major changes to the codebase. 
