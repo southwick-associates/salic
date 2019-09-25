@@ -360,7 +360,8 @@ format_result <- function(
             segment == "res" ~ "Residency",
             segment == "sex" ~ "Gender",
             segment == "agecat" ~ "Age",
-            segment == "county" ~ "County"
+            segment == "county" ~ "County",
+            TRUE ~ segment
         )
     )
     out %>% dplyr::select(
