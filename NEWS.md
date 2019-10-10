@@ -1,7 +1,10 @@
 
 ## Version 2.0.2
 
-Small non-breaking change to remove a cryptic warning that would display in make_history() for sale tables with insufficient years (< 6) for calculating R3.
+Made small non-breaking changes:
+
+- make_history(): removed a cryptic warning. Previously, a warning would display if the input sale table had fewer than 6 years (i.e., no R3 would be calculated). This is expected behavior, and I added a condition to prevent the warning.
+- salic.R: All namespace and global variable definitions were placed at the top-level of this file for more tidy Roxygen2 documentation
 
 ## Version 2.0.1
 
