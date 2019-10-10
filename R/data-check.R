@@ -157,7 +157,6 @@ data_foreign_key <- function(df_foreign, df_primary, key) {
 #' @param required_vars character: variables that should be included
 #' @param allowed_values list: named list with allowed values for specific variables
 #' @family functions to check data format
-#' @import dplyr
 #' @export
 #' @examples
 #' library(dplyr)
@@ -241,7 +240,6 @@ data_check_sale <- function(
 #' @param lic data frame: license types table (primary key = "lic_id")
 #' @param sale data frame: transactions table (foreign keys = "lic_id", "cust_id")
 #' @family functions to check data format
-#' @import dplyr
 #' @export
 #' @examples
 #' library(dplyr)

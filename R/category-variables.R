@@ -13,7 +13,6 @@
 #' \code{\link[base]{cut}}
 #' @param max_age numeric: maximum allowed age. Anything above will be set to missing.
 #' @param suppress_check logical: If TRUE, does not print a coding summary
-#' @import dplyr
 #' @family functions for working with category variables
 #' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
@@ -142,7 +141,6 @@ factor_R3 <- function(x, levels = 1:4,
 #' @param df data frame: Input data frame
 #' @param var character: Name of numeric variable to convert
 #' @inheritParams factor_var
-#' @import dplyr
 #' @export
 #' @family functions for working with category variables
 #' @examples

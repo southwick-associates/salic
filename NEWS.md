@@ -1,4 +1,8 @@
 
+## Version 2.0.2
+
+Small non-breaking change to remove a cryptic warning that would display in make_history() for sale tables with insufficient years (< 6) for calculating R3.
+
 ## Version 2.0.1
 
 Introduced small non-breaking changes to two functions:

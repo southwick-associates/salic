@@ -1,22 +1,5 @@
 # functions for preparing license data from states
 
-# TODO after version 2.0: 
-# - maybe refactor code for the older functions (perhaps use data.table for speed)
-# - maybe remove the global variable dependencies
-
-# certain functions reference global variables (e.g., named variables in data frames)
-# - these occur in a number of places in salic (mostly validation functions)
-# - R CMD check doesn't like this: declaring them in globalVariables() is needed
-# - https://github.com/r-lib/devtools/issues/1714
-if(getRversion() >= "2.15.1") utils::globalVariables(c(
-    "age", "age_year", "agecat", "birth_year", "change_cust",
-    "change_revenue", "change_sales", "customers", "dot", "dot2", "duration", 
-    "issue_month", "issue_year",  "lastvar",  "sales", "var_old", "yr_diff",  
-    ":=", "old", "cust_id", "month", "year", "lapse", ".", "next_year",
-    "yrs_till_next", "duration_run_lag", "year_last", "..fwd_cols",
-    "duration_run", "i.lapse", "i.month"
-))
-
 # Recoding Data -----------------------------------------------------------
 
 #' Data: State/Province/Territory Abbreviations for US & Canada
@@ -44,7 +27,6 @@ NULL
 #' @param state_table data frame: input data holding valid abbreviations
 #' @param oldvar character: name of state variable
 #' @param newvar character: name of new state variable
-#' @import dplyr
 #' @family functions for standardizing state license data
 #' @export
 #' @examples 
@@ -72,7 +54,6 @@ recode_state <- function(dat, state_table, oldvar = "state", newvar = "state_new
 #' set to either the lowest values (for those less than the range) or the
 #' highest value (for those over). This prevents unusual sale months from appearing
 #' in results.
-#' @import dplyr
 #' @return Returns a sales table with a standardized 'month' variable and
 #' prints a validation output.
 #' @family functions for standardizing state license data
@@ -117,7 +98,6 @@ recode_month <- function(sale, month_range = 0:12) {
 #' Check for duplicates in a table
 #' 
 #' @param x data frame: Table holding records
-#' @import dplyr
 #' @family functions for validating license data
 #' @export
 #' @examples
@@ -167,7 +147,6 @@ count_lines_textfile <- function(file_path) {
 #' 
 #' @param sale data frame: Table holding sales by year with a minimum of
 #' 2 variables (cust_id, year)
-#' @import dplyr
 #' @family functions for validating license data
 #' @export
 #' @examples
@@ -200,8 +179,6 @@ summary_initial <- function(sale) {
 #' @param note character: note for output table
 #' @param suppress_notes logical: If TRUE, returns a data frame only
 #' @inheritParams pct_round
-#' @import dplyr
-#' @importFrom utils write.csv
 #' @family functions for validating license data
 #' @export
 #' @examples
@@ -263,8 +240,6 @@ summary_sale <- function(
 #' 2 variables (cust_id, year)
 #' @param years numeric: range of years needed to calculate churn
 #' @inheritParams summary_sale
-#' @import dplyr
-#' @importFrom utils write.csv
 #' @family functions for validating license data
 #' @export
 #' @examples
@@ -335,7 +310,6 @@ pct_round <- function(x, rnd = 1, scale = 100) {
 #' @param x data frame: Table holding sales by year
 #' @param yr numeric: year to calculate churn (e.g., churn for 2014 uses sales
 #' for 2 years: 2013 and 2014)
-#' @import dplyr
 #' @return Returns a numeric vector of length 1
 #' @family internal helper functions
 #' @keywords internal

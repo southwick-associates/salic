@@ -1,4 +1,23 @@
-# package-level documentation: see http://r-pkgs.had.co.nz/man.html#man-packages
+# namespace definitions and package-level documentation
+# - see http://r-pkgs.had.co.nz/man.html#man-packages for documenting packages
+
+#' @import dplyr
+#' @rawNamespace import(data.table, except = c(first, between, last))
+#' @importFrom utils capture.output head tail write.csv
+NULL
+
+# certain functions reference global variables (e.g., named variables in data frames)
+# - these occur in a number of places in salic (mostly validation functions)
+# - R CMD check doesn't like this: declaring them in globalVariables() is needed
+# - https://github.com/r-lib/devtools/issues/1714
+if(getRversion() >= "2.15.1") utils::globalVariables(c(
+    "age", "age_year", "agecat", "birth_year", "change_cust",
+    "change_revenue", "change_sales", "customers", "dot", "dot2", "duration", 
+    "issue_month", "issue_year",  "lastvar",  "sales", "var_old", "yr_diff",  
+    ":=", "old", "cust_id", "month", "year", "lapse", ".", "next_year",
+    "yrs_till_next", "duration_run_lag", "year_last", "..fwd_cols",
+    "duration_run", "i.lapse", "i.month"
+))
 
 #' salic: Prepare Agency Dashboard Data
 #' 

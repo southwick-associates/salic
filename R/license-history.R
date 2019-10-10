@@ -20,10 +20,6 @@
 #' @param grp_var character: name of variable(s) used for grouping
 #' @param first_month logical: If TRUE, also ensures the output contains the 
 #' earliest month by grp_var (intended for mid-year dashboards)
-#' @rawNamespace import(data.table, except = c(first, between, last))
-#' @import dplyr
-#' @importFrom utils tail
-#' @importFrom utils head
 #' @family license history functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
@@ -140,8 +136,6 @@ prep_yrs <- function(yrs, df, func_name) {
 #' If NULL, lapse will not be calculated (useful for mid-year results)
 #' @param show_diagnostics logical: If TRUE, will include intermediate variables in the
 #' output dataset, necessary for running checks: \code{\link{history_check}}.
-#' @import dplyr
-#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @family license history functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
 #' @export
@@ -204,7 +198,6 @@ make_history <- function(
 #' @family internal license history functions
 #' @keywords internal
 #' @name history_internal
-#' @rawNamespace import(data.table, except = c(first, between, last))
 NULL
 
 #' @rdname history_internal
@@ -277,8 +270,6 @@ make_R3 <- function(dt, yrs) {
 #' @inheritParams make_history
 #' @family license history functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
-#' @import dplyr
-#' @rawNamespace import(data.table, except = c(first, between, last))
 #' @name history_check
 #' @examples 
 #' library(dplyr)

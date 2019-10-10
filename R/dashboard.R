@@ -14,9 +14,7 @@
 #' @param msg character: message to be printed in action
 #' @family dashboard functions
 #' @keywords internal
-#' @import dplyr
 #' @export
-#' @importFrom utils capture.output
 #' @examples
 #' library(dplyr)
 #' 
@@ -61,7 +59,6 @@ check_threshold <- function(
 #' optionally with 2 extra variables ("change", "pct_change") if show_test_stat = TRUE
 #' @family dashboard functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
-#' @import dplyr
 #' @export
 #' @examples
 #' library(dplyr)
@@ -135,7 +132,6 @@ est_recruit <- function(
 #' @inheritParams est_part
 #' @family dashboard functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
-#' @import dplyr
 #' @export
 #' @examples
 #' library(dplyr)
@@ -198,7 +194,6 @@ est_churn <- function(
 #' @inheritParams est_part
 #' @family dashboard functions
 #' @seealso Salic Function Reference: \code{\link{salic}}
-#' @import dplyr
 #' @export
 #' @examples
 #' library(dplyr)
