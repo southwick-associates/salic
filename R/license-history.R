@@ -185,7 +185,8 @@ make_history <- function(
         rbindlist(fill = TRUE)
     if (length(yrs) > 5) make_R3(x, yrs)
     if (!show_diagnostics) {
-        x[, c("duration_run_lag", "duration", "year_last", "yrs_since") := NULL]
+        if ("R3" %in% names(x)) x[, c("yrs_since") := NULL]
+        x[, c("duration_run_lag", "duration", "year_last") := NULL]
     }
     x[, duration_run := as.integer(duration_run)] # for consistency
     as_tibble(x)
